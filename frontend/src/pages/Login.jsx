@@ -52,37 +52,29 @@ const Login = () => {
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
         border: '1px solid #E2E8F0'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ 
-            display: 'inline-flex', 
-            background: '#EFF6FF', 
-            padding: '1rem', 
-            borderRadius: '12px', 
-            marginBottom: '1rem'
-          }}>
-            <Lock size={30} color="#2563EB" />
-          </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1E293B', marginBottom: '0.5rem' }}>Welcome back</h2>
-          <p style={{ color: '#64748B', fontSize: '0.9rem' }}>Enter your credentials to access your account</p>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#1E293B', marginBottom: '0.5rem' }}>Welcome back</h2>
+          <p style={{ color: '#64748B', fontSize: '0.95rem' }}>Enter your credentials to access your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Email</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.6rem' }}>Email</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+              <Mail size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input 
                 type="email" 
                 required 
                 className="login-input" 
                 style={{ 
                   width: '100%', 
-                  height: '48px', 
-                  paddingLeft: '2.5rem', 
-                  borderRadius: '10px', 
+                  height: '52px', 
+                  paddingLeft: '2.75rem', 
+                  borderRadius: '12px', 
                   border: '1px solid #E2E8F0',
                   outline: 'none',
-                  fontSize: '1rem'
+                  fontSize: '1rem',
+                  transition: 'all 0.2s'
                 }} 
                 placeholder="name@example.com"
                 value={email} 
@@ -92,22 +84,23 @@ const Login = () => {
           </div>
           
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Password</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.6rem' }}>Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+              <Lock size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input 
                 type={showPassword ? "text" : "password"} 
                 required 
                 className="login-input" 
                 style={{ 
                   width: '100%', 
-                  height: '48px', 
-                  paddingLeft: '2.5rem', 
-                  paddingRight: '2.5rem',
-                  borderRadius: '10px', 
+                  height: '52px', 
+                  paddingLeft: '2.75rem', 
+                  paddingRight: '2.75rem',
+                  borderRadius: '12px', 
                   border: '1px solid #E2E8F0',
                   outline: 'none',
-                  fontSize: '1rem'
+                  fontSize: '1rem',
+                  transition: 'all 0.2s'
                 }} 
                 placeholder="••••••••"
                 value={password} 
@@ -118,7 +111,7 @@ const Login = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{ 
                   position: 'absolute', 
-                  right: '12px', 
+                  right: '14px', 
                   top: '50%', 
                   transform: 'translateY(-50%)', 
                   background: 'none', 
@@ -137,13 +130,15 @@ const Login = () => {
             className="btn btn-primary" 
             style={{ 
               width: '100%', 
-              height: '48px', 
+              height: '52px', 
               fontSize: '1rem', 
-              borderRadius: '10px', 
-              marginTop: '0.5rem',
+              fontWeight: '600',
+              borderRadius: '12px', 
+              marginTop: '0.75rem',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)'
             }} 
             disabled={loading}
           >
@@ -155,7 +150,8 @@ const Login = () => {
       <style>{`
         .login-input:focus {
           border-color: #2563EB !important;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+          background: white;
         }
       `}</style>
     </div>
