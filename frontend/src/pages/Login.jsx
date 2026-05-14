@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -38,120 +36,122 @@ const Login = () => {
     <div style={{ 
       display: 'flex', 
       minHeight: '100vh', 
-      background: 'white', 
+      background: '#F9FAFB', 
       fontFamily: "'Inter', sans-serif",
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      padding: '1.5rem'
     }}>
       <div style={{ 
         width: '100%', 
-        maxWidth: '380px', 
-        padding: '2rem'
+        maxWidth: '520px', 
+        padding: '3rem 2.5rem', 
+        background: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid #E5E7EB'
       }}>
+        {/* Logo Section */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
+          <div style={{ 
+            width: '32px', 
+            height: '32px', 
+            background: '#F59E0B', 
+            borderRadius: '6px', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            color: 'white',
+            fontWeight: 'bold',
+            fontSize: '18px'
+          }}>K</div>
+          <span style={{ fontSize: '22px', fontWeight: '800', color: '#111827' }}>KompaKt</span>
+        </div>
+
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#1E293B', marginBottom: '0.5rem' }}>Welcome back</h2>
-          <p style={{ color: '#64748B', fontSize: '0.95rem' }}>Enter your credentials to access your account</p>
+          <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111827', marginBottom: '0.5rem' }}>Sign in to your account</h2>
+          <p style={{ color: '#111827', fontSize: '16px' }}>
+            or <span style={{ color: '#D97706', cursor: 'pointer', fontWeight: '500' }}>sign up for an account</span>
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.6rem' }}>Email</label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-              <input 
-                type="email" 
-                required 
-                className="login-input" 
-                style={{ 
-                  width: '100%', 
-                  height: '52px', 
-                  paddingLeft: '2.75rem', 
-                  borderRadius: '12px', 
-                  border: '1px solid #E2E8F0',
-                  background: '#F8FAFC',
-                  outline: 'none',
-                  fontSize: '1rem',
-                  transition: 'all 0.2s'
-                }} 
-                placeholder="name@example.com"
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-              />
-            </div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              Email address<span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <input 
+              type="email" 
+              required 
+              style={{ 
+                width: '100%', 
+                height: '44px', 
+                padding: '0 12px', 
+                borderRadius: '8px', 
+                border: '1px solid #D1D5DB',
+                outline: 'none',
+                fontSize: '16px',
+                transition: 'border-color 0.2s'
+              }} 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+            />
           </div>
           
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.6rem' }}>Password</label>
-            <div style={{ position: 'relative' }}>
-              <Lock size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-              <input 
-                type={showPassword ? "text" : "password"} 
-                required 
-                className="login-input" 
-                style={{ 
-                  width: '100%', 
-                  height: '52px', 
-                  paddingLeft: '2.75rem', 
-                  paddingRight: '2.75rem',
-                  borderRadius: '12px', 
-                  border: '1px solid #E2E8F0',
-                  background: '#F8FAFC',
-                  outline: 'none',
-                  fontSize: '1rem',
-                  transition: 'all 0.2s'
-                }} 
-                placeholder="••••••••"
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-              />
-              <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)}
-                style={{ 
-                  position: 'absolute', 
-                  right: '14px', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)', 
-                  background: 'none', 
-                  border: 'none', 
-                  cursor: 'pointer', 
-                  color: '#94A3B8' 
-                }}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              Password<span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <input 
+              type="password" 
+              required 
+              style={{ 
+                width: '100%', 
+                height: '44px', 
+                padding: '0 12px', 
+                borderRadius: '8px', 
+                border: '1px solid #D1D5DB',
+                outline: 'none',
+                fontSize: '16px',
+                transition: 'border-color 0.2s'
+              }} 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input type="checkbox" id="remember" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+            <label htmlFor="remember" style={{ fontSize: '14px', color: '#111827', cursor: 'pointer', fontWeight: '500' }}>Remember me</label>
           </div>
 
           <button 
             type="submit" 
-            className="btn btn-primary" 
             style={{ 
               width: '100%', 
-              height: '52px', 
-              fontSize: '1rem', 
+              height: '46px', 
+              fontSize: '16px', 
               fontWeight: '600',
-              borderRadius: '12px', 
-              marginTop: '0.75rem',
+              borderRadius: '8px', 
+              background: '#D97706',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)'
+              transition: 'background 0.2s'
             }} 
             disabled={loading}
           >
-            {loading ? <div className="spinner spinner-fast"></div> : 'Login'}
+            {loading ? <div className="spinner-fast" style={{ borderTopColor: 'white' }}></div> : 'Sign in'}
           </button>
+
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: '14px', color: '#D97706', cursor: 'pointer', fontWeight: '500' }}>Forgot your password?</span>
+          </div>
         </form>
       </div>
-
-      <style>{`
-        .login-input:focus {
-          border-color: #2563EB !important;
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
-          background: white !important;
-        }
-      `}</style>
     </div>
   );
 };
