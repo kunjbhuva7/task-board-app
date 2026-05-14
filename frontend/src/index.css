@@ -210,6 +210,7 @@ tbody tr:hover {
 .app-container {
   display: flex;
   min-height: 100vh;
+  flex-direction: row;
 }
 
 .sidebar {
@@ -219,6 +220,8 @@ tbody tr:hover {
   display: flex;
   flex-direction: column;
   border-right: 1px solid #E5E7EB;
+  transition: transform 0.3s ease;
+  z-index: 40;
 }
 
 .sidebar-header {
@@ -286,16 +289,18 @@ tbody tr:hover {
   flex-direction: column;
   overflow: hidden;
   background: white;
+  width: 100%;
 }
 
 .topbar {
-  display: none; /* Hide topbar, moving everything to page header */
+  display: none;
 }
 
 .page-content {
   flex: 1;
   padding: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -311,6 +316,7 @@ tbody tr:hover {
   justify-content: center;
   z-index: 50;
   backdrop-filter: blur(2px);
+  padding: 1rem;
 }
 
 .modal-content {
@@ -336,12 +342,12 @@ tbody tr:hover {
 .kanban-column {
   flex: 1;
   min-width: 320px;
-  background: #F1F5F9; /* Lighter, more premium grey */
-  border-radius: 12px; /* Smoother border radius */
+  background: #F1F5F9;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   max-height: 100%;
-  border: 1px solid #E2E8F0; /* Subtle border */
+  border: 1px solid #E2E8F0;
 }
 
 .kanban-column-header {
@@ -368,7 +374,7 @@ tbody tr:hover {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* More breathing room */
+  gap: 1rem;
 }
 
 .kanban-card {
@@ -393,3 +399,29 @@ tbody tr:hover {
 .kanban-card:active {
   cursor: grabbing;
 }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #E5E7EB;
+  }
+  
+  .page-header {
+    padding: 1rem 1rem 0 1rem;
+  }
+  
+  /* Make table scrollable horizontally on mobile */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* End of file */

@@ -160,58 +160,60 @@ const MyTasks = () => {
 
                   {/* Group Items Table */}
                   {!isCollapsed && groupTasks.length > 0 && (
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-                      <thead>
-                        <tr>
-                          <th style={{ width: '40px', padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent' }}></th>
-                          <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Task Name</th>
-                          <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Description</th>
-                          <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Estimation</th>
-                          <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Type</th>
-                          <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>People</th>
-                          <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Priority</th>
-                          <th style={{ width: '40px', padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent' }}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {groupTasks.map(task => {
-                          const pColor = getPriorityColor(task.priority);
-                          return (
-                            <tr key={task.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                              <td style={{ padding: '1rem' }}>
-                                <div style={{ width: '16px', height: '16px', border: '2px solid #E5E7EB', borderRadius: '4px', cursor: 'pointer' }}></div>
-                              </td>
-                              <td style={{ padding: '1rem', fontWeight: '600', color: '#1F2937' }}>{task.title}</td>
-                              <td style={{ padding: '1rem', color: '#4B5563', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.description || '-'}</td>
-                              <td style={{ padding: '1rem', color: '#1F2937', fontWeight: '500' }}>
-                                {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date'}
-                              </td>
-                              <td style={{ padding: '1rem' }}>
-                                <span style={{ background: '#F3E8FF', color: '#9333EA', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>Dashboard</span>
-                              </td>
-                              <td style={{ padding: '1rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E5E7EB', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '10px', border: '1px solid white', zIndex: 2, color: '#374151', fontWeight: 'bold' }}>
-                                    {task.assignee_name ? task.assignee_name.charAt(0).toUpperCase() : '?'}
+                    <div className="table-responsive">
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                        <thead>
+                          <tr>
+                            <th style={{ width: '40px', padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent' }}></th>
+                            <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Task Name</th>
+                            <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Description</th>
+                            <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Estimation</th>
+                            <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Type</th>
+                            <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>People</th>
+                            <th style={{ padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent', color: '#9CA3AF', fontWeight: '600', textTransform: 'none', letterSpacing: '0' }}>Priority</th>
+                            <th style={{ width: '40px', padding: '1rem', borderBottom: '1px solid #F1F5F9', background: 'transparent' }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {groupTasks.map(task => {
+                            const pColor = getPriorityColor(task.priority);
+                            return (
+                              <tr key={task.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                <td style={{ padding: '1rem' }}>
+                                  <div style={{ width: '16px', height: '16px', border: '2px solid #E5E7EB', borderRadius: '4px', cursor: 'pointer' }}></div>
+                                </td>
+                                <td style={{ padding: '1rem', fontWeight: '600', color: '#1F2937' }}>{task.title}</td>
+                                <td style={{ padding: '1rem', color: '#4B5563', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.description || '-'}</td>
+                                <td style={{ padding: '1rem', color: '#1F2937', fontWeight: '500' }}>
+                                  {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date'}
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                  <span style={{ background: '#F3E8FF', color: '#9333EA', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>Dashboard</span>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#E5E7EB', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '10px', border: '1px solid white', zIndex: 2, color: '#374151', fontWeight: 'bold' }}>
+                                      {task.assignee_name ? task.assignee_name.charAt(0).toUpperCase() : '?'}
+                                    </div>
                                   </div>
-                                </div>
-                              </td>
-                              <td style={{ padding: '1rem' }}>
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: pColor.bg, color: pColor.text, padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '600' }}>
-                                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor.dot }}></span>
-                                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                                </span>
-                              </td>
-                              <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9CA3AF' }} onClick={() => { setEditingTask(task); setShowModal(true); }}>
-                                  <MoreHorizontal size={18} />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: pColor.bg, color: pColor.text, padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '600' }}>
+                                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: pColor.dot }}></span>
+                                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                  <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9CA3AF' }} onClick={() => { setEditingTask(task); setShowModal(true); }}>
+                                    <MoreHorizontal size={18} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
               );
