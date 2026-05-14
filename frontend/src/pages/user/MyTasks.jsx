@@ -15,31 +15,31 @@ const SortableTask = ({ task, onEdit, onDelete, canDelete, onSubmitApproval, onA
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`kanban-card priority-${task.priority}`}>
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'0.5rem'}}>
-        <strong style={{fontSize:'0.9rem'}}>{task.title}</strong>
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'0.25rem'}}>
+        <strong style={{fontSize:'0.95rem', color: '#0F172A', fontWeight: '700', lineHeight: '1.4'}}>{task.title}</strong>
       </div>
-      <div style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom:'0.75rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden'}}>
-        {task.description}
+      <div style={{fontSize:'0.85rem', color:'#64748B', marginBottom:'1rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight: '1.5'}}>
+        {task.description || <span style={{fontStyle:'italic', color:'#CBD5E1'}}>No description provided</span>}
       </div>
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        <div style={{display:'flex', alignItems:'center', gap:'0.25rem', fontSize:'0.75rem', color:'var(--text-muted)'}}>
-          <Calendar size={12}/> {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No date'}
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', borderTop: '1px solid #F1F5F9', paddingTop: '0.75rem'}}>
+        <div style={{display:'flex', alignItems:'center', gap:'0.4rem', fontSize:'0.75rem', color:'#94A3B8', fontWeight: '500'}}>
+          <Calendar size={14} color="#CBD5E1" /> {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No date'}
         </div>
-        <div style={{display:'flex', gap:'0.25rem'}} onPointerDown={(e) => e.stopPropagation()}>
+        <div style={{display:'flex', gap:'0.35rem', alignItems: 'center'}} onPointerDown={(e) => e.stopPropagation()}>
           {task.approval_status === 'pending' && !isAdmin && (
-            <button className="btn btn-primary" style={{padding:'0.2rem 0.5rem', fontSize: '0.75rem'}} onClick={() => onSubmitApproval(task.id)}>Submit</button>
+            <button className="btn btn-primary" style={{padding:'0.2rem 0.6rem', fontSize: '0.7rem', borderRadius: '4px', height: '24px', fontWeight: '600'}} onClick={() => onSubmitApproval(task.id)}>Submit</button>
           )}
           {task.approval_status === 'submitted' && isAdmin && (
-            <button className="btn btn-success" style={{padding:'0.2rem 0.5rem', fontSize: '0.75rem', backgroundColor: 'var(--success)', color: 'white'}} onClick={() => onApprove(task.id)}>Approve</button>
+            <button className="btn btn-success" style={{padding:'0.2rem 0.6rem', fontSize: '0.7rem', borderRadius: '4px', height: '24px', fontWeight: '600', backgroundColor: '#10B981', color: 'white'}} onClick={() => onApprove(task.id)}>Approve</button>
           )}
           {task.approval_status === 'submitted' && !isAdmin && (
-            <span className="badge badge-review" style={{fontSize: '0.65rem'}}>Pending Approval</span>
+            <span className="badge" style={{fontSize: '0.65rem', background: '#FEF3C7', color: '#D97706'}}>In Review</span>
           )}
           {task.approval_status === 'approved' && (
-            <span className="badge badge-done" style={{fontSize: '0.65rem'}}>Approved</span>
+            <span className="badge" style={{fontSize: '0.65rem', background: '#D1FAE5', color: '#059669'}}>Approved</span>
           )}
-          <button className="btn btn-secondary" style={{padding:'0.25rem'}} onClick={() => onEdit(task)}><Edit2 size={12}/></button>
-          {canDelete && <button className="btn btn-danger" style={{padding:'0.25rem'}} onClick={() => onDelete(task.id)}><Trash2 size={12}/></button>}
+          <button style={{background:'transparent', border:'none', color:'#94A3B8', cursor:'pointer', padding:'4px', display:'flex', borderRadius:'4px'}} onClick={() => onEdit(task)} onMouseEnter={e => {e.currentTarget.style.color = '#2563EB'; e.currentTarget.style.background = '#EFF6FF'}} onMouseLeave={e => {e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.background = 'transparent'}}><Edit2 size={14}/></button>
+          {canDelete && <button style={{background:'transparent', border:'none', color:'#94A3B8', cursor:'pointer', padding:'4px', display:'flex', borderRadius:'4px'}} onClick={() => onDelete(task.id)} onMouseEnter={e => {e.currentTarget.style.color = '#EF4444'; e.currentTarget.style.background = '#FEF2F2'}} onMouseLeave={e => {e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.background = 'transparent'}}><Trash2 size={14}/></button>}
         </div>
       </div>
     </div>
