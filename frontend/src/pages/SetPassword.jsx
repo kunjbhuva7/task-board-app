@@ -86,7 +86,7 @@ const SetPassword = () => {
           <div style={{marginBottom:'1rem'}}>
             <label className="label">New Password</label>
             <input type="password" required className="input" value={password} onChange={e=>setPassword(e.target.value)} />
-            <small className="text-muted" style={{display:'block',marginTop:'4px'}}>Min 8 chars, 1 uppercase, 1 number, 1 special char</small>
+
           </div>
           <div style={{marginBottom:'1.5rem'}}>
             <label className="label">Confirm Password</label>
