@@ -38,19 +38,15 @@ const Login = () => {
     <div style={{ 
       display: 'flex', 
       minHeight: '100vh', 
-      background: '#F8FAFC', 
+      background: 'white', 
       fontFamily: "'Inter', sans-serif",
       justifyContent: 'center',
       alignItems: 'center'
     }}>
       <div style={{ 
         width: '100%', 
-        maxWidth: '400px', 
-        padding: '2.5rem', 
-        background: 'white',
-        borderRadius: '16px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-        border: '1px solid #E2E8F0'
+        maxWidth: '380px', 
+        padding: '2rem'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#1E293B', marginBottom: '0.5rem' }}>Welcome back</h2>
@@ -72,6 +68,7 @@ const Login = () => {
                   paddingLeft: '2.75rem', 
                   borderRadius: '12px', 
                   border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   outline: 'none',
                   fontSize: '1rem',
                   transition: 'all 0.2s'
@@ -98,6 +95,7 @@ const Login = () => {
                   paddingRight: '2.75rem',
                   borderRadius: '12px', 
                   border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   outline: 'none',
                   fontSize: '1rem',
                   transition: 'all 0.2s'
@@ -151,7 +149,7 @@ const Login = () => {
         .login-input:focus {
           border-color: #2563EB !important;
           box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
-          background: white;
+          background: white !important;
         }
       `}</style>
     </div>
