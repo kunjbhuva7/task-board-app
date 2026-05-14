@@ -24,6 +24,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (localStorage.getItem('token')) {
       fetchUser();
+      
+      // Poll every 30 seconds to keep permissions up to date
+      const interval = setInterval(() => {
+        fetchUser();
+      }, 30000);
+      return () => clearInterval(interval);
     } else {
       setLoading(false);
     }
