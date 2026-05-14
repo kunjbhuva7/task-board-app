@@ -83,7 +83,6 @@ const Login = () => {
             <input 
               type="email" 
               required 
-              placeholder="name@company.com"
               style={{ 
                 width: '100%', 
                 height: '46px', 
@@ -92,10 +91,10 @@ const Login = () => {
                 border: '1px solid #D1D5DB',
                 outline: 'none',
                 fontSize: '16px',
-                transition: 'border-color 0.2s',
+                transition: 'all 0.2s',
                 background: '#fff'
               }} 
-              onFocus={(e) => e.target.style.borderColor = '#D1D5DB'} // Removed blue focus color
+              className="login-input-field"
               value={email} 
               onChange={e => setEmail(e.target.value)} 
             />
@@ -108,7 +107,6 @@ const Login = () => {
             <input 
               type="password" 
               required 
-              placeholder="••••••••"
               style={{ 
                 width: '100%', 
                 height: '46px', 
@@ -117,10 +115,10 @@ const Login = () => {
                 border: '1px solid #D1D5DB',
                 outline: 'none',
                 fontSize: '16px',
-                transition: 'border-color 0.2s',
+                transition: 'all 0.2s',
                 background: '#fff'
               }} 
-              onFocus={(e) => e.target.style.borderColor = '#D1D5DB'} // Removed blue focus color
+              className="login-input-field"
               value={password} 
               onChange={e => setPassword(e.target.value)} 
             />
@@ -159,6 +157,13 @@ const Login = () => {
           </div>
         </form>
       </div>
+
+      <style>{`
+        .login-input-field:focus {
+          border-color: #2563EB !important;
+          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+      `}</style>
     </div>
   );
 };
