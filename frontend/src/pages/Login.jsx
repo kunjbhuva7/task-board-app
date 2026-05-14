@@ -92,11 +92,10 @@ const Login = () => {
                 border: '1px solid #D1D5DB',
                 outline: 'none',
                 fontSize: '16px',
-                transition: 'all 0.2s',
+                transition: 'border-color 0.2s',
                 background: '#fff'
               }} 
-              onFocus={(e) => e.target.style.borderColor = '#2563EB'}
-              onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
+              onFocus={(e) => e.target.style.borderColor = '#D1D5DB'} // Removed blue focus color
               value={email} 
               onChange={e => setEmail(e.target.value)} 
             />
@@ -118,11 +117,10 @@ const Login = () => {
                 border: '1px solid #D1D5DB',
                 outline: 'none',
                 fontSize: '16px',
-                transition: 'all 0.2s',
+                transition: 'border-color 0.2s',
                 background: '#fff'
               }} 
-              onFocus={(e) => e.target.style.borderColor = '#2563EB'}
-              onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
+              onFocus={(e) => e.target.style.borderColor = '#D1D5DB'} // Removed blue focus color
               value={password} 
               onChange={e => setPassword(e.target.value)} 
             />
