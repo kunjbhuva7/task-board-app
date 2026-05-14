@@ -45,7 +45,7 @@ const Login = () => {
       <div style={{ 
         width: '100%', 
         maxWidth: '520px', 
-        padding: '3rem 2.5rem', 
+        padding: '3.5rem 3rem', 
         background: 'white',
         borderRadius: '12px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
@@ -56,7 +56,7 @@ const Login = () => {
           <div style={{ 
             width: '32px', 
             height: '32px', 
-            background: '#F59E0B', 
+            background: '#2563EB', 
             borderRadius: '6px', 
             display: 'flex', 
             justifyContent: 'center', 
@@ -64,14 +64,14 @@ const Login = () => {
             color: 'white',
             fontWeight: 'bold',
             fontSize: '18px'
-          }}>K</div>
-          <span style={{ fontSize: '22px', fontWeight: '800', color: '#111827' }}>KompaKt</span>
+          }}>T</div>
+          <span style={{ fontSize: '24px', fontWeight: '800', color: '#111827' }}>TaskBoard</span>
         </div>
 
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#111827', marginBottom: '0.5rem' }}>Sign in to your account</h2>
-          <p style={{ color: '#111827', fontSize: '16px' }}>
-            or <span style={{ color: '#D97706', cursor: 'pointer', fontWeight: '500' }}>sign up for an account</span>
+          <h2 style={{ fontSize: '30px', fontWeight: '800', color: '#111827', marginBottom: '0.75rem', letterSpacing: '-0.025em' }}>Sign in to your account</h2>
+          <p style={{ color: '#4B5563', fontSize: '16px' }}>
+            Enter your details to manage your tasks
           </p>
         </div>
 
@@ -83,16 +83,20 @@ const Login = () => {
             <input 
               type="email" 
               required 
+              placeholder="name@company.com"
               style={{ 
                 width: '100%', 
-                height: '44px', 
-                padding: '0 12px', 
+                height: '46px', 
+                padding: '0 14px', 
                 borderRadius: '8px', 
                 border: '1px solid #D1D5DB',
                 outline: 'none',
                 fontSize: '16px',
-                transition: 'border-color 0.2s'
+                transition: 'all 0.2s',
+                background: '#fff'
               }} 
+              onFocus={(e) => e.target.style.borderColor = '#2563EB'}
+              onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
               value={email} 
               onChange={e => setEmail(e.target.value)} 
             />
@@ -105,16 +109,20 @@ const Login = () => {
             <input 
               type="password" 
               required 
+              placeholder="••••••••"
               style={{ 
                 width: '100%', 
-                height: '44px', 
-                padding: '0 12px', 
+                height: '46px', 
+                padding: '0 14px', 
                 borderRadius: '8px', 
                 border: '1px solid #D1D5DB',
                 outline: 'none',
                 fontSize: '16px',
-                transition: 'border-color 0.2s'
+                transition: 'all 0.2s',
+                background: '#fff'
               }} 
+              onFocus={(e) => e.target.style.borderColor = '#2563EB'}
+              onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
               value={password} 
               onChange={e => setPassword(e.target.value)} 
             />
@@ -122,25 +130,26 @@ const Login = () => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input type="checkbox" id="remember" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-            <label htmlFor="remember" style={{ fontSize: '14px', color: '#111827', cursor: 'pointer', fontWeight: '500' }}>Remember me</label>
+            <label htmlFor="remember" style={{ fontSize: '14px', color: '#374151', cursor: 'pointer', fontWeight: '500' }}>Remember me</label>
           </div>
 
           <button 
             type="submit" 
             style={{ 
               width: '100%', 
-              height: '46px', 
+              height: '48px', 
               fontSize: '16px', 
               fontWeight: '600',
               borderRadius: '8px', 
-              background: '#D97706',
+              background: '#2563EB',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              transition: 'background 0.2s'
+              transition: 'background 0.2s',
+              marginTop: '0.5rem'
             }} 
             disabled={loading}
           >
@@ -148,7 +157,7 @@ const Login = () => {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '14px', color: '#D97706', cursor: 'pointer', fontWeight: '500' }}>Forgot your password?</span>
+            <span style={{ fontSize: '14px', color: '#2563EB', cursor: 'pointer', fontWeight: '500' }}>Forgot your password?</span>
           </div>
         </form>
       </div>
