@@ -44,6 +44,7 @@ const initDb = () => {
       assigned_to INTEGER REFERENCES users(id),
       created_by INTEGER REFERENCES users(id),
       due_date DATE,
+      approval_status TEXT DEFAULT 'approved',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
