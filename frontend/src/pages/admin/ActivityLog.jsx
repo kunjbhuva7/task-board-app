@@ -6,7 +6,7 @@ const ACTION_COLORS = {
   'Create Task':  { bg:'rgba(16,185,129,0.1)',  color:'#059669', border:'rgba(16,185,129,0.2)'  },
   'Delete Task':  { bg:'rgba(239,68,68,0.1)',   color:'#DC2626', border:'rgba(239,68,68,0.2)'   },
   'Update Task':  { bg:'rgba(59,130,246,0.1)',  color:'#2563EB', border:'rgba(59,130,246,0.2)'  },
-  'Create User':  { bg:'rgba(99,102,241,0.1)',  color:'#6366F1', border:'rgba(99,102,241,0.2)'  },
+  'Create User':  { bg:'rgba(255,126,95,0.1)',  color:'#FF7E5F', border:'rgba(255,126,95,0.2)'  },
   'Delete User':  { bg:'rgba(239,68,68,0.1)',   color:'#DC2626', border:'rgba(239,68,68,0.2)'   },
   'Update User':  { bg:'rgba(245,158,11,0.1)',  color:'#D97706', border:'rgba(245,158,11,0.2)'  },
 };
@@ -49,7 +49,7 @@ const ActivityLog = () => {
       <div style={{background:'rgba(255,255,255,0.6)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.8)', borderRadius:'16px', boxShadow:'0 4px 20px rgba(0,0,0,0.06)', overflow:'hidden'}}>
         {loading ? (
           <div style={{display:'flex', justifyContent:'center', padding:'4rem'}}>
-            <div style={{width:36,height:36,border:'3px solid rgba(99,102,241,0.2)',borderTopColor:'#6366F1',borderRadius:'50%',animation:'spin 0.9s linear infinite'}}/>
+            <div style={{width:36,height:36,border:'3px solid rgba(255,126,95,0.2)',borderTopColor:'#FF7E5F',borderRadius:'50%',animation:'spin 0.9s linear infinite'}}/>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{padding:'4rem', textAlign:'center', color:'#94A3B8'}}>
@@ -76,7 +76,7 @@ const ActivityLog = () => {
                     onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
                     <td style={{padding:'0.9rem 1.1rem'}}>
                       <div style={{display:'flex', alignItems:'center', gap:'0.6rem'}}>
-                        <div style={{width:28,height:28,borderRadius:'50%',background:'linear-gradient(135deg,#6366F1,#8B5CF6)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'0.68rem',fontWeight:'800',flexShrink:0}}>
+                        <div style={{width:28,height:28,borderRadius:'50%',background:'linear-gradient(135deg,#FF7E5F,#FEB47B)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'0.68rem',fontWeight:'800',flexShrink:0}}>
                           {(act.user_name||'S').charAt(0).toUpperCase()}
                         </div>
                         <span style={{fontWeight:'600', color:'#1E293B', fontSize:'0.85rem'}}>{act.user_name || 'System'}</span>

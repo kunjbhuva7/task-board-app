@@ -11,10 +11,7 @@ const Login = () => {
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  if (user) {
-    if (user.role === 'admin') navigate('/admin/dashboard');
-    else navigate('/user/dashboard');
-  }
+  if (user) navigate('/user/dashboard');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +20,7 @@ const Login = () => {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.token, res.data.user);
       toast.success('Welcome back!');
-      if (res.data.user.role === 'admin') navigate('/admin/dashboard');
-      else navigate('/user/dashboard');
+      navigate('/user/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {
@@ -37,32 +33,30 @@ const Login = () => {
       display: 'flex', minHeight: '100vh',
       alignItems: 'center', justifyContent: 'center',
       padding: '1.5rem',
-      fontFamily: "'Inter', sans-serif",
-      // Beautiful light gradient (peach/orange -> light blue -> white)
-      background: 'linear-gradient(135deg, #FFEDD5 0%, #E0F2FE 50%, #F1F5F9 100%)'
+      fontFamily: "'Inter', sans-serif"
     }}>
       {/* Light Glass Card */}
       <div style={{
         width: '100%', maxWidth: '440px',
-        background: 'rgba(255,255,255,0.7)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
+        background: 'rgba(255,255,255,0.75)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
         borderRadius: '24px',
         border: '1px solid rgba(255,255,255,0.9)',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.08)',
+        boxShadow: '0 24px 64px rgba(239, 130, 80, 0.08)',
         padding: '3rem 2.5rem',
       }}>
         {/* Logo */}
-        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginBottom:'2rem' }}>
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.6rem', marginBottom:'2rem' }}>
           <div style={{
-            width:'48px', height:'48px',
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-            borderRadius:'14px',
+            width:'40px', height:'40px',
+            background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)',
+            borderRadius:'12px',
             display:'flex', justifyContent:'center', alignItems:'center',
-            fontWeight:'900', fontSize:'22px', color:'white',
-            boxShadow:'0 4px 16px rgba(99,102,241,0.3)'
-          }}>C</div>
-          <span style={{ fontSize:'1.5rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px' }}>Craftboard</span>
+            fontWeight:'800', fontSize:'1.2rem', color:'white',
+            boxShadow:'0 4px 14px rgba(255, 126, 95, 0.35)'
+          }}>A</div>
+          <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>Atome</span>
         </div>
 
         <div style={{ textAlign:'center', marginBottom:'2rem' }}>
@@ -90,7 +84,7 @@ const Login = () => {
                 color:'#1E293B',
                 transition:'all 0.2s',
               }}
-              onFocus={e => { e.target.style.borderColor='#6366F1'; e.target.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'; }}
+              onFocus={e => { e.target.style.borderColor='#FF7E5F'; e.target.style.boxShadow='0 0 0 3px rgba(255,126,95,0.15)'; }}
               onBlur={e => { e.target.style.borderColor='rgba(0,0,0,0.08)'; e.target.style.boxShadow='none'; }}
             />
           </div>
@@ -110,7 +104,7 @@ const Login = () => {
                 color:'#1E293B',
                 transition:'all 0.2s',
               }}
-              onFocus={e => { e.target.style.borderColor='#6366F1'; e.target.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'; }}
+              onFocus={e => { e.target.style.borderColor='#FF7E5F'; e.target.style.boxShadow='0 0 0 3px rgba(255,126,95,0.15)'; }}
               onBlur={e => { e.target.style.borderColor='rgba(0,0,0,0.08)'; e.target.style.boxShadow='none'; }}
             />
           </div>
@@ -121,10 +115,10 @@ const Login = () => {
               width:'100%', height:'48px',
               fontSize:'0.95rem', fontWeight:'700',
               borderRadius:'12px',
-              background: loading ? 'rgba(99,102,241,0.7)' : '#6366F1',
+              background: loading ? 'rgba(255,126,95,0.7)' : 'linear-gradient(135deg, #FF7E5F, #FEB47B)',
               color:'white', border:'none', cursor: loading ? 'not-allowed' : 'pointer',
               display:'flex', justifyContent:'center', alignItems:'center',
-              boxShadow:'0 4px 16px rgba(99,102,241,0.3)',
+              boxShadow:'0 4px 16px rgba(255,126,95,0.3)',
               transition:'all 0.2s', marginTop:'0.4rem',
             }}
             onMouseEnter={e => { if(!loading) e.currentTarget.style.transform='translateY(-1px)'; }}

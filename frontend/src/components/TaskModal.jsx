@@ -9,8 +9,7 @@ const TaskModal = ({ task, onClose, onSave, users }) => {
     description: task?.description || '',
     priority: task?.priority || 'medium',
     status: task?.status || 'todo',
-    due_date: task?.due_date || '',
-    assigned_to: task?.assigned_to || ''
+    due_date: task?.due_date || ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -97,15 +96,6 @@ const TaskModal = ({ task, onClose, onSave, users }) => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
-              <div>
-                <label style={labelStyle}>Assign To</label>
-                <select style={inputStyle} value={formData.assigned_to} onChange={e => setFormData({...formData, assigned_to: e.target.value})} onFocus={(e) => e.target.style.borderColor = '#2563EB'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}>
-                  <option value="">Unassigned</option>
-                  {users.map(u => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
-              </div>
               {task && (
                 <div>
                   <label style={labelStyle}>Status</label>

@@ -78,7 +78,7 @@ const MyTasks = () => {
     fetchTasks();
     if (user.role === 'admin' || canCreateTask)
       api.get('/users').then(r => setUsers(r.data)).catch(() => {});
-    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5000');
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5005');
     s.on('tasks_updated', fetchTasks);
     return () => s.disconnect();
   }, [user, canCreateTask]);
@@ -129,7 +129,7 @@ const MyTasks = () => {
 
   // styles
   const hdrStyle = { padding:'1.25rem 1.75rem 0', background:'transparent', borderBottom:'1px solid rgba(0,0,0,0.08)' };
-  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'500', fontSize:'0.875rem', color: active?'#818CF8':'#64748B', borderBottom: active?'2px solid #818CF8':'2px solid transparent', transition:'all 0.2s' });
+  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'500', fontSize:'0.875rem', color: active?'#FF7E5F':'#64748B', borderBottom: active?'2px solid #FF7E5F':'2px solid transparent', transition:'all 0.2s' });
   const btnGlass = { display:'flex', alignItems:'center', gap:'0.4rem', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.08)', padding:'0.4rem 0.9rem', borderRadius:'9px', fontWeight:'600', color:'#1E293B', cursor:'pointer', fontSize:'0.82rem' };
 
   return (
@@ -139,8 +139,8 @@ const MyTasks = () => {
       <div style={hdrStyle}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.1rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
-            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'#1E293B', boxShadow:'0 4px 12px rgba(99,102,241,0.4)' }}>C</div>
-            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B', margin:0, letterSpacing:'-0.3px' }}>Craftboard Project</h1>
+            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'white', boxShadow:'0 4px 12px rgba(255, 126, 95, 0.4)' }}>A</div>
+            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B', margin:0, letterSpacing:'-0.3px' }}>Atome</h1>
           </div>
         </div>
 
@@ -174,7 +174,9 @@ const MyTasks = () => {
 
             {canCreateTask && (
               <button onClick={() => { setEditingTask(null); setShowModal(true); }}
-                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', border:'none', padding:'0.45rem 1rem', borderRadius:'9px', fontWeight:'700', color:'#1E293B', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 4px 14px rgba(99,102,241,0.4)' }}>
+                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'linear-gradient(135deg,#FF7E5F,#FEB47B)', border:'none', padding:'0.45rem 1rem', borderRadius:'9px', fontWeight:'700', color:'white', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 4px 12px rgba(255,126,95,0.3)', transition:'all 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'}
+                onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
                 <Plus size={13}/> New Task
               </button>
             )}
@@ -273,7 +275,7 @@ const MyTasks = () => {
                   if (gTasks.length === 0 && group.id !== 'todo' && group.id !== 'in_progress') return null;
                   const isCol = collapsed[group.id];
                   return (
-                    <div key={group.id} style={{ background:'rgba(255,255,255,0.5)', backdropFilter:'blur(20px)', borderRadius:'16px', border:'1px solid rgba(99,102,241,0.1)', boxShadow:'0 4px 16px rgba(0,0,0,0.06)' }}>
+                    <div key={group.id} style={{ background:'rgba(255,255,255,0.5)', backdropFilter:'blur(20px)', borderRadius:'16px', border:'1px solid rgba(255,126,95,0.1)', boxShadow:'0 4px 16px rgba(0,0,0,0.06)' }}>
                       {/* Group header */}
                       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(255,255,255,0.7)', borderBottom: isCol?'none':'1px solid rgba(0,0,0,0.08)' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', cursor:'pointer' }} onClick={() => setCollapsed(p => ({...p,[group.id]:!p[group.id]}))}>
@@ -301,7 +303,6 @@ const MyTasks = () => {
                                 <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Task Name</th>
                                 <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Description</th>
                                 <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Due Date</th>
-                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Assigned</th>
                                 <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Priority</th>
                                 <th style={{ width:36, padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent' }}></th>
                               </tr>
@@ -322,11 +323,6 @@ const MyTasks = () => {
                                     </td>
                                     <td style={{ padding:'0.8rem 0.9rem', color:'#374151', fontWeight:'600', whiteSpace:'nowrap' }}>
                                       {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : <span style={{ color:'#CBD5E1' }}>No date</span>}
-                                    </td>
-                                    <td style={{ padding:'0.8rem 0.9rem' }}>
-                                      <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', justifyContent:'center', alignItems:'center', color:'#1E293B', fontSize:'0.7rem', fontWeight:'800' }}>
-                                        {task.assignee_name ? task.assignee_name.charAt(0).toUpperCase() : '?'}
-                                      </div>
                                     </td>
                                     <td style={{ padding:'0.8rem 0.9rem' }}>
                                       <span style={{ display:'inline-flex', alignItems:'center', gap:'0.3rem', background:col.bg, color:col.text, padding:'0.2rem 0.55rem', borderRadius:'6px', fontSize:'0.72rem', fontWeight:'700' }}>
@@ -355,7 +351,7 @@ const MyTasks = () => {
                       )}
                       {!isCol && gTasks.length === 0 && (
                         <div style={{ padding:'1.25rem', textAlign:'center', color:'#CBD5E1', fontSize:'0.82rem' }}>
-                          No tasks here yet{canCreateTask && <span style={{ color:'#6366F1', cursor:'pointer', marginLeft:'0.3rem' }} onClick={() => { setEditingTask(null); setShowModal(true); }}>— Add one</span>}
+                          No tasks here yet{canCreateTask && <span style={{ color:'#FF7E5F', cursor:'pointer', marginLeft:'0.3rem' }} onClick={() => { setEditingTask(null); setShowModal(true); }}>— Add one</span>}
                         </div>
                       )}
                     </div>
@@ -385,7 +381,7 @@ const MyTasks = () => {
             {GROUPS.findIndex(x => x.id === dt.status) === GROUPS.length - 1 && (
               <div style={{ padding:'0.45rem 0.9rem', fontSize:'0.8rem', color:'#94A3B8', fontStyle:'italic' }}>Already completed</div>
             )}
-            {canEditTask && (
+            {canEditTask && dt.status !== 'done' && (
               <>
                 <div style={{ height:1, background:'rgba(0,0,0,0.07)', margin:'0.35rem 0' }}/>
                 <div onClick={() => { setDropdown(null); setEditingTask(dt); setShowModal(true); }}

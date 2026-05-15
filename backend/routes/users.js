@@ -4,13 +4,18 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../database');
 const authMiddleware = require('../middleware/auth');
 const checkPermission = require('../middleware/permissions');
+const sendEmail = require('../utils/email');
 const { sendInviteEmail } = require('../utils/email');
 
 router.use(authMiddleware);
-router.use(checkPermission('can_manage_users'));
 
-// GET /api/users - list all users
+// GET /api/users - list all users (accessible to admin, can_view_users, can_manage_users, can_manage_roles)
 router.get('/', (req, res) => {
+  const isAdmin = req.user.role === 'admin';
+  const perms = isAdmin ? null : db.prepare('SELECT * FROM permissions WHERE user_id = ?').get(req.user.id);
+  const allowed = isAdmin || (perms && (perms.is_super_admin || perms.can_view_users || perms.can_manage_users || perms.can_manage_roles));
+  if (!allowed) return res.status(403).json({ message: 'Forbidden: cannot view users' });
+
   const users = db.prepare('SELECT id, name, email, role, is_active, invite_token, created_at FROM users').all();
   res.json(users);
 });
@@ -31,12 +36,12 @@ router.post('/', async (req, res) => {
     const userId = info.lastInsertRowid;
 
     const perms = role === 'admin'
-      ? [1, 1, 1, 1, 1, 1]
-      : [1, 1, 0, 0, 0, 0];
+      ? [1, 1, 1, 1, 1]
+      : [1, 1, 0, 0, 0];
 
     db.prepare(`
-      INSERT INTO permissions (user_id, can_create_task, can_edit_task, can_delete_task, can_assign_task, can_view_all_tasks, can_manage_users)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO permissions (user_id, can_create_task, can_edit_task, can_delete_task, can_view_all_tasks, can_manage_users)
+      VALUES (?, ?, ?, ?, ?, ?)
     `).run(userId, ...perms);
 
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Create User', 'user', userId, `Created user ${email}`);
@@ -78,7 +83,6 @@ router.delete('/:id', (req, res) => {
   const { id } = req.params;
   try {
     // Null out task references so we don't violate any constraints
-    db.prepare('UPDATE tasks SET assigned_to = NULL WHERE assigned_to = ?').run(id);
     db.prepare('UPDATE tasks SET created_by = NULL WHERE created_by = ?').run(id);
     // Delete permissions first (FK reference)
     db.prepare('DELETE FROM permissions WHERE user_id = ?').run(id);

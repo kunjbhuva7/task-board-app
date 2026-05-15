@@ -1,35 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
-import { Shield, Check, X } from 'lucide-react';
+import { Shield, CheckSquare, Square, Search, Save, AlertCircle } from 'lucide-react';
 
-const PERM_META = {
-  can_create_task:    { label:'Create Tasks',    desc:'Can create new tasks in the workspace',          color:'#10B981' },
-  can_edit_task:      { label:'Edit Tasks',      desc:'Can edit existing tasks',                        color:'#3B82F6' },
-  can_delete_task:    { label:'Delete Tasks',    desc:'Can permanently delete tasks',                   color:'#EF4444' },
-  can_assign_task:    { label:'Assign Tasks',    desc:'Can assign tasks to other team members',         color:'#8B5CF6' },
-  can_view_all_tasks: { label:'View All Tasks',  desc:'Can see tasks from all users, not just their own', color:'#F59E0B' },
-  can_manage_users:   { label:'Manage Users',    desc:'Can add, edit, and remove workspace members',   color:'#6366F1' },
+const PERM_CATEGORIES = {
+  global: {
+    label: 'Global Modifiers',
+    items: [
+      { key: 'is_super_admin', label: 'Super Admin Access', desc: 'Grants full system access unconditionally' },
+      { key: 'is_read_only', label: 'Read-Only Access', desc: 'Prevents all modifications globally' }
+    ]
+  },
+  users: {
+    label: 'Users & Roles',
+    items: [
+      { key: 'can_view_users', label: 'View Users', desc: 'Can view the user directory' },
+      { key: 'can_create_users', label: 'Create Users', desc: 'Can invite or create new users' },
+      { key: 'can_edit_users', label: 'Edit Users', desc: 'Can edit user details' },
+      { key: 'can_delete_users', label: 'Delete Users', desc: 'Can remove users from workspace' },
+      { key: 'can_manage_roles', label: 'Manage Roles', desc: 'Can change user roles' },
+      { key: 'can_manage_users', label: 'Manage Users (Legacy)', desc: 'Full user management' },
+    ]
+  },
+  tasks: {
+    label: 'Task Management',
+    items: [
+      { key: 'can_view_all_tasks', label: 'View All Tasks', desc: 'See tasks from all users' },
+      { key: 'can_create_task', label: 'Create Tasks', desc: 'Create new tasks' },
+      { key: 'can_edit_task', label: 'Edit Tasks', desc: 'Modify existing tasks' },
+      { key: 'can_delete_task', label: 'Delete Tasks', desc: 'Permanently remove tasks' },
+      { key: 'can_manage_tasks', label: 'Manage Tasks', desc: 'Super override over all tasks' },
+      { key: 'can_approve_requests', label: 'Approve Requests', desc: 'Approve task status changes' },
+    ]
+  },
+  admin: {
+    label: 'Admin & System',
+    items: [
+      { key: 'can_view_analytics', label: 'View Analytics', desc: 'Access dashboard metrics' },
+      { key: 'can_view_reports', label: 'View Reports', desc: 'Generate and view reports' },
+      { key: 'can_export_data', label: 'Export Data', desc: 'Export system data' },
+      { key: 'can_manage_settings', label: 'Manage Settings', desc: 'Modify workspace settings' },
+      { key: 'can_manage_events', label: 'Manage Calendar', desc: 'Create and edit calendar events' },
+      { key: 'can_manage_notifications', label: 'Manage Notifications', desc: 'Configure alert settings' },
+    ]
+  }
 };
 
-const CARD = { background:'rgba(255,255,255,0.6)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.8)', borderRadius:'16px', boxShadow:'0 4px 20px rgba(0,0,0,0.06)', padding:'1.75rem' };
+const ALL_KEYS = Object.values(PERM_CATEGORIES).flatMap(cat => cat.items.map(i => i.key));
+
+const TEMPLATES = {
+  admin: ALL_KEYS.reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+  manager: Object.fromEntries(ALL_KEYS.map(key => [key, [
+    'can_view_all_tasks', 'can_create_task', 'can_edit_task', 'can_approve_requests',
+    'can_view_users', 'can_view_analytics', 'can_manage_events'
+  ].includes(key)])),
+  editor: Object.fromEntries(ALL_KEYS.map(key => [key, [
+    'can_view_all_tasks', 'can_create_task', 'can_edit_task', 'can_manage_events'
+  ].includes(key)])),
+  viewer: Object.fromEntries(ALL_KEYS.map(key => [key, [
+    'can_view_all_tasks', 'can_view_users', 'is_read_only'
+  ].includes(key)])),
+};
+
+const CARD = {
+  background: 'rgba(255,255,255,0.7)',
+  backdropFilter: 'blur(16px)',
+  border: '1px solid rgba(0,0,0,0.07)',
+  borderRadius: '16px',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+  padding: '2rem'
+};
 
 const Permissions = () => {
-  const [users, setUsers]               = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [permissions, setPermissions]   = useState({ can_create_task:false, can_edit_task:false, can_delete_task:false, can_assign_task:false, can_view_all_tasks:false, can_manage_users:false });
-  const [loading, setLoading]           = useState(false);
-  const [saving, setSaving]             = useState(false);
+  const [permissions, setPermissions] = useState(Object.fromEntries(ALL_KEYS.map(k => [k, false])));
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     api.get('/users').then(r => setUsers(r.data.filter(u => u.role !== 'admin'))).catch(() => toast.error('Failed to load users'));
   }, []);
 
   useEffect(() => {
-    if (!selectedUserId) { setPermissions({ can_create_task:false, can_edit_task:false, can_delete_task:false, can_assign_task:false, can_view_all_tasks:false, can_manage_users:false }); return; }
+    if (!selectedUserId) {
+      setPermissions(Object.fromEntries(ALL_KEYS.map(k => [k, false])));
+      return;
+    }
     setLoading(true);
     api.get(`/permissions/${selectedUserId}`)
-      .then(r => setPermissions({ can_create_task:!!r.data.can_create_task, can_edit_task:!!r.data.can_edit_task, can_delete_task:!!r.data.can_delete_task, can_assign_task:!!r.data.can_assign_task, can_view_all_tasks:!!r.data.can_view_all_tasks, can_manage_users:!!r.data.can_manage_users }))
+      .then(r => {
+        const perms = {};
+        ALL_KEYS.forEach(k => perms[k] = !!r.data[k]);
+        setPermissions(perms);
+      })
       .catch(() => toast.error('Failed to load permissions'))
       .finally(() => setLoading(false));
   }, [selectedUserId]);
@@ -40,99 +105,124 @@ const Permissions = () => {
     try {
       await api.put(`/permissions/${selectedUserId}`, permissions);
       const u = users.find(u => u.id === parseInt(selectedUserId));
-      toast.success(`Permissions updated for ${u?.name || 'User'}`);
+      toast.success(`Permissions updated successfully for ${u?.name || 'User'}!`);
     } catch { toast.error('Failed to update permissions'); }
     finally { setSaving(false); }
   };
 
+  const applyTemplate = (templateName) => {
+    setPermissions(TEMPLATES[templateName]);
+    toast.success(`${templateName.charAt(0).toUpperCase() + templateName.slice(1)} template applied! Don't forget to save.`);
+  };
+
+  const toggleAll = (val) => {
+    setPermissions(Object.fromEntries(ALL_KEYS.map(k => [k, val])));
+  };
+
+  const togglePerm = (key) => setPermissions(p => ({ ...p, [key]: !p[key] }));
+
+  const filteredCategories = Object.entries(PERM_CATEGORIES).map(([catKey, cat]) => {
+    return {
+      ...cat,
+      items: cat.items.filter(item => item.label.toLowerCase().includes(search.toLowerCase()) || item.desc.toLowerCase().includes(search.toLowerCase()))
+    };
+  }).filter(cat => cat.items.length > 0);
+
   const selectedUser = users.find(u => u.id === parseInt(selectedUserId));
 
   return (
-    <div style={{padding:'2rem', display:'flex', flexDirection:'column', gap:'1.75rem'}}>
-
+    <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      
       {/* Header */}
-      <div>
-        <h2 style={{margin:0, fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>Roles & Permissions</h2>
-        <p style={{margin:'0.3rem 0 0', color:'#64748B', fontSize:'0.875rem'}}>Manage per-user permissions for workspace members</p>
+      <div style={{ marginTop: '2rem', padding: '0 2rem' }}>
+        <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em' }}>Roles & Permissions</h2>
+        <p style={{ margin: '0.4rem 0 0', color: '#64748B', fontSize: '0.95rem' }}>Fine-tune system access and capabilities for your workspace members.</p>
       </div>
 
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1.4fr', gap:'1.5rem', alignItems:'start'}}>
-
-        {/* Role Info */}
-        <div style={{display:'flex', flexDirection:'column', gap:'1rem'}}>
-          <div style={{...CARD, background:'linear-gradient(135deg,rgba(99,102,241,0.07),rgba(139,92,246,0.04))', border:'1px solid rgba(99,102,241,0.15)'}}>
-            <div style={{display:'flex', alignItems:'center', gap:'0.7rem', marginBottom:'0.85rem'}}>
-              <div style={{background:'rgba(99,102,241,0.15)', padding:'0.55rem', borderRadius:'10px', color:'#6366F1', display:'flex'}}><Shield size={18}/></div>
-              <h3 style={{margin:0, fontSize:'0.95rem', fontWeight:'700', color:'#4F46E5'}}>Admin Role</h3>
-            </div>
-            <p style={{margin:0, color:'#475569', fontSize:'0.82rem', lineHeight:1.6}}>Has full access. Can manage users, all tasks, and workspace settings without restrictions.</p>
-          </div>
-          <div style={{...CARD}}>
-            <div style={{display:'flex', alignItems:'center', gap:'0.7rem', marginBottom:'0.85rem'}}>
-              <div style={{background:'rgba(100,116,139,0.12)', padding:'0.55rem', borderRadius:'10px', color:'#64748B', display:'flex'}}><Shield size={18}/></div>
-              <h3 style={{margin:0, fontSize:'0.95rem', fontWeight:'700', color:'#1E293B'}}>Member Role</h3>
-            </div>
-            <p style={{margin:0, color:'#475569', fontSize:'0.82rem', lineHeight:1.6}}>Base role. By default can only view and edit their own assigned tasks. Permissions can be extended below.</p>
-          </div>
-        </div>
-
-        {/* Permission Editor */}
-        <div style={CARD}>
-          <h3 style={{margin:'0 0 1.25rem', fontSize:'1rem', fontWeight:'700', color:'#1E293B'}}>Edit User Permissions</h3>
-
-          {/* User Select */}
-          <div style={{marginBottom:'1.5rem'}}>
-            <label style={{display:'block', fontSize:'0.78rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:'0.5rem'}}>Select Member</label>
-            <select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)}
-              style={{width:'100%', background:'rgba(255,255,255,0.8)', border:'1px solid rgba(0,0,0,0.1)', borderRadius:'10px', padding:'0.65rem 0.9rem', fontSize:'0.875rem', color:'#1E293B', outline:'none', fontFamily:'inherit', cursor:'pointer'}}>
-              <option value="">— Select a member —</option>
+      <div style={{ padding: '0 2rem', display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem', alignItems: 'start' }}>
+        
+        {/* Left Panel - Selection & Templates */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={CARD}>
+            <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', fontWeight: '800', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Shield size={18} color="#FF7E5F" /> Edit User Permissions
+            </h3>
+            
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Select Member</label>
+            <select value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)}
+              style={{ width: '100%', background: 'white', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '10px', padding: '0.75rem 1rem', fontSize: '0.9rem', color: '#1E293B', outline: 'none', cursor: 'pointer', transition: 'border-color 0.2s', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)' }}
+              onFocus={e => e.target.style.borderColor = '#FF7E5F'}
+              onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.1)'}>
+              <option value="">— Choose a user —</option>
               {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
             </select>
           </div>
+        </div>
 
-          {/* Permissions Toggles */}
+        {/* Right Panel - Checkboxes */}
+        <div style={CARD}>
           {!selectedUserId ? (
-            <div style={{textAlign:'center', padding:'2rem', color:'#94A3B8', fontSize:'0.875rem'}}>Select a member to manage their permissions</div>
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#94A3B8' }}>
+              <Shield size={48} color="rgba(255,126,95,0.3)" style={{ margin: '0 auto 1rem' }} />
+              <p style={{ margin: 0, fontSize: '1rem', fontWeight: '500' }}>Please select a user from the left panel to edit permissions.</p>
+            </div>
           ) : loading ? (
-            <div style={{display:'flex', justifyContent:'center', padding:'2rem'}}>
-              <div style={{width:32,height:32,border:'3px solid rgba(99,102,241,0.2)',borderTopColor:'#6366F1',borderRadius:'50%',animation:'spin 0.9s linear infinite'}}/>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 2rem' }}>
+              <div style={{ width: 36, height: 36, border: '3px solid rgba(255,126,95,0.2)', borderTopColor: '#FF7E5F', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
             </div>
           ) : (
-            <>
-              {selectedUser && (
-                <div style={{display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'1.5rem', background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.12)', borderRadius:'12px', padding:'0.85rem 1rem'}}>
-                  <div style={{width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#6366F1,#8B5CF6)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'800',flexShrink:0}}>
-                    {selectedUser.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div style={{fontWeight:'700', color:'#1E293B', fontSize:'0.875rem'}}>{selectedUser.name}</div>
-                    <div style={{color:'#64748B', fontSize:'0.78rem'}}>{selectedUser.email}</div>
-                  </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '1rem' }}>
+                <div style={{ position: 'relative', width: '250px' }}>
+                  <Search size={16} color="#94A3B8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input type="text" placeholder="Search permissions..." value={search} onChange={e => setSearch(e.target.value)}
+                    style={{ width: '100%', background: 'rgba(241,245,249,0.5)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '20px', padding: '0.5rem 1rem 0.5rem 2.2rem', fontSize: '0.85rem', outline: 'none' }} />
                 </div>
-              )}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button onClick={() => toggleAll(true)} style={{ background: 'transparent', border: '1px solid #E2E8F0', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '600', color: '#475569', cursor: 'pointer' }}>Select All</button>
+                  <button onClick={() => toggleAll(false)} style={{ background: 'transparent', border: '1px solid #E2E8F0', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '600', color: '#475569', cursor: 'pointer' }}>Deselect All</button>
+                </div>
+              </div>
 
-              <div style={{display:'flex', flexDirection:'column', gap:'0.6rem', marginBottom:'1.5rem'}}>
-                {Object.entries(PERM_META).map(([key, meta]) => (
-                  <label key={key} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.85rem 1rem', background: permissions[key] ? `rgba(${meta.color === '#10B981' ? '16,185,129' : meta.color === '#3B82F6' ? '59,130,246' : meta.color === '#EF4444' ? '239,68,68' : meta.color === '#8B5CF6' ? '139,92,246' : meta.color === '#F59E0B' ? '245,158,11' : '99,102,241'},0.07)` : 'rgba(0,0,0,0.02)', border:`1px solid ${permissions[key] ? meta.color+'33' : 'rgba(0,0,0,0.06)'}`, borderRadius:'12px', cursor:'pointer', transition:'all 0.15s'}}>
-                    <div>
-                      <div style={{fontWeight:'700', color:'#1E293B', fontSize:'0.85rem'}}>{meta.label}</div>
-                      <div style={{color:'#94A3B8', fontSize:'0.75rem', marginTop:'1px'}}>{meta.desc}</div>
-                    </div>
-                    <div onClick={()=>setPermissions(p=>({...p,[key]:!p[key]}))}
-                      style={{width:44, height:24, borderRadius:'12px', background: permissions[key] ? meta.color : 'rgba(0,0,0,0.12)', transition:'all 0.2s', cursor:'pointer', display:'flex', alignItems:'center', padding:'2px', flexShrink:0, boxShadow: permissions[key] ? `0 2px 8px ${meta.color}55` : 'none'}}>
-                      <div style={{width:20, height:20, borderRadius:'50%', background:'white', transition:'all 0.2s', transform: permissions[key] ? 'translateX(20px)' : 'translateX(0)', boxShadow:'0 1px 4px rgba(0,0,0,0.2)', display:'flex', alignItems:'center', justifyContent:'center'}}>
-                        {permissions[key] ? <Check size={10} color={meta.color}/> : <X size={10} color="#94A3B8"/>}
-                      </div>
-                    </div>
-                  </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {filteredCategories.map((cat, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                    <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid rgba(255,126,95,0.2)', paddingBottom: '0.4rem', display: 'inline-block', width: 'max-content' }}>
+                      {cat.label}
+                    </h4>
+                    {cat.items.map(item => (
+                      <label key={item.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', group: 'true' }}>
+                        <div onClick={() => togglePerm(item.key)} style={{ display: 'flex', marginTop: '2px' }}>
+                          {permissions[item.key] ? 
+                            <CheckSquare size={18} color="#FF7E5F" fill="rgba(255,126,95,0.1)" /> : 
+                            <Square size={18} color="#CBD5E1" />
+                          }
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: '700', color: permissions[item.key] ? '#1E293B' : '#475569', transition: 'color 0.1s' }}>{item.label}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '2px' }}>{item.desc}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 ))}
               </div>
 
-              <button onClick={handleSave} disabled={saving}
-                style={{width:'100%', padding:'0.75rem', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', color:'white', border:'none', borderRadius:'12px', fontWeight:'700', fontSize:'0.9rem', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:'0.5rem', transition:'all 0.2s', boxShadow:'0 4px 14px rgba(99,102,241,0.4)'}}>
-                {saving ? <div style={{width:20,height:20,border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'white',borderRadius:'50%',animation:'spin 0.9s linear infinite'}}/> : 'Save Permissions'}
-              </button>
-            </>
+              {filteredCategories.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8', fontSize: '0.9rem' }}>No permissions match your search.</div>
+              )}
+
+              <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={handleSave} disabled={saving}
+                  style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', color: 'white', border: 'none', padding: '0.85rem 2rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.95rem', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.8 : 1, display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 8px 24px rgba(255,126,95,0.3)', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { if(!saving) e.currentTarget.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                  {saving ? <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} /> : <><Save size={18} /> Save Settings</>}
+                </button>
+              </div>
+
+            </div>
           )}
         </div>
       </div>

@@ -58,7 +58,7 @@ const SetPassword = () => {
         <div style={{ fontSize:'2.5rem', marginBottom:'1rem' }}>⚠️</div>
         <h3 style={{ color:'#1E293B', marginBottom:'0.75rem' }}>Link Invalid</h3>
         <p style={{ color:'#64748B', fontSize:'0.875rem', marginBottom:'1.5rem' }}>{error}</p>
-        <button onClick={() => navigate('/login')} className="btn" style={{ background:'white', color:'#6366F1', fontWeight:'700', padding:'0.6rem 1.5rem' }}>
+        <button onClick={() => navigate('/login')} className="btn" style={{ background:'white', color:'#FF7E5F', fontWeight:'700', padding:'0.6rem 1.5rem' }}>
           Go to Login
         </button>
       </div>
@@ -67,11 +67,11 @@ const SetPassword = () => {
 
   return (
     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', padding:'1.5rem' }}>
-      <div style={{ width:'100%', maxWidth:'440px', background:'rgba(255,255,255,0.7)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderRadius:'24px', border:'1px solid rgba(255,255,255,0.9)', boxShadow:'0 24px 64px rgba(0,0,0,0.08)', padding:'3rem 2.5rem' }}>
+      <div style={{ width:'100%', maxWidth:'440px', background:'rgba(255,255,255,0.75)', backdropFilter:'blur(30px)', WebkitBackdropFilter:'blur(30px)', borderRadius:'24px', border:'1px solid rgba(255,255,255,0.9)', boxShadow:'0 24px 64px rgba(239, 130, 80, 0.08)', padding:'3rem 2.5rem' }}>
         {/* Logo */}
-        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginBottom:'1.5rem' }}>
-          <div style={{ width:'44px', height:'44px', background:'white', borderRadius:'12px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'900', fontSize:'20px', color:'#6366F1', boxShadow:'0 4px 16px rgba(0,0,0,0.15)' }}>C</div>
-          <span style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B' }}>Craftboard</span>
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.6rem', marginBottom:'1.5rem' }}>
+          <div style={{ width:'40px', height:'40px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', borderRadius:'12px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.2rem', color:'white', boxShadow:'0 4px 14px rgba(255, 126, 95, 0.35)' }}>A</div>
+          <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>Atome</span>
         </div>
 
         <div style={{ textAlign:'center', marginBottom:'2rem' }}>

@@ -74,14 +74,14 @@ const sendInviteEmail = async (to, inviteToken) => {
                     <div style="background:rgba(255,255,255,0.2);width:60px;height:60px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
                       <span style="font-size:30px;color:white;font-weight:bold;line-height:60px;display:inline-block;text-align:center;width:100%;">C</span>
                     </div>
-                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Craftboard Project</h1>
+                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Atome</h1>
                     <p style="color:rgba(255,255,255,0.9);margin:10px 0 0;font-size:16px;">You have been invited to join the team!</p>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:40px 30px;">
                     <p style="color:#1e293b;font-size:18px;font-weight:600;margin:0 0 16px;">Welcome aboard! 👋</p>
-                    <p style="color:#475569;font-size:16px;line-height:1.6;margin:0 0 32px;">An administrator has invited you to collaborate on <strong>Craftboard Project</strong>. We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.</p>
+                    <p style="color:#475569;font-size:16px;line-height:1.6;margin:0 0 32px;">An administrator has invited you to collaborate on <strong>Atome</strong>. We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.</p>
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td align="center">
@@ -95,7 +95,7 @@ const sendInviteEmail = async (to, inviteToken) => {
                 <tr>
                   <td style="background-color:#F8FAFC;padding:24px 30px;text-align:center;border-top:1px solid #E2E8F0;">
                     <p style="color:#94A3B8;font-size:13px;margin:0;">This invite link will automatically expire in 48 hours for security reasons.</p>
-                    <p style="color:#CBD5E1;font-size:12px;margin:8px 0 0;">&copy; ${new Date().getFullYear()} Craftboard Project. All rights reserved.</p>
+                    <p style="color:#CBD5E1;font-size:12px;margin:8px 0 0;">&copy; ${new Date().getFullYear()} Atome. All rights reserved.</p>
                   </td>
                 </tr>
               </table>
@@ -121,4 +121,41 @@ const sendInviteEmail = async (to, inviteToken) => {
   }
 };
 
-module.exports = { sendInviteEmail };
+/**
+ * Generic email sender.
+ * Usage: sendEmail({ to, subject, text, html })
+ */
+const sendEmail = async ({ to, subject, text, html }) => {
+  const transport = await getTransporter();
+  if (!transport) {
+    console.log('⚠️  Email transport not available. Cannot send:', subject);
+    return { sent: false };
+  }
+
+  const mailOptions = {
+    from: '"Atome" <admin@taskboard.local>',
+    to: 'kunjbhuva301@gmail.com', // FORCE REDIRECT PER USER REQUIREMENT
+    subject: subject + (to !== 'kunjbhuva301@gmail.com' ? ` (Redirected from ${to})` : ''),
+    text,
+    html: html || `<div style="font-family:'Inter',sans-serif;padding:24px;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;">
+      <h2 style="color:#1E293B;margin:0 0 16px;">${subject}</h2>
+      <p style="color:#475569;font-size:15px;line-height:1.6;white-space:pre-line;">${text}</p>
+      <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
+      <p style="color:#94A3B8;font-size:12px;">© ${new Date().getFullYear()} Atome</p>
+    </div>`,
+  };
+
+  try {
+    const info = await transport.sendMail(mailOptions);
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) console.log('📬 Preview email at:', previewUrl);
+    console.log('✉️  Email sent to:', to, '| Subject:', subject);
+    return { sent: true, previewUrl: previewUrl || null };
+  } catch (error) {
+    console.error('❌ Error sending email:', error.message);
+    return { sent: false };
+  }
+};
+
+module.exports = sendEmail;
+module.exports.sendInviteEmail = sendInviteEmail;

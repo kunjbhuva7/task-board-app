@@ -18,8 +18,8 @@ import Profile from './pages/user/Profile';
 
 import Sidebar from './components/Sidebar';
 
-const ProtectedRoute = ({ children, requireAdmin }) => {
-  const { user, loading } = useContext(AuthContext);
+const ProtectedRoute = ({ children, requiredPerm }) => {
+  const { user, permissions, loading } = useContext(AuthContext);
 
   if (loading) {
     return (
@@ -33,7 +33,11 @@ const ProtectedRoute = ({ children, requireAdmin }) => {
   }
 
   if (!user) return <Navigate to="/login" />;
-  if (requireAdmin && user.role !== 'admin') return <Navigate to="/user/dashboard" />;
+
+  if (requiredPerm) {
+    const hasPerm = user.role === 'admin' || permissions?.is_super_admin || permissions?.[requiredPerm];
+    if (!hasPerm) return <Navigate to="/user/dashboard" />;
+  }
 
   return (
     <div className="app-container">
@@ -56,12 +60,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/set-password" element={<SetPassword />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/users" element={<ProtectedRoute requireAdmin={true}><Users /></ProtectedRoute>} />
-        <Route path="/admin/permissions" element={<ProtectedRoute requireAdmin={true}><Permissions /></ProtectedRoute>} />
-        <Route path="/admin/tasks" element={<ProtectedRoute requireAdmin={true}><AdminAllTasks /></ProtectedRoute>} />
-        <Route path="/admin/activity" element={<ProtectedRoute requireAdmin={true}><ActivityLog /></ProtectedRoute>} />
+        {/* Admin/Manager Routes */}
+        <Route path="/admin/dashboard" element={<ProtectedRoute requiredPerm="can_view_analytics"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute requiredPerm="can_view_users"><Users /></ProtectedRoute>} />
+        <Route path="/admin/permissions" element={<ProtectedRoute requiredPerm="can_manage_roles"><Permissions /></ProtectedRoute>} />
+        <Route path="/admin/tasks" element={<ProtectedRoute requiredPerm="can_manage_tasks"><AdminAllTasks /></ProtectedRoute>} />
+        <Route path="/admin/activity" element={<ProtectedRoute requiredPerm="can_view_reports"><ActivityLog /></ProtectedRoute>} />
 
         {/* User Routes */}
         <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />

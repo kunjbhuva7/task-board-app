@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
 import { usePermissions } from '../../hooks/usePermissions';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 import { Search, Filter, Trash2, CheckCircle, Clock, AlertCircle, Circle } from 'lucide-react';
 
 const PRIORITY_STYLES = {
@@ -32,7 +33,12 @@ const AllTasks = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchTasks(); }, []);
+  useEffect(() => {
+    fetchTasks();
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5005');
+    s.on('tasks_updated', fetchTasks);
+    return () => s.disconnect();
+  }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this task?')) return;
@@ -60,7 +66,7 @@ const AllTasks = () => {
             Manage and monitor all tasks across the workspace
           </p>
         </div>
-        <div style={{ background:'linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.08))', border:'1px solid rgba(99,102,241,0.2)', borderRadius:'12px', padding:'0.6rem 1.1rem', fontSize:'0.85rem', fontWeight:'700', color:'#6366F1' }}>
+        <div style={{ background:'linear-gradient(135deg,rgba(255,126,95,0.1),rgba(139,92,246,0.08))', border:'1px solid rgba(255,126,95,0.2)', borderRadius:'12px', padding:'0.6rem 1.1rem', fontSize:'0.85rem', fontWeight:'700', color:'#FF7E5F' }}>
           {filtered.length} task{filtered.length !== 1 ? 's' : ''}
         </div>
       </div>
@@ -101,7 +107,7 @@ const AllTasks = () => {
       <div style={{ background:'rgba(255,255,255,0.6)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.8)', borderRadius:'16px', boxShadow:'0 4px 20px rgba(0,0,0,0.05)', overflow:'hidden' }}>
         {loading ? (
           <div style={{ display:'flex', justifyContent:'center', padding:'4rem' }}>
-            <div style={{ width:36, height:36, border:'3px solid rgba(99,102,241,0.2)', borderTopColor:'#6366F1', borderRadius:'50%', animation:'spin 0.9s linear infinite' }}/>
+            <div style={{ width:36, height:36, border:'3px solid rgba(255,126,95,0.2)', borderTopColor:'#FF7E5F', borderRadius:'50%', animation:'spin 0.9s linear infinite' }}/>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding:'4rem', textAlign:'center', color:'#94A3B8', fontSize:'0.9rem' }}>
@@ -111,8 +117,8 @@ const AllTasks = () => {
         ) : (
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
-              <tr style={{ background:'rgba(99,102,241,0.04)', borderBottom:'1px solid rgba(0,0,0,0.06)' }}>
-                {['Title','Status','Priority','Assigned To','Due Date', canDeleteTask && 'Actions'].filter(Boolean).map(h => (
+              <tr style={{ background:'rgba(255,126,95,0.04)', borderBottom:'1px solid rgba(0,0,0,0.06)' }}>
+                {['Title','Status','Priority','Due Date', canDeleteTask && 'Actions'].filter(Boolean).map(h => (
                   <th key={h} style={{ padding:'0.85rem 1.1rem', textAlign:'left', fontSize:'0.71rem', fontWeight:'800', color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.07em' }}>{h}</th>
                 ))}
               </tr>
@@ -125,7 +131,7 @@ const AllTasks = () => {
                 return (
                   <tr key={t.id}
                     style={{ borderBottom: i < filtered.length-1 ? '1px solid rgba(0,0,0,0.05)' : 'none', transition:'background 0.15s' }}
-                    onMouseEnter={e => e.currentTarget.style.background='rgba(99,102,241,0.03)'}
+                    onMouseEnter={e => e.currentTarget.style.background='rgba(255,126,95,0.03)'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     <td style={{ padding:'0.9rem 1.1rem', fontWeight:'600', color:'#1E293B', fontSize:'0.875rem', maxWidth:220, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
                       {t.title}
@@ -140,18 +146,6 @@ const AllTasks = () => {
                         <span style={{ width:5, height:5, borderRadius:'50%', background:ps.color, flexShrink:0 }}/>
                         {t.priority}
                       </span>
-                    </td>
-                    <td style={{ padding:'0.9rem 1.1rem', color:'#475569', fontSize:'0.875rem' }}>
-                      {t.assignee_name ? (
-                        <div style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
-                          <div style={{ width:26, height:26, borderRadius:'50%', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:'0.68rem', fontWeight:'800', flexShrink:0 }}>
-                            {t.assignee_name.charAt(0).toUpperCase()}
-                          </div>
-                          <span style={{ fontSize:'0.875rem', color:'#1E293B', fontWeight:'500' }}>{t.assignee_name}</span>
-                        </div>
-                      ) : (
-                        <span style={{ color:'#94A3B8', fontSize:'0.82rem' }}>Unassigned</span>
-                      )}
                     </td>
                     <td style={{ padding:'0.9rem 1.1rem', color:'#475569', fontSize:'0.875rem', whiteSpace:'nowrap' }}>
                       {t.due_date ? (

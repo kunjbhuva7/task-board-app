@@ -4,6 +4,11 @@ const dotenv = require('dotenv');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
+const cron = require('node-cron');
+const db = require('./database');
+const sendEmail = require('./utils/email');
+const { createClient } = require('redis');
+const { createAdapter } = require('@socket.io/redis-adapter');
 
 dotenv.config();
 
@@ -24,6 +29,23 @@ const io = new Server(server, {
 // Attach io to app so routes can use it via req.app.get('io')
 app.set('io', io);
 
+// Redis setup for Socket.io adapter and caching
+if (process.env.REDIS_URL || process.env.REDISPROXY_URL) {
+  const redisUrl = process.env.REDIS_URL || process.env.REDISPROXY_URL;
+  const pubClient = createClient({ url: redisUrl });
+  const subClient = pubClient.duplicate();
+
+  Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+    console.log('✅ Redis connected successfully on Railway');
+    io.adapter(createAdapter(pubClient, subClient));
+    app.set('redis', pubClient);
+  }).catch((err) => {
+    console.error('❌ Redis connection error:', err);
+  });
+} else {
+  console.log('⚠️ No REDIS_URL found. Running without Redis.');
+}
+
 io.on('connection', (socket) => {
   console.log('A client connected:', socket.id);
   socket.on('disconnect', () => {
@@ -41,6 +63,7 @@ const taskRoutes = require('./routes/tasks');
 const permissionRoutes = require('./routes/permissions');
 const activityRoutes = require('./routes/activity');
 const dashboardRoutes = require('./routes/dashboard');
+const eventRoutes = require('./routes/events');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -48,6 +71,41 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/events', eventRoutes);
+
+// Cron Job for Event Reminders (Checks every minute)
+cron.schedule('* * * * *', async () => {
+  try {
+    const now = new Date();
+    // Look ahead 2 hours
+    const reminderTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const dateStr = reminderTime.toISOString().split('T')[0];
+    
+    // We fetch events where event_date is today or later, and reminder not sent
+    // We can do it in JS to handle timezone logic easily
+    const events = db.prepare('SELECT * FROM events WHERE reminder_sent = 0').all();
+    
+    for (const event of events) {
+      // event.event_date is 'YYYY-MM-DD', event.event_time is 'HH:MM'
+      const eventDateTime = new Date(`${event.event_date}T${event.event_time}`);
+      
+      const diffMs = eventDateTime.getTime() - now.getTime();
+      const diffMinutes = Math.floor(diffMs / 60000);
+      
+      // If event is exactly or less than 120 minutes away, but greater than 0, send reminder
+      if (diffMinutes > 0 && diffMinutes <= 120) {
+        db.prepare('UPDATE events SET reminder_sent = 1 WHERE id = ?').run(event.id);
+        await sendEmail({
+          to: 'kunjbhuva301@gmail.com',
+          subject: `Reminder: ${event.title} starts in 2 hours!`,
+          text: `Reminder: Your event "${event.title}" is scheduled to start at ${event.event_time} on ${event.event_date}.`
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error in cron job', err);
+  }
+});
 
 // Serve frontend in production (for Railway/Hosting)
 const fs = require('fs');

@@ -96,4 +96,49 @@ router.get('/me', require('../middleware/auth'), (req, res) => {
   }
 });
 
+// PUT /api/auth/profile
+router.put('/profile', require('../middleware/auth'), (req, res) => {
+  const { name } = req.body;
+  if (!name || name.trim().length < 2) return res.status(400).json({ message: 'Name must be at least 2 characters' });
+  try {
+    db.prepare('UPDATE users SET name = ? WHERE id = ?').run(name.trim(), req.user.id);
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Update Profile', 'user', req.user.id, 'User updated their profile name');
+    res.json({ message: 'Profile updated' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/auth/password
+router.put('/password', require('../middleware/auth'), [
+  body('current').notEmpty().withMessage('Current password is required'),
+  body('newPass').isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
+    .matches(/\d/).withMessage('Must contain a number')
+    .matches(/[A-Z]/).withMessage('Must contain an uppercase letter')
+    .matches(/[!@#$%^&*(),.?":{}|<>]/).withMessage('Must contain a special character')
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const { current, newPass } = req.body;
+
+  try {
+    const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(req.user.id);
+    if (!user || !user.password_hash) return res.status(400).json({ message: 'User not found' });
+
+    const isMatch = bcrypt.compareSync(current, user.password_hash);
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect current password' });
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(newPass, salt);
+
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, req.user.id);
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Update Password', 'user', req.user.id, 'User updated their password');
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
