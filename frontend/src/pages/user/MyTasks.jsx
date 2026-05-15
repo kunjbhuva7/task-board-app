@@ -117,9 +117,9 @@ const MyTasks = () => {
   const today = new Date();
 
   // styles
-  const hdrStyle = { padding:'1.25rem 1.75rem 0', background:'rgba(255,255,255,0.15)', backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.2)' };
-  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'600', fontSize:'0.875rem', color: active?'white':'rgba(255,255,255,0.55)', borderBottom: active?'3px solid white':'3px solid transparent', transition:'all 0.2s' });
-  const btnGlass = { display:'flex', alignItems:'center', gap:'0.4rem', background:'rgba(255,255,255,0.18)', border:'1px solid rgba(255,255,255,0.3)', padding:'0.4rem 0.9rem', borderRadius:'9px', fontWeight:'600', color:'white', cursor:'pointer', fontSize:'0.82rem', backdropFilter:'blur(8px)' };
+  const hdrStyle = { padding:'1.25rem 1.75rem 0', background:'rgba(255,255,255,0.7)', backdropFilter:'blur(20px)', boxShadow:'0 1px 0 rgba(124,111,247,0.08)' };
+  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'500', fontSize:'0.875rem', color: active?'#7C6FF7':'#9999BB', borderBottom: active?'2px solid #7C6FF7':'2px solid transparent', transition:'all 0.2s' });
+  const btnGlass = { display:'flex', alignItems:'center', gap:'0.4rem', background:'rgba(124,111,247,0.1)', border:'none', padding:'0.4rem 0.9rem', borderRadius:'9px', fontWeight:'600', color:'#7C6FF7', cursor:'pointer', fontSize:'0.82rem' };
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:'transparent' }}>
@@ -128,10 +128,10 @@ const MyTasks = () => {
       <div style={hdrStyle}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.1rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
-            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.7) 100%)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'#6366F1' }}>C</div>
-            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'white', margin:0, textShadow:'0 1px 6px rgba(0,0,0,0.15)' }}>Craftboard Project</h1>
+            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#7C6FF7,#A78BFA)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'white' }}>C</div>
+            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1A1A2E', margin:0, letterSpacing:'-0.3px' }}>Craftboard Project</h1>
           </div>
-          <div style={{ width:'34px', height:'34px', borderRadius:'50%', background:'linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.7))', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', color:'#6366F1', fontSize:'0.9rem', boxShadow:'0 2px 8px rgba(0,0,0,0.15)' }}>
+          <div style={{ width:'34px', height:'34px', borderRadius:'50%', background:'linear-gradient(135deg,#7C6FF7,#A78BFA)', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', color:'white', fontSize:'0.9rem', boxShadow:'0 2px 8px rgba(124,111,247,0.3)' }}>
             {user.name.charAt(0).toUpperCase()}
           </div>
         </div>
@@ -147,14 +147,14 @@ const MyTasks = () => {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', paddingBottom:'0.5rem' }}>
             <div style={{ position:'relative' }}>
-              <Search size={13} style={{ position:'absolute', left:'9px', top:'50%', transform:'translateY(-50%)', color:'rgba(255,255,255,0.6)' }}/>
+              <Search size={13} style={{ position:'absolute', left:'9px', top:'50%', transform:'translateY(-50%)', color:'#9999BB' }}/>
               <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
-                style={{ padding:'0.4rem 0.9rem 0.4rem 2rem', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.3)', outline:'none', width:'160px', fontSize:'0.82rem', background:'rgba(255,255,255,0.18)', color:'white', backdropFilter:'blur(8px)' }}/>
+                style={{ padding:'0.4rem 0.9rem 0.4rem 2rem', borderRadius:'8px', border:'1.5px solid rgba(124,111,247,0.15)', outline:'none', width:'160px', fontSize:'0.82rem', background:'rgba(255,255,255,0.9)', color:'#1A1A2E' }}/>
             </div>
             <button style={btnGlass}><Filter size={13}/> Filter</button>
             {canCreateTask && (
               <button onClick={() => { setEditingTask(null); setShowModal(true); }}
-                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'white', border:'none', padding:'0.4rem 1rem', borderRadius:'9px', fontWeight:'700', color:'#6366F1', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 2px 12px rgba(0,0,0,0.15)' }}>
+                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'linear-gradient(135deg,#7C6FF7,#A78BFA)', border:'none', padding:'0.45rem 1rem', borderRadius:'9px', fontWeight:'700', color:'white', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 4px 14px rgba(124,111,247,0.3)' }}>
                 <Plus size={13}/> New Task
               </button>
             )}
@@ -253,19 +253,19 @@ const MyTasks = () => {
                   if (gTasks.length === 0 && group.id !== 'todo' && group.id !== 'in_progress') return null;
                   const isCol = collapsed[group.id];
                   return (
-                    <div key={group.id} style={{ background:'rgba(255,255,255,0.88)', backdropFilter:'blur(12px)', borderRadius:'14px', border:'1px solid rgba(255,255,255,0.6)', overflow:'hidden', boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+                    <div key={group.id} style={{ background:'rgba(255,255,255,0.82)', backdropFilter:'blur(16px)', borderRadius:'16px', border:'none', overflow:'hidden', boxShadow:'0 2px 16px rgba(124,111,247,0.07)' }}>
                       {/* Group header */}
-                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(248,250,252,0.7)', borderBottom: isCol?'none':'1px solid rgba(241,245,249,0.8)' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(240,238,255,0.4)', borderBottom: isCol?'none':'1px solid rgba(124,111,247,0.06)' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', cursor:'pointer' }} onClick={() => setCollapsed(p => ({...p,[group.id]:!p[group.id]}))}>
-                          {isCol ? <ChevronRight size={16} color="#94A3B8"/> : <ChevronDown size={16} color="#94A3B8"/>}
-                          <span style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.875rem' }}>{group.label}</span>
-                          <span style={{ background:'#EEF2FF', color:'#6366F1', padding:'0.1rem 0.5rem', borderRadius:'6px', fontSize:'0.7rem', fontWeight:'800' }}>{gTasks.length}</span>
+                          {isCol ? <ChevronRight size={16} color="#9999BB"/> : <ChevronDown size={16} color="#9999BB"/>}
+                          <span style={{ fontWeight:'700', color:'#1A1A2E', fontSize:'0.875rem' }}>{group.label}</span>
+                          <span style={{ background:'rgba(124,111,247,0.1)', color:'#7C6FF7', padding:'0.1rem 0.5rem', borderRadius:'6px', fontSize:'0.7rem', fontWeight:'800' }}>{gTasks.length}</span>
                         </div>
                         {canCreateTask && (
                           <button title="Add task" onClick={() => { setEditingTask(null); setShowModal(true); }}
-                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'#CBD5E1', display:'flex', padding:'3px', borderRadius:'6px' }}
-                            onMouseEnter={e => { e.currentTarget.style.color='#6366F1'; e.currentTarget.style.background='#EEF2FF'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color='#CBD5E1'; e.currentTarget.style.background='transparent'; }}>
+                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'#C4C4D4', display:'flex', padding:'3px', borderRadius:'6px' }}
+                            onMouseEnter={e => { e.currentTarget.style.color='#7C6FF7'; e.currentTarget.style.background='rgba(124,111,247,0.1)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color='#C4C4D4'; e.currentTarget.style.background='transparent'; }}>
                             <Plus size={16}/>
                           </button>
                         )}
@@ -291,7 +291,7 @@ const MyTasks = () => {
                                 const col = pc(task.priority);
                                 return (
                                   <tr key={task.id}
-                                    onMouseEnter={e => e.currentTarget.style.background='rgba(238,242,255,0.4)'}
+                                    onMouseEnter={e => e.currentTarget.style.background='rgba(124,111,247,0.04)'}
                                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                                     <td style={{ padding:'0.8rem 0.9rem' }}>
                                       <div style={{ width:15, height:15, border:'2px solid #CBD5E1', borderRadius:'4px' }}/>
