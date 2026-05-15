@@ -51,7 +51,10 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Serve frontend in production (for Railway/Hosting)
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
-app.get(/.*/, (req, res) => {
+
+// Safely handle all other routes (React Router)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 

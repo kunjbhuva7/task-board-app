@@ -20,11 +20,10 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   /* Premium Dark Theme Gradient */
-  background: linear-gradient(135deg,
-    #020617 0%,
-    #0F172A 40%,
-    #1E1B4B 80%,
-    #312E81 100%
+  background: linear-gradient(180deg,
+    #05152A 0%,
+    #2E6F74 50%,
+    #A3E8D8 100%
   );
   background-attachment: fixed;
   color: var(--text-primary);
