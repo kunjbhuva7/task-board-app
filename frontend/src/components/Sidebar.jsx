@@ -209,7 +209,7 @@ const Sidebar = () => {
           </div>
           <div style={{ marginTop:'2rem', padding:'1.5rem', background:'rgba(255,255,255,0.03)', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.08)' }}>
             <p style={{ margin:0, color:'#94A3B8', fontSize:'0.9rem', textAlign:'center', lineHeight:'1.5' }}>
-              <Calendar size={24} color="#64748B" style={{marginBottom:'0.5rem'}}<br/>
+              <Calendar size={24} color="#64748B" style={{marginBottom:'0.5rem'}} /><br/>
               Full calendar integration coming soon!<br/>
               <span style={{ fontSize:'0.8rem', color:'#64748B' }}>Task deadlines will appear here.</span>
             </p>
