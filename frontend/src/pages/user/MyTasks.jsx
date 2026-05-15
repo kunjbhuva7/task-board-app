@@ -3,207 +3,159 @@ import api from '../../api/axios';
 import { usePermissions } from '../../hooks/usePermissions';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../../context/AuthContext';
-import { Plus, Search, Filter, MoreHorizontal, ChevronDown, ChevronRight, Edit2, Trash2, Calendar } from 'lucide-react';
+import { Plus, Search, Filter, MoreHorizontal, ChevronDown, ChevronRight, Trash2, Calendar, Edit2 } from 'lucide-react';
 import { DndContext, closestCorners, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import TaskModal from '../../components/TaskModal';
 import { io } from 'socket.io-client';
 
-// --- KANBAN CARD ---
-const SortableTask = ({ task, onEdit, onDelete, canEdit, canDelete }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id, data: { task } });
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+const GROUPS = [
+  { id: 'todo',        label: 'To-do' },
+  { id: 'in_progress', label: 'On Progress' },
+  { id: 'review',      label: 'In Review' },
+  { id: 'done',        label: 'Done' },
+];
+
+const pc = p => {
+  if (p === 'high' || p === 'urgent') return { bg:'#FEE2E2', text:'#DC2626', dot:'#EF4444' };
+  if (p === 'low') return { bg:'#DBEAFE', text:'#2563EB', dot:'#3B82F6' };
+  return { bg:'#FEF3C7', text:'#D97706', dot:'#F59E0B' };
+};
+
+// ── Kanban Card ──────────────────────────────────────────────────────────────
+const KanbanCard = ({ task, onEdit, onDelete, canEdit, canDelete }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`kanban-card priority-${task.priority}`}>
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'0.25rem'}}>
-        <strong style={{fontSize:'0.95rem', color:'#0F172A', fontWeight:'700', lineHeight:'1.4'}}>{task.title}</strong>
+    <div ref={setNodeRef} {...attributes} {...listeners}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1,
+        background:'rgba(255,255,255,0.92)', borderRadius:'12px', padding:'1rem',
+        boxShadow:'0 2px 12px rgba(0,0,0,0.08)', cursor:'grab',
+        border:'1px solid rgba(255,255,255,0.8)' }}>
+      <div style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.9rem', marginBottom:'0.4rem' }}>{task.title}</div>
+      <div style={{ fontSize:'0.8rem', color:'#64748B', marginBottom:'0.85rem', lineHeight:1.4,
+        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+        {task.description || <span style={{ color:'#CBD5E1', fontStyle:'italic' }}>No description</span>}
       </div>
-      <div style={{fontSize:'0.85rem', color:'#64748B', marginBottom:'1rem', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden', lineHeight:'1.5'}}>
-        {task.description || <span style={{fontStyle:'italic', color:'#CBD5E1'}}>No description</span>}
-      </div>
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid #F1F5F9', paddingTop:'0.75rem'}}>
-        <div style={{display:'flex', alignItems:'center', gap:'0.4rem', fontSize:'0.75rem', color:'#94A3B8', fontWeight:'500'}}>
-          <Calendar size={14} color="#CBD5E1" />
-          {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : 'No date'}
-        </div>
-        <div style={{display:'flex', gap:'0.35rem', alignItems:'center'}} onPointerDown={e => e.stopPropagation()}>
-          {canEdit && (
-            <button style={{background:'transparent', border:'none', color:'#94A3B8', cursor:'pointer', padding:'4px', display:'flex', borderRadius:'4px'}}
-              onClick={() => onEdit(task)}
-              onMouseEnter={e => { e.currentTarget.style.color='#2563EB'; e.currentTarget.style.background='#EFF6FF'; }}
-              onMouseLeave={e => { e.currentTarget.style.color='#94A3B8'; e.currentTarget.style.background='transparent'; }}>
-              <Edit2 size={14}/>
-            </button>
-          )}
-          {canDelete && (
-            <button style={{background:'transparent', border:'none', color:'#94A3B8', cursor:'pointer', padding:'4px', display:'flex', borderRadius:'4px'}}
-              onClick={() => onDelete(task.id)}
-              onMouseEnter={e => { e.currentTarget.style.color='#EF4444'; e.currentTarget.style.background='#FEF2F2'; }}
-              onMouseLeave={e => { e.currentTarget.style.color='#94A3B8'; e.currentTarget.style.background='transparent'; }}>
-              <Trash2 size={14}/>
-            </button>
-          )}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(241,245,249,0.8)', paddingTop:'0.6rem' }}>
+        <span style={{ fontSize:'0.72rem', color:'#94A3B8' }}>
+          <Calendar size={11} style={{ verticalAlign:'middle', marginRight:3 }} />
+          {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'No date'}
+        </span>
+        <div style={{ display:'flex', gap:'4px' }} onPointerDown={e => e.stopPropagation()}>
+          {canEdit && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onEdit(task)}><Edit2 size={13}/></button>}
+          {canDelete && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onDelete(task.id)}><Trash2 size={13}/></button>}
         </div>
       </div>
     </div>
   );
 };
 
-const DroppableColumn = ({ id, title, tasks, onEdit, onDelete, canEdit, canDelete }) => (
-  <div className="kanban-column">
-    <div className="kanban-column-header">
-      {title} <span className="badge badge-todo">{tasks.length}</span>
-    </div>
-    <div className="kanban-cards">
-      <SortableContext id={id} items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-        {tasks.map(task => (
-          <SortableTask key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} canEdit={canEdit} canDelete={canDelete} />
-        ))}
-      </SortableContext>
-    </div>
-  </div>
-);
-
-// --- MAIN ---
+// ── Main ─────────────────────────────────────────────────────────────────────
 const MyTasks = () => {
   const { user } = useContext(AuthContext);
   const { canCreateTask, canEditTask, canDeleteTask } = usePermissions();
-  const [tasks, setTasks]     = useState([]);
-  const [users, setUsers]     = useState([]);
+  const [tasks, setTasks]   = useState([]);
+  const [users, setUsers]   = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal]     = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [collapsedGroups, setCollapsedGroups] = useState({});
-  const [activeDropdown, setActiveDropdown]   = useState(null);
+  const [collapsed, setCollapsed]   = useState({});
+  const [dropdown, setDropdown]     = useState(null);
   const [activeTab, setActiveTab]   = useState('list');
-  const [activeDragTask, setActiveDragTask] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [dragTask, setDragTask]     = useState(null);
+  const [search, setSearch]         = useState('');
 
   const fetchTasks = async () => {
-    try {
-      const res = await api.get('/tasks');
-      setTasks(res.data);
-    } catch { toast.error('Failed to load tasks'); }
+    try { const r = await api.get('/tasks'); setTasks(r.data); }
+    catch { toast.error('Failed to load tasks'); }
     finally { setLoading(false); }
-  };
-
-  const fetchUsers = async () => {
-    try { const res = await api.get('/users'); setUsers(res.data); } catch {}
   };
 
   useEffect(() => {
     fetchTasks();
-    if (user.role === 'admin' || canCreateTask) fetchUsers();
-    const socket = io(import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000');
-    socket.on('tasks_updated', fetchTasks);
-    return () => socket.disconnect();
+    if (user.role === 'admin' || canCreateTask)
+      api.get('/users').then(r => setUsers(r.data)).catch(() => {});
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5000');
+    s.on('tasks_updated', fetchTasks);
+    return () => s.disconnect();
   }, [user, canCreateTask]);
 
   useEffect(() => {
-    const close = () => setActiveDropdown(null);
+    const close = () => setDropdown(null);
     document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
   }, []);
 
-  const toggleGroup = id => setCollapsedGroups(p => ({ ...p, [id]: !p[id] }));
-
-  const handleDelete = async id => {
-    if (!window.confirm('Delete this task?')) return;
-    try { await api.delete(`/tasks/${id}`); toast.success('Task deleted'); fetchTasks(); }
-    catch { toast.error('Failed to delete task'); }
-  };
-
-  const changeTaskStatus = async (id, status) => {
-    setActiveDropdown(null);
+  const changeStatus = async (id, status) => {
+    setDropdown(null);
     setTasks(p => p.map(t => t.id === id ? { ...t, status } : t));
-    try { await api.patch(`/tasks/${id}/status`, { status }); toast.success('Status updated'); }
-    catch { toast.error('Failed to update status'); fetchTasks(); }
+    try { await api.patch(`/tasks/${id}/status`, { status }); }
+    catch { toast.error('Failed'); fetchTasks(); }
   };
 
-  const onDragEnd = async ({ active, over }) => {
-    setActiveDragTask(null);
+  const deleteTask = async id => {
+    if (!window.confirm('Delete this task?')) return;
+    try { await api.delete(`/tasks/${id}`); toast.success('Deleted'); fetchTasks(); }
+    catch { toast.error('Failed to delete'); }
+  };
+
+  const onDragEnd = ({ active, over }) => {
+    setDragTask(null);
     if (!over) return;
-    const drag = tasks.find(t => t.id === active.id);
-    const overTask = tasks.find(t => t.id === over.id);
-    const newStatus = overTask ? overTask.status : over.id;
-    if (drag && drag.status !== newStatus) changeTaskStatus(drag.id, newStatus);
+    const t = tasks.find(x => x.id === active.id);
+    const ov = tasks.find(x => x.id === over.id);
+    const ns = ov ? ov.status : over.id;
+    if (t && t.status !== ns) changeStatus(t.id, ns);
   };
 
-  const groups = [
-    { id: 'todo',        label: 'To-do' },
-    { id: 'in_progress', label: 'On Progress' },
-    { id: 'review',      label: 'In Review' },
-    { id: 'done',        label: 'Done' },
-  ];
-
-  const getPriorityColor = p => {
-    if (p === 'high' || p === 'urgent') return { bg:'#FEF2F2', text:'#EF4444', dot:'#EF4444' };
-    if (p === 'low') return { bg:'#EFF6FF', text:'#3B82F6', dot:'#3B82F6' };
-    return { bg:'#FFFBEB', text:'#F59E0B', dot:'#F59E0B' };
-  };
-
-  const filteredTasks = tasks.filter(t =>
-    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (t.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+  const filtered = tasks.filter(t =>
+    t.title.toLowerCase().includes(search.toLowerCase()) ||
+    (t.description||'').toLowerCase().includes(search.toLowerCase())
   );
 
-  const tabStyle = active => ({
-    padding: '1rem 0',
-    color: active ? '#111827' : '#9CA3AF',
-    fontWeight: active ? '700' : '600',
-    cursor: 'pointer',
-    borderBottom: active ? '3px solid #111827' : '3px solid transparent',
-    transition: 'all 0.2s',
-  });
+  const today = new Date();
+
+  // styles
+  const hdrStyle = { padding:'1.25rem 1.75rem 0', background:'rgba(255,255,255,0.15)', backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.2)' };
+  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'600', fontSize:'0.875rem', color: active?'white':'rgba(255,255,255,0.55)', borderBottom: active?'3px solid white':'3px solid transparent', transition:'all 0.2s' });
+  const btnGlass = { display:'flex', alignItems:'center', gap:'0.4rem', background:'rgba(255,255,255,0.18)', border:'1px solid rgba(255,255,255,0.3)', padding:'0.4rem 0.9rem', borderRadius:'9px', fontWeight:'600', color:'white', cursor:'pointer', fontSize:'0.82rem', backdropFilter:'blur(8px)' };
 
   return (
-    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:'linear-gradient(135deg, #f8fafc 0%, #eff6ff 60%, #faf5ff 100%)' }}>
+    <div style={{ height:'100%', display:'flex', flexDirection:'column', background:'transparent' }}>
 
       {/* ── Header ── */}
-      <div style={{ padding:'2rem 2.5rem 0 2.5rem', background:'rgba(255,255,255,0.85)', backdropFilter:'blur(8px)', borderBottom:'1px solid #F1F5F9' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
-            <div style={{ width:'40px', height:'40px', background:'linear-gradient(135deg,#5266F9,#7C3AED)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', color:'white', fontWeight:'bold', fontSize:'1.2rem' }}>C</div>
-            <h1 style={{ fontSize:'1.6rem', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-0.5px' }}>Craftboard Project</h1>
+      <div style={hdrStyle}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.1rem' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
+            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.7) 100%)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'#6366F1' }}>C</div>
+            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'white', margin:0, textShadow:'0 1px 6px rgba(0,0,0,0.15)' }}>Craftboard Project</h1>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
-            <div style={{ display:'flex' }}>
-              {[user.name.charAt(0).toUpperCase()].map((l, i) => (
-                <div key={i} style={{ width:'32px', height:'32px', borderRadius:'50%', background:'#5266F9', display:'flex', justifyContent:'center', alignItems:'center', fontSize:'12px', color:'white', border:'2px solid white', fontWeight:'bold' }}>{l}</div>
-              ))}
-            </div>
+          <div style={{ width:'34px', height:'34px', borderRadius:'50%', background:'linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.7))', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', color:'#6366F1', fontSize:'0.9rem', boxShadow:'0 2px 8px rgba(0,0,0,0.15)' }}>
+            {user.name.charAt(0).toUpperCase()}
           </div>
         </div>
 
-        {/* Tabs + Actions */}
+        {/* Tabs */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <div style={{ display:'flex', gap:'2rem' }}>
-            {['kanban', 'timeline', 'list'].map(tab => (
-              <div key={tab} onClick={() => setActiveTab(tab)} style={tabStyle(activeTab === tab)}>
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          <div style={{ display:'flex', gap:'1.75rem' }}>
+            {['kanban','timeline','list'].map(tab => (
+              <div key={tab} onClick={() => setActiveTab(tab)} style={tabSt(activeTab===tab)}>
+                {tab.charAt(0).toUpperCase()+tab.slice(1)}
               </div>
             ))}
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', paddingBottom:'0.5rem' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', paddingBottom:'0.5rem' }}>
             <div style={{ position:'relative' }}>
-              <Search size={15} style={{ position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                style={{ padding:'0.5rem 1rem 0.5rem 2.2rem', borderRadius:'8px', border:'1px solid #E5E7EB', outline:'none', width:'180px', fontSize:'0.875rem', background:'white' }}
-              />
+              <Search size={13} style={{ position:'absolute', left:'9px', top:'50%', transform:'translateY(-50%)', color:'rgba(255,255,255,0.6)' }}/>
+              <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
+                style={{ padding:'0.4rem 0.9rem 0.4rem 2rem', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.3)', outline:'none', width:'160px', fontSize:'0.82rem', background:'rgba(255,255,255,0.18)', color:'white', backdropFilter:'blur(8px)' }}/>
             </div>
-            <button style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'white', border:'1px solid #E5E7EB', padding:'0.5rem 1rem', borderRadius:'8px', fontWeight:'600', color:'#374151', cursor:'pointer', fontSize:'0.875rem' }}>
-              <Filter size={15} /> Filter
-            </button>
+            <button style={btnGlass}><Filter size={13}/> Filter</button>
             {canCreateTask && (
-              <button
-                style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'linear-gradient(135deg,#111827,#374151)', border:'none', padding:'0.5rem 1.1rem', borderRadius:'8px', fontWeight:'600', color:'white', cursor:'pointer', fontSize:'0.875rem', boxShadow:'0 2px 8px rgba(0,0,0,0.15)' }}
-                onClick={() => { setEditingTask(null); setShowModal(true); }}>
-                <Plus size={15} /> New Task
+              <button onClick={() => { setEditingTask(null); setShowModal(true); }}
+                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'white', border:'none', padding:'0.4rem 1rem', borderRadius:'9px', fontWeight:'700', color:'#6366F1', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 2px 12px rgba(0,0,0,0.15)' }}>
+                <Plus size={13}/> New Task
               </button>
             )}
           </div>
@@ -211,160 +163,189 @@ const MyTasks = () => {
       </div>
 
       {/* ── Body ── */}
-      <div style={{ flex:1, overflowY:'auto', padding:'2rem 2.5rem' }}>
+      <div style={{ flex:1, overflowY:'auto', padding:'1.25rem 1.75rem' }}>
         {loading ? (
           <div style={{ display:'flex', justifyContent:'center', padding:'4rem' }}>
-            <div className="spinner spinner-primary"></div>
+            <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white' }}></div>
           </div>
         ) : (
           <>
             {/* KANBAN */}
             {activeTab === 'kanban' && (
-              <DndContext collisionDetection={closestCorners} onDragStart={e => setActiveDragTask(tasks.find(t => t.id === e.active.id))} onDragEnd={onDragEnd}>
-                <div className="kanban-board" style={{ height:'auto', paddingBottom:'2rem' }}>
-                  {groups.map(g => (
-                    <DroppableColumn
-                      key={g.id} id={g.id} title={g.label}
-                      tasks={filteredTasks.filter(t => t.status === g.id)}
-                      onEdit={t => { setEditingTask(t); setShowModal(true); }}
-                      onDelete={handleDelete}
-                      canEdit={canEditTask}
-                      canDelete={canDeleteTask}
-                    />
+              <DndContext collisionDetection={closestCorners}
+                onDragStart={e => setDragTask(tasks.find(t => t.id === e.active.id))}
+                onDragEnd={onDragEnd}>
+                <div className="kanban-board">
+                  {GROUPS.map(g => (
+                    <div key={g.id} className="kanban-column">
+                      <div className="kanban-column-header">
+                        {g.label} <span className="badge">{filtered.filter(t=>t.status===g.id).length}</span>
+                      </div>
+                      <div className="kanban-cards">
+                        <SortableContext id={g.id} items={filtered.filter(t=>t.status===g.id).map(t=>t.id)} strategy={verticalListSortingStrategy}>
+                          {filtered.filter(t => t.status===g.id).map(task => (
+                            <KanbanCard key={task.id} task={task}
+                              onEdit={t => { setEditingTask(t); setShowModal(true); }}
+                              onDelete={deleteTask} canEdit={canEditTask} canDelete={canDeleteTask}/>
+                          ))}
+                        </SortableContext>
+                      </div>
+                    </div>
                   ))}
                 </div>
                 <DragOverlay>
-                  {activeDragTask ? (
-                    <div className={`kanban-card priority-${activeDragTask.priority}`} style={{ opacity:0.85, boxShadow:'0 20px 40px rgba(0,0,0,0.15)' }}>
-                      <strong>{activeDragTask.title}</strong>
-                    </div>
-                  ) : null}
+                  {dragTask && <div className="kanban-card" style={{ opacity:0.85 }}><strong>{dragTask.title}</strong></div>}
                 </DragOverlay>
               </DndContext>
             )}
 
             {/* TIMELINE */}
             {activeTab === 'timeline' && (
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'300px', color:'#94A3B8', background:'white', borderRadius:'16px', border:'1px solid #F1F5F9' }}>
-                <Calendar size={48} style={{ marginBottom:'1rem', opacity:0.4 }} />
-                <h3 style={{ color:'#64748B', marginBottom:'0.5rem' }}>Timeline View</h3>
-                <p style={{ fontSize:'0.875rem' }}>Coming soon to Craftboard!</p>
+              <div style={{ background:'rgba(255,255,255,0.12)', backdropFilter:'blur(16px)', border:'1px solid rgba(255,255,255,0.25)', borderRadius:'16px', overflow:'hidden' }}>
+                <div style={{ padding:'1rem 1.5rem', borderBottom:'1px solid rgba(255,255,255,0.15)', display:'flex', alignItems:'center', gap:'0.6rem' }}>
+                  <Calendar size={17} color="white"/>
+                  <h3 style={{ color:'white', margin:0, fontSize:'0.95rem', fontWeight:'700' }}>
+                    Timeline — {today.toLocaleString('default',{month:'long',year:'numeric'})}
+                  </h3>
+                </div>
+                <div style={{ padding:'1.25rem 1.5rem', display:'flex', flexDirection:'column', gap:'0.75rem' }}>
+                  {filtered.filter(t => t.due_date).sort((a,b)=>new Date(a.due_date)-new Date(b.due_date)).map(task => {
+                    const due = new Date(task.due_date);
+                    const overdue = due < today && task.status !== 'done';
+                    const daysLeft = Math.ceil((due - today)/(1000*60*60*24));
+                    const col = pc(task.priority);
+                    return (
+                      <div key={task.id} style={{ background:'rgba(255,255,255,0.88)', borderRadius:'12px', padding:'0.9rem 1.25rem', display:'flex', alignItems:'center', gap:'1rem', boxShadow:'0 2px 8px rgba(0,0,0,0.07)' }}>
+                        <span style={{ display:'inline-block', width:'8px', height:'8px', borderRadius:'50%', background:col.dot, flexShrink:0 }}/>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.875rem', marginBottom:'0.15rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{task.title}</div>
+                          <div style={{ fontSize:'0.75rem', color:'#64748B' }}>{task.description || 'No description'}</div>
+                        </div>
+                        <span className={`badge badge-${task.status}`}>{task.status.replace('_',' ')}</span>
+                        <div style={{ textAlign:'right', flexShrink:0 }}>
+                          <div style={{ fontSize:'0.82rem', fontWeight:'700', color: overdue?'#EF4444':'#1E293B' }}>
+                            {due.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+                          </div>
+                          <div style={{ fontSize:'0.7rem', color: overdue?'#EF4444': daysLeft<=3?'#F59E0B':'#64748B', fontWeight:'600' }}>
+                            {overdue ? `${Math.abs(daysLeft)}d overdue` : daysLeft===0 ? 'Due today' : `${daysLeft}d left`}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {filtered.filter(t=>!t.due_date).length > 0 && (
+                    <div style={{ background:'rgba(255,255,255,0.4)', borderRadius:'10px', padding:'0.7rem 1.25rem', color:'rgba(255,255,255,0.7)', fontSize:'0.8rem', textAlign:'center' }}>
+                      {filtered.filter(t=>!t.due_date).length} task(s) have no due date
+                    </div>
+                  )}
+                  {filtered.length === 0 && (
+                    <div style={{ padding:'2rem', textAlign:'center', color:'rgba(255,255,255,0.6)' }}>No tasks yet</div>
+                  )}
+                </div>
               </div>
             )}
 
             {/* LIST */}
             {activeTab === 'list' && (
-              <div style={{ display:'flex', flexDirection:'column', gap:'1.5rem' }}>
-                {groups.map(group => {
-                  const groupTasks = filteredTasks.filter(t => t.status === group.id);
-                  if (groupTasks.length === 0 && group.id !== 'todo' && group.id !== 'in_progress') return null;
-                  const isCollapsed = collapsedGroups[group.id];
-
+              <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+                {GROUPS.map(group => {
+                  const gTasks = filtered.filter(t => t.status === group.id);
+                  if (gTasks.length === 0 && group.id !== 'todo' && group.id !== 'in_progress') return null;
+                  const isCol = collapsed[group.id];
                   return (
-                    <div key={group.id} style={{ background:'white', borderRadius:'12px', border:'1px solid #F1F5F9', overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
-                      {/* Group Header */}
-                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.9rem 1.25rem', background:'#FAFAFA', borderBottom: isCollapsed ? 'none' : '1px solid #F1F5F9' }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', cursor:'pointer' }} onClick={() => toggleGroup(group.id)}>
-                          {isCollapsed
-                            ? <ChevronRight size={17} color="#9CA3AF" />
-                            : <ChevronDown size={17} color="#9CA3AF" />
-                          }
-                          <span style={{ fontWeight:'700', color:'#1F2937', fontSize:'0.9rem' }}>{group.label}</span>
-                          <span style={{ background:'#EEF0FF', color:'#5266F9', padding:'0.1rem 0.5rem', borderRadius:'6px', fontSize:'0.72rem', fontWeight:'700' }}>{groupTasks.length}</span>
+                    <div key={group.id} style={{ background:'rgba(255,255,255,0.88)', backdropFilter:'blur(12px)', borderRadius:'14px', border:'1px solid rgba(255,255,255,0.6)', overflow:'hidden', boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+                      {/* Group header */}
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(248,250,252,0.7)', borderBottom: isCol?'none':'1px solid rgba(241,245,249,0.8)' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', cursor:'pointer' }} onClick={() => setCollapsed(p => ({...p,[group.id]:!p[group.id]}))}>
+                          {isCol ? <ChevronRight size={16} color="#94A3B8"/> : <ChevronDown size={16} color="#94A3B8"/>}
+                          <span style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.875rem' }}>{group.label}</span>
+                          <span style={{ background:'#EEF2FF', color:'#6366F1', padding:'0.1rem 0.5rem', borderRadius:'6px', fontSize:'0.7rem', fontWeight:'800' }}>{gTasks.length}</span>
                         </div>
-                        {/* Only show + if user can create tasks */}
                         {canCreateTask && (
-                          <button
-                            title="Add task"
-                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'#CBD5E1', display:'flex', padding:'4px', borderRadius:'6px', transition:'all 0.2s' }}
-                            onClick={() => { setEditingTask(null); setShowModal(true); }}
-                            onMouseEnter={e => { e.currentTarget.style.color='#5266F9'; e.currentTarget.style.background='#EEF0FF'; }}
+                          <button title="Add task" onClick={() => { setEditingTask(null); setShowModal(true); }}
+                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'#CBD5E1', display:'flex', padding:'3px', borderRadius:'6px' }}
+                            onMouseEnter={e => { e.currentTarget.style.color='#6366F1'; e.currentTarget.style.background='#EEF2FF'; }}
                             onMouseLeave={e => { e.currentTarget.style.color='#CBD5E1'; e.currentTarget.style.background='transparent'; }}>
-                            <Plus size={17} />
+                            <Plus size={16}/>
                           </button>
                         )}
                       </div>
 
-                      {/* Group Rows */}
-                      {!isCollapsed && groupTasks.length > 0 && (
+                      {/* Rows */}
+                      {!isCol && gTasks.length > 0 && (
                         <div style={{ overflowX:'auto' }}>
-                          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.875rem' }}>
+                          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.85rem' }}>
                             <thead>
                               <tr>
-                                <th style={{ width:'40px', padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent' }}></th>
-                                <th style={{ padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent', color:'#9CA3AF', fontWeight:'600', textTransform:'none', letterSpacing:'0', fontSize:'0.8rem' }}>Task Name</th>
-                                <th style={{ padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent', color:'#9CA3AF', fontWeight:'600', textTransform:'none', letterSpacing:'0', fontSize:'0.8rem' }}>Description</th>
-                                <th style={{ padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent', color:'#9CA3AF', fontWeight:'600', textTransform:'none', letterSpacing:'0', fontSize:'0.8rem' }}>Due Date</th>
-                                <th style={{ padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent', color:'#9CA3AF', fontWeight:'600', textTransform:'none', letterSpacing:'0', fontSize:'0.8rem' }}>Assigned</th>
-                                <th style={{ padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent', color:'#9CA3AF', fontWeight:'600', textTransform:'none', letterSpacing:'0', fontSize:'0.8rem' }}>Priority</th>
-                                <th style={{ width:'40px', padding:'0.75rem 1rem', borderBottom:'1px solid #F1F5F9', background:'transparent' }}></th>
+                                <th style={{ width:36, padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}></th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Task Name</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Description</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Due Date</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Assigned</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Priority</th>
+                                <th style={{ width:36, padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent' }}></th>
                               </tr>
                             </thead>
                             <tbody>
-                              {groupTasks.map(task => {
-                                const pc = getPriorityColor(task.priority);
+                              {gTasks.map(task => {
+                                const col = pc(task.priority);
                                 return (
-                                  <tr key={task.id} style={{ borderBottom:'1px solid #F9FAFB', transition:'background 0.15s' }}
-                                    onMouseEnter={e => e.currentTarget.style.background='#FAFBFF'}
+                                  <tr key={task.id}
+                                    onMouseEnter={e => e.currentTarget.style.background='rgba(238,242,255,0.4)'}
                                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                                    <td style={{ padding:'0.9rem 1rem' }}>
-                                      <div style={{ width:'16px', height:'16px', border:'2px solid #E5E7EB', borderRadius:'4px', cursor:'pointer' }}></div>
+                                    <td style={{ padding:'0.8rem 0.9rem' }}>
+                                      <div style={{ width:15, height:15, border:'2px solid #CBD5E1', borderRadius:'4px' }}/>
                                     </td>
-                                    <td style={{ padding:'0.9rem 1rem', fontWeight:'600', color:'#1F2937', whiteSpace:'nowrap' }}>{task.title}</td>
-                                    <td style={{ padding:'0.9rem 1rem', color:'#6B7280', maxWidth:'200px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                                      {task.description || <span style={{ color:'#D1D5DB', fontStyle:'italic' }}>—</span>}
+                                    <td style={{ padding:'0.8rem 0.9rem', fontWeight:'700', color:'#1E293B', whiteSpace:'nowrap' }}>{task.title}</td>
+                                    <td style={{ padding:'0.8rem 0.9rem', color:'#64748B', maxWidth:180, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                                      {task.description || <span style={{ color:'#CBD5E1' }}>—</span>}
                                     </td>
-                                    <td style={{ padding:'0.9rem 1rem', color:'#374151', fontWeight:'500', whiteSpace:'nowrap' }}>
-                                      {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : <span style={{ color:'#D1D5DB' }}>No date</span>}
+                                    <td style={{ padding:'0.8rem 0.9rem', color:'#374151', fontWeight:'600', whiteSpace:'nowrap' }}>
+                                      {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : <span style={{ color:'#CBD5E1' }}>No date</span>}
                                     </td>
-                                    <td style={{ padding:'0.9rem 1rem' }}>
-                                      <div style={{ width:'28px', height:'28px', borderRadius:'50%', background:'linear-gradient(135deg,#5266F9,#7C3AED)', display:'flex', justifyContent:'center', alignItems:'center', fontSize:'11px', color:'white', fontWeight:'700' }}>
+                                    <td style={{ padding:'0.8rem 0.9rem' }}>
+                                      <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', justifyContent:'center', alignItems:'center', color:'white', fontSize:'0.7rem', fontWeight:'800' }}>
                                         {task.assignee_name ? task.assignee_name.charAt(0).toUpperCase() : '?'}
                                       </div>
                                     </td>
-                                    <td style={{ padding:'0.9rem 1rem' }}>
-                                      <span style={{ display:'inline-flex', alignItems:'center', gap:'0.35rem', background:pc.bg, color:pc.text, padding:'0.2rem 0.6rem', borderRadius:'6px', fontSize:'0.75rem', fontWeight:'600' }}>
-                                        <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:pc.dot, flexShrink:0 }}></span>
-                                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                                    <td style={{ padding:'0.8rem 0.9rem' }}>
+                                      <span style={{ display:'inline-flex', alignItems:'center', gap:'0.3rem', background:col.bg, color:col.text, padding:'0.2rem 0.55rem', borderRadius:'6px', fontSize:'0.72rem', fontWeight:'700' }}>
+                                        <span style={{ width:6, height:6, borderRadius:'50%', background:col.dot }}/>
+                                        {task.priority.charAt(0).toUpperCase()+task.priority.slice(1)}
                                       </span>
                                     </td>
-                                    <td style={{ padding:'0.9rem 1rem', textAlign:'right', position:'relative' }}>
-                                      <button
-                                        style={{ background:'transparent', border:'none', cursor:'pointer', color:'#9CA3AF', display:'flex', padding:'4px', borderRadius:'6px' }}
-                                        onClick={e => { e.stopPropagation(); setActiveDropdown(activeDropdown === task.id ? null : task.id); }}>
-                                        <MoreHorizontal size={17} />
+                                    <td style={{ padding:'0.8rem 0.9rem', textAlign:'right', position:'relative' }}>
+                                      <button style={{ background:'transparent', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', padding:'3px', borderRadius:'6px' }}
+                                        onClick={e => { e.stopPropagation(); setDropdown(dropdown===task.id?null:task.id); }}>
+                                        <MoreHorizontal size={16}/>
                                       </button>
-                                      {activeDropdown === task.id && (
-                                        <div style={{ position:'absolute', right:'30px', top:'8px', background:'white', border:'1px solid #E5E7EB', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.12)', zIndex:99, width:'170px', textAlign:'left', padding:'0.4rem 0', animation:'fadeIn 0.1s ease' }}>
-                                          <div style={{ padding:'0.4rem 1rem', fontSize:'0.7rem', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
-                                          {groups.map(g => (
-                                            <div key={g.id}
-                                              style={{ padding:'0.5rem 1rem', cursor:'pointer', fontSize:'0.875rem', background:task.status === g.id ? '#F5F3FF' : 'transparent', color:task.status === g.id ? '#5266F9' : '#374151', fontWeight:task.status === g.id ? '600' : '400', transition:'background 0.15s' }}
-                                              onMouseEnter={e => { if (task.status !== g.id) e.currentTarget.style.background='#F9FAFB'; }}
-                                              onMouseLeave={e => { if (task.status !== g.id) e.currentTarget.style.background='transparent'; }}
-                                              onClick={() => changeTaskStatus(task.id, g.id)}>
+                                      {dropdown === task.id && (
+                                        <div style={{ position:'absolute', right:28, top:8, background:'white', border:'1px solid #E2E8F0', borderRadius:'12px', boxShadow:'0 12px 32px rgba(0,0,0,0.12)', zIndex:99, width:165, textAlign:'left', padding:'0.4rem 0', animation:'fadeIn 0.15s ease' }}>
+                                          <div style={{ padding:'0.35rem 0.9rem', fontSize:'0.68rem', fontWeight:'800', color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
+                                          {GROUPS.map(g => (
+                                            <div key={g.id} onClick={() => changeStatus(task.id, g.id)}
+                                              style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', background:task.status===g.id?'#EEF2FF':'transparent', color:task.status===g.id?'#6366F1':'#374151', fontWeight:task.status===g.id?'700':'400' }}
+                                              onMouseEnter={e => { if(task.status!==g.id) e.currentTarget.style.background='#F9FAFB'; }}
+                                              onMouseLeave={e => { if(task.status!==g.id) e.currentTarget.style.background='transparent'; }}>
                                               {g.label}
                                             </div>
                                           ))}
-                                          {/* Only show Edit if user has edit permission */}
                                           {canEditTask && (
                                             <>
-                                              <div style={{ height:'1px', background:'#F1F5F9', margin:'0.4rem 0' }}></div>
-                                              <div
-                                                style={{ padding:'0.5rem 1rem', cursor:'pointer', fontSize:'0.875rem', color:'#374151', transition:'background 0.15s' }}
+                                              <div style={{ height:1, background:'#F1F5F9', margin:'0.35rem 0' }}/>
+                                              <div onClick={() => { setDropdown(null); setEditingTask(task); setShowModal(true); }}
+                                                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#374151' }}
                                                 onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
-                                                onMouseLeave={e => e.currentTarget.style.background='transparent'}
-                                                onClick={() => { setActiveDropdown(null); setEditingTask(task); setShowModal(true); }}>
+                                                onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                                                 ✏️ Edit Task
                                               </div>
                                             </>
                                           )}
                                           {canDeleteTask && (
-                                            <div
-                                              style={{ padding:'0.5rem 1rem', cursor:'pointer', fontSize:'0.875rem', color:'#EF4444', transition:'background 0.15s' }}
+                                            <div onClick={() => { setDropdown(null); deleteTask(task.id); }}
+                                              style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#EF4444' }}
                                               onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
-                                              onMouseLeave={e => e.currentTarget.style.background='transparent'}
-                                              onClick={() => { setActiveDropdown(null); handleDelete(task.id); }}>
+                                              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                                               🗑️ Delete Task
                                             </div>
                                           )}
@@ -378,12 +359,9 @@ const MyTasks = () => {
                           </table>
                         </div>
                       )}
-
-                      {/* Empty state */}
-                      {!isCollapsed && groupTasks.length === 0 && (
-                        <div style={{ padding:'1.5rem', textAlign:'center', color:'#CBD5E1', fontSize:'0.875rem' }}>
-                          No tasks here yet
-                          {canCreateTask && <span style={{ color:'#5266F9', cursor:'pointer', marginLeft:'0.3rem' }} onClick={() => { setEditingTask(null); setShowModal(true); }}>— Add one</span>}
+                      {!isCol && gTasks.length === 0 && (
+                        <div style={{ padding:'1.25rem', textAlign:'center', color:'#CBD5E1', fontSize:'0.82rem' }}>
+                          No tasks here yet{canCreateTask && <span style={{ color:'#6366F1', cursor:'pointer', marginLeft:'0.3rem' }} onClick={() => { setEditingTask(null); setShowModal(true); }}>— Add one</span>}
                         </div>
                       )}
                     </div>
@@ -396,12 +374,9 @@ const MyTasks = () => {
       </div>
 
       {showModal && (
-        <TaskModal
-          task={editingTask}
-          users={users}
+        <TaskModal task={editingTask} users={users}
           onClose={() => setShowModal(false)}
-          onSave={() => { setShowModal(false); fetchTasks(); }}
-        />
+          onSave={() => { setShowModal(false); fetchTasks(); }}/>
       )}
     </div>
   );
