@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
 :root {
-  --primary: #6366F1;
-  --primary-light: rgba(99, 102, 241, 0.15);
-  --text-primary: #1E293B;
-  --text-secondary: #475569;
+  --primary: #4F46E5;
+  --primary-light: rgba(79, 70, 229, 0.1);
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
   --text-muted: #64748B;
-  --glass: rgba(255, 255, 255, 0.6);
-  --glass-strong: rgba(255, 255, 255, 0.85);
-  --border: rgba(255, 255, 255, 0.9);
+  --glass: rgba(255, 255, 255, 0.75);
+  --glass-strong: rgba(255, 255, 255, 0.95);
+  --border: rgba(226, 232, 240, 0.8);
   --bg-dark: #FFFFFF;
 }
 
@@ -19,9 +19,10 @@ html, body, #root { height: 100%; min-height: 100vh; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background: linear-gradient(135deg, #FFEDD5 0%, #E0F2FE 50%, #F1F5F9 100%);
+  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 50%, #F1F5F9 100%);
   background-attachment: fixed;
   color: var(--text-primary);
+  font-size: 15px;
 }
 
 h1,h2,h3,h4,h5,h6 {
@@ -124,23 +125,23 @@ h1,h2,h3,h4,h5,h6 {
 /* ── Tables ── */
 .table-container {
   width: 100%; overflow-x: auto;
-  background: rgba(255,255,255,0.55);
+  background: var(--glass-strong);
   backdrop-filter: blur(24px);
-  border-radius: 16px; border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+  border-radius: 16px; border: 1px solid var(--border);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
 }
 table { width: 100%; border-collapse: collapse; }
 th, td {
-  padding: 0.85rem 1.1rem; text-align: left;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 1rem 1.25rem; text-align: left;
+  border-bottom: 1px solid rgba(226,232,240,0.8);
 }
 th {
-  background: rgba(0,0,0,0.03);
+  background: rgba(248,250,252,0.6);
   font-weight: 700; color: var(--text-muted);
-  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
 }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover { background: rgba(99,102,241,0.04); }
+tbody tr:hover { background: rgba(241,245,249,0.5); }
 
 /* ── Badges ── */
 .badge {

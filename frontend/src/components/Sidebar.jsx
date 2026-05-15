@@ -7,29 +7,31 @@ import api from '../api/axios';
 
 const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
   <div
-    style={{ position:'fixed', inset:0, zIndex:200, display:'flex' }}
+    style={{ position:'fixed', inset:0, zIndex:200, display:'flex', alignItems:'center', justifyContent:'center' }}
     onClick={e => e.target === e.currentTarget && onClose()}>
     {/* Backdrop */}
-    <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.15)', backdropFilter:'blur(2px)' }} onClick={onClose} />
+    <div style={{ position:'absolute', inset:0, background:'rgba(15, 23, 42, 0.4)', backdropFilter:'blur(8px)' }} onClick={onClose} />
     {/* Panel */}
     <div style={{
-      position:'absolute', left:'240px', top:0, height:'100%', width:'400px',
-      background:'rgba(255,255,255,0.97)', borderRight:'1px solid rgba(0,0,0,0.08)',
-      boxShadow:'4px 0 32px rgba(0,0,0,0.12)',
-      display:'flex', flexDirection:'column', animation:'slideInLeft 0.2s ease',
-      zIndex:201
+      position:'relative', width:'90vw', maxWidth:'1000px', height:'90vh',
+      background:'rgba(255,255,255,0.98)', border:'1px solid rgba(226, 232, 240, 0.8)',
+      boxShadow:'0 25px 50px -12px rgba(0, 0, 0, 0.25)', borderRadius:'24px',
+      display:'flex', flexDirection:'column', animation:'fadeIn 0.2s ease',
+      zIndex:201, overflow:'hidden'
     }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem', borderBottom:'1px solid rgba(0,0,0,0.06)', flexShrink:0 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
-          <Icon size={20} color="#6366F1" />
-          <h3 style={{ margin:0, fontWeight:'700', color:'#1E293B', fontSize:'1rem' }}>{title}</h3>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem 2rem', borderBottom:'1px solid rgba(226, 232, 240, 0.8)', background:'rgba(248, 250, 252, 0.5)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
+          <div style={{ padding:'0.5rem', background:'rgba(79, 70, 229, 0.1)', borderRadius:'10px', display:'flex' }}>
+            <Icon size={22} color="#4F46E5" />
+          </div>
+          <h3 style={{ margin:0, fontWeight:'800', color:'#0F172A', fontSize:'1.25rem', letterSpacing:'-0.02em' }}>{title}</h3>
         </div>
-        <button onClick={onClose} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#64748B', display:'flex', padding:'4px' }}
-          onMouseEnter={e=>e.currentTarget.style.color='#1E293B'} onMouseLeave={e=>e.currentTarget.style.color='#64748B'}>
+        <button onClick={onClose} style={{ background:'rgba(241, 245, 249, 1)', border:'1px solid rgba(226, 232, 240, 1)', borderRadius:'50%', cursor:'pointer', color:'#64748B', display:'flex', padding:'8px', transition:'all 0.2s' }}
+          onMouseEnter={e=>{e.currentTarget.style.color='#0F172A'; e.currentTarget.style.background='#E2E8F0';}} onMouseLeave={e=>{e.currentTarget.style.color='#64748B'; e.currentTarget.style.background='rgba(241, 245, 249, 1)';}}>
           <X size={18} />
         </button>
       </div>
-      <div style={{ flex:1, overflowY:'auto', padding:'1rem' }}>
+      <div style={{ flex:1, overflowY:'auto', padding:'2rem', background:'transparent' }}>
         {children}
       </div>
     </div>

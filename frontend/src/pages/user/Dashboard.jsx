@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
+import { io } from 'socket.io-client';
 import { Clock, CheckCircle, ListTodo, TrendingUp, Calendar } from 'lucide-react';
 
 const Dashboard = () => {
@@ -20,6 +21,13 @@ const Dashboard = () => {
       }
     };
     fetchStats();
+
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5000');
+    s.on('tasks_updated', fetchStats);
+    
+    return () => {
+      s.disconnect();
+    };
   }, []);
 
   const hour = new Date().getHours();

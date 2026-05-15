@@ -108,7 +108,15 @@ const MyTasks = () => {
     const t = tasks.find(x => x.id === active.id);
     const ov = tasks.find(x => x.id === over.id);
     const ns = ov ? ov.status : over.id;
-    if (t && t.status !== ns) changeStatus(t.id, ns);
+    if (t && t.status !== ns) {
+      const curIdx = GROUPS.findIndex(g => g.id === t.status);
+      const newIdx = GROUPS.findIndex(g => g.id === ns);
+      if (newIdx > curIdx) {
+        changeStatus(t.id, ns);
+      } else {
+        toast.error("Tasks can only be moved forward!");
+      }
+    }
   };
 
   const filtered = tasks.filter(t =>
@@ -366,14 +374,17 @@ const MyTasks = () => {
         return (
           <div style={{ position:'fixed', top: dropdownPos.top, right: dropdownPos.right, zIndex:9999, background:'rgba(255,255,255,0.97)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,0,0,0.1)', borderRadius:'12px', boxShadow:'0 12px 36px rgba(0,0,0,0.15)', width:170, padding:'0.4rem 0', animation:'fadeIn 0.15s ease' }}>
             <div style={{ padding:'0.35rem 0.9rem', fontSize:'0.68rem', fontWeight:'800', color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
-            {GROUPS.map(g => (
+            {GROUPS.filter((g, i) => i > GROUPS.findIndex(x => x.id === dt.status)).map(g => (
               <div key={g.id} onClick={() => changeStatus(dt.id, g.id)}
-                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', background:dt.status===g.id?'rgba(99,102,241,0.08)':'transparent', color:dt.status===g.id?'#6366F1':'#1E293B', fontWeight:dt.status===g.id?'700':'500' }}
-                onMouseEnter={e => { if(dt.status!==g.id) e.currentTarget.style.background='rgba(0,0,0,0.04)'; }}
-                onMouseLeave={e => { if(dt.status!==g.id) e.currentTarget.style.background='transparent'; }}>
-                {g.label}
+                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#1E293B', fontWeight:'500' }}
+                onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.04)'}
+                onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                Move to {g.label}
               </div>
             ))}
+            {GROUPS.findIndex(x => x.id === dt.status) === GROUPS.length - 1 && (
+              <div style={{ padding:'0.45rem 0.9rem', fontSize:'0.8rem', color:'#94A3B8', fontStyle:'italic' }}>Already completed</div>
+            )}
             {canEditTask && (
               <>
                 <div style={{ height:1, background:'rgba(0,0,0,0.07)', margin:'0.35rem 0' }}/>
