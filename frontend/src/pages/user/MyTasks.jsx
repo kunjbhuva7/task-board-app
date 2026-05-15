@@ -29,22 +29,22 @@ const KanbanCard = ({ task, onEdit, onDelete, canEdit, canDelete }) => {
   return (
     <div ref={setNodeRef} {...attributes} {...listeners}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1,
-        background:'rgba(255,255,255,0.06)', borderRadius:'12px', padding:'1rem',
+        background:'rgba(0,0,0,0.04)', borderRadius:'12px', padding:'1rem',
         boxShadow:'0 2px 10px rgba(0,0,0,0.2)', cursor:'grab',
-        border:'1px solid rgba(255,255,255,0.1)' }}>
-      <div style={{ fontWeight:'700', color:'#F8FAFC', fontSize:'0.9rem', marginBottom:'0.4rem' }}>{task.title}</div>
-      <div style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:'0.85rem', lineHeight:1.4,
+        border:'1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.9rem', marginBottom:'0.4rem' }}>{task.title}</div>
+      <div style={{ fontSize:'0.8rem', color:'#64748B', marginBottom:'0.85rem', lineHeight:1.4,
         display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
         {task.description || <span style={{ color:'#64748B', fontStyle:'italic' }}>No description</span>}
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:'0.6rem' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(0,0,0,0.08)', paddingTop:'0.6rem' }}>
         <span style={{ fontSize:'0.72rem', color:'#64748B' }}>
           <Calendar size={11} style={{ verticalAlign:'middle', marginRight:3 }} />
           {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'No date'}
         </span>
         <div style={{ display:'flex', gap:'4px' }} onPointerDown={e => e.stopPropagation()}>
-          {canEdit && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onEdit(task)}><Edit2 size={13}/></button>}
-          {canDelete && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#94A3B8', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onDelete(task.id)}><Trash2 size={13}/></button>}
+          {canEdit && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#64748B', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onEdit(task)}><Edit2 size={13}/></button>}
+          {canDelete && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#64748B', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onDelete(task.id)}><Trash2 size={13}/></button>}
         </div>
       </div>
     </div>
@@ -119,9 +119,9 @@ const MyTasks = () => {
   const today = new Date();
 
   // styles
-  const hdrStyle = { padding:'1.25rem 1.75rem 0', background:'transparent', borderBottom:'1px solid rgba(255,255,255,0.08)' };
-  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'500', fontSize:'0.875rem', color: active?'#818CF8':'#94A3B8', borderBottom: active?'2px solid #818CF8':'2px solid transparent', transition:'all 0.2s' });
-  const btnGlass = { display:'flex', alignItems:'center', gap:'0.4rem', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', padding:'0.4rem 0.9rem', borderRadius:'9px', fontWeight:'600', color:'#F8FAFC', cursor:'pointer', fontSize:'0.82rem' };
+  const hdrStyle = { padding:'1.25rem 1.75rem 0', background:'transparent', borderBottom:'1px solid rgba(0,0,0,0.08)' };
+  const tabSt = active => ({ padding:'0.8rem 0', cursor:'pointer', fontWeight: active?'700':'500', fontSize:'0.875rem', color: active?'#818CF8':'#64748B', borderBottom: active?'2px solid #818CF8':'2px solid transparent', transition:'all 0.2s' });
+  const btnGlass = { display:'flex', alignItems:'center', gap:'0.4rem', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.08)', padding:'0.4rem 0.9rem', borderRadius:'9px', fontWeight:'600', color:'#1E293B', cursor:'pointer', fontSize:'0.82rem' };
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:'transparent' }}>
@@ -130,8 +130,8 @@ const MyTasks = () => {
       <div style={hdrStyle}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.1rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
-            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'white', boxShadow:'0 4px 12px rgba(99,102,241,0.4)' }}>C</div>
-            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'#F8FAFC', margin:0, letterSpacing:'-0.3px' }}>Craftboard Project</h1>
+            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'#1E293B', boxShadow:'0 4px 12px rgba(99,102,241,0.4)' }}>C</div>
+            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B', margin:0, letterSpacing:'-0.3px' }}>Craftboard Project</h1>
           </div>
         </div>
 
@@ -148,14 +148,14 @@ const MyTasks = () => {
             <div style={{ position:'relative' }}>
               <Search size={13} style={{ position:'absolute', left:'9px', top:'50%', transform:'translateY(-50%)', color:'#64748B' }}/>
               <input type="text" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
-                style={{ padding:'0.4rem 0.9rem 0.4rem 2rem', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.15)', outline:'none', width:'160px', fontSize:'0.82rem', background:'rgba(0,0,0,0.2)', color:'#F8FAFC' }}/>
+                style={{ padding:'0.4rem 0.9rem 0.4rem 2rem', borderRadius:'8px', border:'1px solid rgba(0,0,0,0.1)', outline:'none', width:'160px', fontSize:'0.82rem', background:'rgba(255,255,255,0.7)', color:'#1E293B' }}/>
             </div>
             
             {/* Filter */}
-            <div style={{ position:'relative', display:'flex', alignItems:'center', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', padding:'0.2rem 0.6rem', borderRadius:'9px' }}>
-              <Filter size={13} color="#94A3B8" style={{marginRight:'0.3rem'}}/>
+            <div style={{ position:'relative', display:'flex', alignItems:'center', background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.08)', padding:'0.2rem 0.6rem', borderRadius:'9px' }}>
+              <Filter size={13} color="#64748B" style={{marginRight:'0.3rem'}}/>
               <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)}
-                style={{ background:'transparent', border:'none', outline:'none', color:'#F8FAFC', fontSize:'0.82rem', fontWeight:'600', appearance:'none', cursor:'pointer' }}>
+                style={{ background:'transparent', border:'none', outline:'none', color:'#1E293B', fontSize:'0.82rem', fontWeight:'600', appearance:'none', cursor:'pointer' }}>
                 <option value="all" style={{color:'black'}}>All Priorities</option>
                 <option value="high" style={{color:'black'}}>High</option>
                 <option value="medium" style={{color:'black'}}>Medium</option>
@@ -165,7 +165,7 @@ const MyTasks = () => {
 
             {canCreateTask && (
               <button onClick={() => { setEditingTask(null); setShowModal(true); }}
-                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', border:'none', padding:'0.45rem 1rem', borderRadius:'9px', fontWeight:'700', color:'white', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 4px 14px rgba(99,102,241,0.4)' }}>
+                style={{ display:'flex', alignItems:'center', gap:'0.4rem', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', border:'none', padding:'0.45rem 1rem', borderRadius:'9px', fontWeight:'700', color:'#1E293B', cursor:'pointer', fontSize:'0.82rem', boxShadow:'0 4px 14px rgba(99,102,241,0.4)' }}>
                 <Plus size={13}/> New Task
               </button>
             )}
@@ -177,7 +177,7 @@ const MyTasks = () => {
       <div style={{ flex:1, overflowY:'auto', padding:'1.25rem 1.75rem' }}>
         {loading ? (
           <div style={{ display:'flex', justifyContent:'center', padding:'4rem' }}>
-            <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white' }}></div>
+            <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(0,0,0,0.15)', borderTopcolor:'#1E293B' }}></div>
           </div>
         ) : (
           <>
@@ -212,10 +212,10 @@ const MyTasks = () => {
 
             {/* TIMELINE */}
             {activeTab === 'timeline' && (
-              <div style={{ background:'rgba(255,255,255,0.03)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'16px', overflow:'hidden' }}>
-                <div style={{ padding:'1rem 1.5rem', borderBottom:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', gap:'0.6rem' }}>
+              <div style={{ background:'rgba(0,0,0,0.02)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:'16px', overflow:'hidden' }}>
+                <div style={{ padding:'1rem 1.5rem', borderBottom:'1px solid rgba(0,0,0,0.08)', display:'flex', alignItems:'center', gap:'0.6rem' }}>
                   <Calendar size={17} color="white"/>
-                  <h3 style={{ color:'white', margin:0, fontSize:'0.95rem', fontWeight:'700' }}>
+                  <h3 style={{ color:'#1E293B', margin:0, fontSize:'0.95rem', fontWeight:'700' }}>
                     Timeline — {today.toLocaleString('default',{month:'long',year:'numeric'})}
                   </h3>
                 </div>
@@ -226,15 +226,15 @@ const MyTasks = () => {
                     const daysLeft = Math.ceil((due - today)/(1000*60*60*24));
                     const col = pc(task.priority);
                     return (
-                      <div key={task.id} style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'12px', padding:'0.9rem 1.25rem', display:'flex', alignItems:'center', gap:'1rem', boxShadow:'0 2px 8px rgba(0,0,0,0.2)' }}>
+                      <div key={task.id} style={{ background:'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:'12px', padding:'0.9rem 1.25rem', display:'flex', alignItems:'center', gap:'1rem', boxShadow:'0 2px 8px rgba(0,0,0,0.2)' }}>
                         <span style={{ display:'inline-block', width:'8px', height:'8px', borderRadius:'50%', background:col.dot, flexShrink:0 }}/>
                         <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ fontWeight:'700', color:'#F8FAFC', fontSize:'0.875rem', marginBottom:'0.15rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{task.title}</div>
-                          <div style={{ fontSize:'0.75rem', color:'#94A3B8' }}>{task.description || 'No description'}</div>
+                          <div style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.875rem', marginBottom:'0.15rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{task.title}</div>
+                          <div style={{ fontSize:'0.75rem', color:'#64748B' }}>{task.description || 'No description'}</div>
                         </div>
                         <span className={`badge badge-${task.status}`}>{task.status.replace('_',' ')}</span>
                         <div style={{ textAlign:'right', flexShrink:0 }}>
-                          <div style={{ fontSize:'0.82rem', fontWeight:'700', color: overdue?'#EF4444':'#F8FAFC' }}>
+                          <div style={{ fontSize:'0.82rem', fontWeight:'700', color: overdue?'#EF4444':'#1E293B' }}>
                             {due.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
                           </div>
                           <div style={{ fontSize:'0.7rem', color: overdue?'#EF4444': daysLeft<=3?'#F59E0B':'#64748B', fontWeight:'600' }}>
@@ -245,12 +245,12 @@ const MyTasks = () => {
                     );
                   })}
                   {filtered.filter(t=>!t.due_date).length > 0 && (
-                    <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:'10px', padding:'0.7rem 1.25rem', color:'#94A3B8', fontSize:'0.8rem', textAlign:'center' }}>
+                    <div style={{ background:'rgba(0,0,0,0.04)', borderRadius:'10px', padding:'0.7rem 1.25rem', color:'#64748B', fontSize:'0.8rem', textAlign:'center' }}>
                       {filtered.filter(t=>!t.due_date).length} task(s) have no due date
                     </div>
                   )}
                   {filtered.length === 0 && (
-                    <div style={{ padding:'2rem', textAlign:'center', color:'rgba(255,255,255,0.6)' }}>No tasks yet</div>
+                    <div style={{ padding:'2rem', textAlign:'center', color:'#64748B' }}>No tasks yet</div>
                   )}
                 </div>
               </div>
@@ -264,19 +264,19 @@ const MyTasks = () => {
                   if (gTasks.length === 0 && group.id !== 'todo' && group.id !== 'in_progress') return null;
                   const isCol = collapsed[group.id];
                   return (
-                    <div key={group.id} style={{ background:'rgba(255,255,255,0.03)', backdropFilter:'blur(20px)', borderRadius:'16px', border:'1px solid rgba(255,255,255,0.08)', overflow:'hidden', boxShadow:'0 4px 20px rgba(0,0,0,0.3)' }}>
+                    <div key={group.id} style={{ background:'rgba(0,0,0,0.02)', backdropFilter:'blur(20px)', borderRadius:'16px', border:'1px solid rgba(0,0,0,0.08)', overflow:'hidden', boxShadow:'0 4px 20px rgba(0,0,0,0.3)' }}>
                       {/* Group header */}
-                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(0,0,0,0.2)', borderBottom: isCol?'none':'1px solid rgba(255,255,255,0.08)' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(255,255,255,0.7)', borderBottom: isCol?'none':'1px solid rgba(0,0,0,0.08)' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', cursor:'pointer' }} onClick={() => setCollapsed(p => ({...p,[group.id]:!p[group.id]}))}>
-                          {isCol ? <ChevronRight size={16} color="#94A3B8"/> : <ChevronDown size={16} color="#94A3B8"/>}
-                          <span style={{ fontWeight:'700', color:'#F8FAFC', fontSize:'0.875rem' }}>{group.label}</span>
-                          <span style={{ background:'rgba(255,255,255,0.1)', color:'#F8FAFC', padding:'0.1rem 0.5rem', borderRadius:'6px', fontSize:'0.7rem', fontWeight:'800' }}>{gTasks.length}</span>
+                          {isCol ? <ChevronRight size={16} color="#64748B"/> : <ChevronDown size={16} color="#64748B"/>}
+                          <span style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.875rem' }}>{group.label}</span>
+                          <span style={{ background:'rgba(0,0,0,0.08)', color:'#1E293B', padding:'0.1rem 0.5rem', borderRadius:'6px', fontSize:'0.7rem', fontWeight:'800' }}>{gTasks.length}</span>
                         </div>
                         {canCreateTask && (
                           <button title="Add task" onClick={() => { setEditingTask(null); setShowModal(true); }}
-                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', padding:'3px', borderRadius:'6px' }}
-                            onMouseEnter={e => { e.currentTarget.style.color='#F8FAFC'; e.currentTarget.style.background='rgba(255,255,255,0.1)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color='#94A3B8'; e.currentTarget.style.background='transparent'; }}>
+                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'#64748B', display:'flex', padding:'3px', borderRadius:'6px' }}
+                            onMouseEnter={e => { e.currentTarget.style.color='#1E293B'; e.currentTarget.style.background='rgba(0,0,0,0.08)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color='#64748B'; e.currentTarget.style.background='transparent'; }}>
                             <Plus size={16}/>
                           </button>
                         )}
@@ -288,12 +288,12 @@ const MyTasks = () => {
                           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.85rem' }}>
                             <thead>
                               <tr>
-                                <th style={{ width:36, padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}></th>
-                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Task Name</th>
-                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Description</th>
-                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Due Date</th>
-                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Assigned</th>
-                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#94A3B8', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Priority</th>
+                                <th style={{ width:36, padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}></th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Task Name</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Description</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Due Date</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Assigned</th>
+                                <th style={{ padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent', color:'#64748B', fontWeight:'600', textTransform:'none', letterSpacing:0 }}>Priority</th>
                                 <th style={{ width:36, padding:'0.65rem 0.9rem', borderBottom:'1px solid rgba(241,245,249,0.8)', background:'transparent' }}></th>
                               </tr>
                             </thead>
@@ -315,7 +315,7 @@ const MyTasks = () => {
                                       {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : <span style={{ color:'#CBD5E1' }}>No date</span>}
                                     </td>
                                     <td style={{ padding:'0.8rem 0.9rem' }}>
-                                      <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', justifyContent:'center', alignItems:'center', color:'white', fontSize:'0.7rem', fontWeight:'800' }}>
+                                      <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', justifyContent:'center', alignItems:'center', color:'#1E293B', fontSize:'0.7rem', fontWeight:'800' }}>
                                         {task.assignee_name ? task.assignee_name.charAt(0).toUpperCase() : '?'}
                                       </div>
                                     </td>
@@ -326,27 +326,27 @@ const MyTasks = () => {
                                       </span>
                                     </td>
                                     <td style={{ padding:'0.8rem 0.9rem', textAlign:'right', position:'relative' }}>
-                                      <button style={{ background:'transparent', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', padding:'3px', borderRadius:'6px' }}
+                                      <button style={{ background:'transparent', border:'none', cursor:'pointer', color:'#64748B', display:'flex', padding:'3px', borderRadius:'6px' }}
                                         onClick={e => { e.stopPropagation(); setDropdown(dropdown===task.id?null:task.id); }}>
                                         <MoreHorizontal size={16}/>
                                       </button>
                                       {dropdown === task.id && (
-                                        <div style={{ position:'absolute', right:28, top:8, background:'rgba(15,23,42,0.95)', backdropFilter:'blur(16px)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', boxShadow:'0 12px 32px rgba(0,0,0,0.5)', zIndex:99, width:165, textAlign:'left', padding:'0.4rem 0', animation:'fadeIn 0.15s ease' }}>
-                                          <div style={{ padding:'0.35rem 0.9rem', fontSize:'0.68rem', fontWeight:'800', color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
+                                        <div style={{ position:'absolute', right:28, top:8, background:'rgba(15,23,42,0.95)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:'12px', boxShadow:'0 12px 32px rgba(0,0,0,0.5)', zIndex:99, width:165, textAlign:'left', padding:'0.4rem 0', animation:'fadeIn 0.15s ease' }}>
+                                          <div style={{ padding:'0.35rem 0.9rem', fontSize:'0.68rem', fontWeight:'800', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
                                           {GROUPS.map(g => (
                                             <div key={g.id} onClick={() => changeStatus(task.id, g.id)}
-                                              style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', background:task.status===g.id?'rgba(129,140,248,0.15)':'transparent', color:task.status===g.id?'#818CF8':'#F8FAFC', fontWeight:task.status===g.id?'700':'400' }}
-                                              onMouseEnter={e => { if(task.status!==g.id) e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}
+                                              style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', background:task.status===g.id?'rgba(129,140,248,0.15)':'transparent', color:task.status===g.id?'#818CF8':'#1E293B', fontWeight:task.status===g.id?'700':'400' }}
+                                              onMouseEnter={e => { if(task.status!==g.id) e.currentTarget.style.background='rgba(0,0,0,0.04)'; }}
                                               onMouseLeave={e => { if(task.status!==g.id) e.currentTarget.style.background='transparent'; }}>
                                               {g.label}
                                             </div>
                                           ))}
                                           {canEditTask && (
                                             <>
-                                              <div style={{ height:1, background:'rgba(255,255,255,0.08)', margin:'0.35rem 0' }}/>
+                                              <div style={{ height:1, background:'rgba(0,0,0,0.08)', margin:'0.35rem 0' }}/>
                                               <div onClick={() => { setDropdown(null); setEditingTask(task); setShowModal(true); }}
-                                                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#F8FAFC' }}
-                                                onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.05)'}
+                                                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#1E293B' }}
+                                                onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.04)'}
                                                 onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                                                 Edit Task
                                               </div>

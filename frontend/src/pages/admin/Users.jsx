@@ -179,7 +179,7 @@ const Users = () => {
       {showModal && (
         <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && setShowModal(false)}>
           <div className="modal-content" style={{maxWidth: '450px', padding: '2.5rem', borderRadius: '16px'}}>
-            <h3 style={{marginBottom:'2rem', fontSize: '1.25rem', color: '#0F172A', fontWeight: '700'}}>Add New User</h3>
+            <h3 style={{marginBottom:'2rem', fontSize: '1.25rem', color: '#F8FAFC', fontWeight: '700'}}>Add New User</h3>
             <form onSubmit={handleCreateUser}>
               <div style={{marginBottom:'1.5rem'}}>
                 <label className="label" style={{marginBottom: '0.5rem', color: '#475569', fontWeight: '600'}}>Email Address</label>
@@ -194,7 +194,7 @@ const Users = () => {
               </div>
               <div style={{display:'flex', justifyContent:'flex-end', gap:'1rem'}}>
                 <button type="button" className="btn" onClick={() => setShowModal(false)} style={{background: 'white', color: '#475569', border: '1px solid #E2E8F0', padding: '0.6rem 1.2rem', fontWeight: '600'}}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={submitting} style={{background: '#0F172A', color: 'white', padding: '0.6rem 1.2rem', fontWeight: '600', border: 'none'}}>
+                <button type="submit" className="btn btn-primary" disabled={submitting} style={{background: '#F8FAFC', color:'#1E293B', padding: '0.6rem 1.2rem', fontWeight: '600', border: 'none'}}>
                   {submitting ? <div className="spinner"></div> : 'Create User'}
                 </button>
               </div>

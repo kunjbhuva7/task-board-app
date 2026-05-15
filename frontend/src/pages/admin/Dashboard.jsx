@@ -26,7 +26,7 @@ const Dashboard = () => {
   }
 
   const statusColors = {
-    todo: '#94A3B8',
+    todo: '#64748B',
     in_progress: '#2563EB',
     review: '#D97706',
     done: '#16A34A'
@@ -84,10 +84,10 @@ const Dashboard = () => {
             {stats?.recentActivity?.map(act => (
               <div key={act.id} style={{borderBottom:'1px solid rgba(241,245,249,0.8)', paddingBottom:'0.75rem'}}>
                 <div style={{fontWeight:'600', color:'#1E293B', fontSize:'0.82rem'}}>{act.user_name || 'System'} <span style={{fontWeight:'400', color:'#64748B'}}>{act.action}</span></div>
-                <div style={{fontSize:'0.75rem', color:'#94A3B8', marginTop:'2px'}}>{new Date(act.created_at).toLocaleString()}</div>
+                <div style={{fontSize:'0.75rem', color:'#64748B', marginTop:'2px'}}>{new Date(act.created_at).toLocaleString()}</div>
               </div>
             ))}
-            {!stats?.recentActivity?.length && <div style={{color:'#94A3B8', fontSize:'0.85rem'}}>No recent activity</div>}
+            {!stats?.recentActivity?.length && <div style={{color:'#64748B', fontSize:'0.85rem'}}>No recent activity</div>}
           </div>
         </div>
       </div>

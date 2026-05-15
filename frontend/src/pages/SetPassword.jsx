@@ -41,23 +41,23 @@ const SetPassword = () => {
   const inp = {
     width:'100%', height:'46px', padding:'0 14px', borderRadius:'12px',
     outline:'none', fontSize:'0.9rem',
-    background:'rgba(255,255,255,0.2)', border:'1px solid rgba(255,255,255,0.35)',
-    color:'white', transition:'all 0.2s',
+    background:'rgba(255,255,255,0.8)', border:'1px solid rgba(0,0,0,0.1)',
+    color:'#1E293B', transition:'all 0.2s',
   };
-  const lbl = { display:'block', fontSize:'0.82rem', fontWeight:'700', color:'rgba(255,255,255,0.85)', marginBottom:'6px' };
+  const lbl = { display:'block', fontSize:'0.82rem', fontWeight:'700', color:'#334155', marginBottom:'6px' };
 
   if (verifying) return (
     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh' }}>
-      <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white' }}/>
+      <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(0,0,0,0.15)', borderTopcolor:'#1E293B' }}/>
     </div>
   );
 
   if (error) return (
     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh' }}>
-      <div style={{ background:'rgba(255,255,255,0.18)', backdropFilter:'blur(24px)', borderRadius:'20px', border:'1px solid rgba(255,255,255,0.3)', padding:'2.5rem', textAlign:'center', maxWidth:'380px' }}>
+      <div style={{ background:'rgba(255,255,255,0.7)', backdropFilter:'blur(24px)', borderRadius:'20px', border:'1px solid rgba(255,255,255,0.9)', padding:'2.5rem', textAlign:'center', maxWidth:'380px' }}>
         <div style={{ fontSize:'2.5rem', marginBottom:'1rem' }}>⚠️</div>
-        <h3 style={{ color:'white', marginBottom:'0.75rem' }}>Link Invalid</h3>
-        <p style={{ color:'rgba(255,255,255,0.7)', fontSize:'0.875rem', marginBottom:'1.5rem' }}>{error}</p>
+        <h3 style={{ color:'#1E293B', marginBottom:'0.75rem' }}>Link Invalid</h3>
+        <p style={{ color:'#64748B', fontSize:'0.875rem', marginBottom:'1.5rem' }}>{error}</p>
         <button onClick={() => navigate('/login')} className="btn" style={{ background:'white', color:'#6366F1', fontWeight:'700', padding:'0.6rem 1.5rem' }}>
           Go to Login
         </button>
@@ -67,16 +67,16 @@ const SetPassword = () => {
 
   return (
     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', padding:'1.5rem' }}>
-      <div style={{ width:'100%', maxWidth:'440px', background:'rgba(255,255,255,0.18)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderRadius:'24px', border:'1px solid rgba(255,255,255,0.35)', boxShadow:'0 24px 64px rgba(0,0,0,0.2)', padding:'3rem 2.5rem' }}>
+      <div style={{ width:'100%', maxWidth:'440px', background:'rgba(255,255,255,0.7)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderRadius:'24px', border:'1px solid rgba(255,255,255,0.9)', boxShadow:'0 24px 64px rgba(0,0,0,0.08)', padding:'3rem 2.5rem' }}>
         {/* Logo */}
         <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginBottom:'1.5rem' }}>
           <div style={{ width:'44px', height:'44px', background:'white', borderRadius:'12px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'900', fontSize:'20px', color:'#6366F1', boxShadow:'0 4px 16px rgba(0,0,0,0.15)' }}>C</div>
-          <span style={{ fontSize:'1.4rem', fontWeight:'800', color:'white' }}>Craftboard</span>
+          <span style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B' }}>Craftboard</span>
         </div>
 
         <div style={{ textAlign:'center', marginBottom:'2rem' }}>
-          <h2 style={{ fontSize:'1.5rem', fontWeight:'800', color:'white', margin:'0 0 0.4rem' }}>Setup Your Account</h2>
-          <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.85rem', margin:0 }}>Set your name and password to get started</p>
+          <h2 style={{ fontSize:'1.5rem', fontWeight:'800', color:'#1E293B', margin:'0 0 0.4rem' }}>Setup Your Account</h2>
+          <p style={{ color:'#64748B', fontSize:'0.85rem', margin:0 }}>Set your name and password to get started</p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
@@ -87,20 +87,20 @@ const SetPassword = () => {
           <div>
             <label style={lbl}>Full Name</label>
             <input type="text" required placeholder="e.g. John Doe" value={name} onChange={e => setName(e.target.value)} style={inp}
-              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
-              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}/>
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.9)'; e.target.style.borderColor='#6366F1'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(0,0,0,0.1)'; }}/>
           </div>
           <div>
             <label style={lbl}>Password</label>
             <input type="password" required placeholder="Min 8 chars, 1 number, 1 symbol" value={password} onChange={e => setPassword(e.target.value)} style={inp}
-              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
-              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}/>
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.9)'; e.target.style.borderColor='#6366F1'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(0,0,0,0.1)'; }}/>
           </div>
           <div>
             <label style={lbl}>Confirm Password</label>
             <input type="password" required placeholder="Re-enter password" value={confirm} onChange={e => setConfirm(e.target.value)} style={inp}
-              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
-              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}/>
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.9)'; e.target.style.borderColor='#6366F1'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(0,0,0,0.1)'; }}/>
           </div>
 
           <button type="submit" disabled={loading} style={{ width:'100%', height:'48px', fontSize:'0.95rem', fontWeight:'700', borderRadius:'12px', background:'white', color:'#6366F1', border:'none', cursor: loading?'not-allowed':'pointer', display:'flex', justifyContent:'center', alignItems:'center', boxShadow:'0 4px 16px rgba(0,0,0,0.15)', marginTop:'0.4rem', transition:'all 0.2s' }}
