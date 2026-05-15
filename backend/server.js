@@ -50,13 +50,21 @@ app.use('/api/activity', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Serve frontend in production (for Railway/Hosting)
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+const fs = require('fs');
+const frontendDist = path.join(__dirname, '../frontend/dist');
 
-// Safely handle all other routes (React Router)
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) return next();
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-});
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  // Safely handle all other routes (React Router)
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('Railway Backend Working 🚀. Frontend build not found.');
+  });
+}
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
