@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import api from '../../api/axios';
+import { AuthContext } from '../../context/AuthContext';
 import { Users, CheckCircle, Clock, Send, Activity, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-const CARD = { background:'rgba(255,255,255,0.6)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.8)', borderRadius:'16px', boxShadow:'0 4px 20px rgba(0,0,0,0.06)', padding:'1.5rem' };
-
 const Dashboard = () => {
+  const { user } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,13 +26,16 @@ const Dashboard = () => {
 
   const BAR_COLORS = { 'Todo':'#94A3B8', 'In Progress':'#3B82F6', 'Review':'#F59E0B', 'Done':'#10B981' };
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
   return (
     <div style={{padding:'2rem', display:'flex', flexDirection:'column', gap:'1.75rem'}}>
 
       {/* Header */}
       <div>
-        <h2 style={{margin:0, fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>Admin Dashboard</h2>
-        <p style={{margin:'0.3rem 0 0', color:'#64748B', fontSize:'0.875rem'}}>Overview of your workspace activity and metrics</p>
+        <h2 style={{margin:0, fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{greeting}, {user?.name || 'Admin'} 👋</h2>
+        <p style={{margin:'0.3rem 0 0', color:'#64748B', fontSize:'0.875rem'}}>Here's what's happening with your workspace metrics.</p>
       </div>
 
       {/* Stat Cards */}
@@ -58,12 +61,12 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Row */}
-      <div style={{display:'grid', gridTemplateColumns:'1.8fr 1fr', gap:'1.25rem'}}>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.25rem'}}>
 
         {/* Bar Chart */}
-        <div style={CARD}>
+        <div style={{background:'linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.04))', border:'1px solid rgba(99,102,241,0.15)', borderRadius:'16px', padding:'1.5rem', backdropFilter:'blur(12px)'}}>
           <div style={{display:'flex', alignItems:'center', gap:'0.6rem', marginBottom:'1.5rem'}}>
-            <div style={{background:'rgba(99,102,241,0.12)', padding:'0.5rem', borderRadius:'8px', color:'#6366F1', display:'flex'}}><TrendingUp size={17}/></div>
+            <TrendingUp size={16} color="#818CF8"/>
             <h3 style={{margin:0, fontSize:'1rem', fontWeight:'700', color:'#1E293B'}}>Tasks by Status</h3>
           </div>
           {chartData.length === 0 ? (
@@ -86,14 +89,14 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <div style={CARD}>
+        <div style={{background:'linear-gradient(135deg,rgba(16,185,129,0.06),rgba(52,211,153,0.04))', border:'1px solid rgba(16,185,129,0.15)', borderRadius:'16px', padding:'1.5rem', backdropFilter:'blur(12px)'}}>
           <div style={{display:'flex', alignItems:'center', gap:'0.6rem', marginBottom:'1.25rem'}}>
-            <div style={{background:'rgba(16,185,129,0.12)', padding:'0.5rem', borderRadius:'8px', color:'#10B981', display:'flex'}}><Activity size={17}/></div>
+            <Activity size={16} color="#10B981"/>
             <h3 style={{margin:0, fontSize:'1rem', fontWeight:'700', color:'#1E293B'}}>Recent Activity</h3>
           </div>
           <div style={{display:'flex', flexDirection:'column', gap:'0'}}>
             {stats?.recentActivity?.length ? stats.recentActivity.map((act, i) => (
-              <div key={act.id} style={{padding:'0.75rem 0', borderBottom: i < stats.recentActivity.length-1 ? '1px solid rgba(0,0,0,0.05)' : 'none', display:'flex', gap:'0.75rem', alignItems:'flex-start'}}>
+              <div key={act.id} style={{padding:'0.75rem 1rem', background:'rgba(255,255,255,0.5)', border:'1px solid rgba(16,185,129,0.1)', borderRadius:'10px', display:'flex', gap:'0.75rem', alignItems:'flex-start'}}>
                 <div style={{width:30, height:30, borderRadius:'50%', background:'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:'0.65rem', fontWeight:'800', flexShrink:0}}>
                   {(act.user_name || 'S').charAt(0).toUpperCase()}
                 </div>
