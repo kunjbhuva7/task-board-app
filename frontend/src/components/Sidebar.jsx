@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Sidebar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -12,6 +13,10 @@ const Sidebar = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleComingSoon = (feature) => {
+    toast.success(`${feature} is coming soon in the next update!`, { icon: '🚀' });
   };
 
   return (
@@ -30,15 +35,15 @@ const Sidebar = () => {
       
       <div className="sidebar-nav">
         <div className="sidebar-section-title">MAIN MENU</div>
-        <NavLink to="#" className="sidebar-item" onClick={(e) => e.preventDefault()}>
+        <div className="sidebar-item" onClick={() => handleComingSoon('Search')} style={{cursor: 'pointer'}}>
           <Search size={18} /> Search
-        </NavLink>
-        <NavLink to="#" className="sidebar-item" onClick={(e) => e.preventDefault()}>
+        </div>
+        <div className="sidebar-item" onClick={() => handleComingSoon('Notifications')} style={{cursor: 'pointer'}}>
           <Bell size={18} /> Notification
-        </NavLink>
-        <NavLink to="#" className="sidebar-item" onClick={(e) => e.preventDefault()}>
+        </div>
+        <div className="sidebar-item" onClick={() => handleComingSoon('Calendar')} style={{cursor: 'pointer'}}>
           <Calendar size={18} /> Calendar
-        </NavLink>
+        </div>
         <NavLink to="/user/profile" className="sidebar-item">
           <Settings size={18} /> Settings
         </NavLink>

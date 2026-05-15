@@ -64,23 +64,44 @@ const sendInviteEmail = async (to, inviteToken) => {
     html: `
       <!DOCTYPE html>
       <html>
-      <body style="margin:0;padding:0;background:#F8FAFC;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
-        <div style="max-width:560px;margin:40px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.07);">
-          <div style="background:linear-gradient(135deg,#2563EB,#1D4ED8);padding:32px;text-align:center;">
-            <h1 style="color:white;margin:0;font-size:24px;">✅ TaskBoard</h1>
-            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;">You've been invited!</p>
-          </div>
-          <div style="padding:32px;">
-            <p style="color:#0F172A;font-size:16px;line-height:1.6;">Hello,</p>
-            <p style="color:#475569;font-size:15px;line-height:1.6;">You have been invited to join <strong>TaskBoard</strong>. Click the button below to set your password and get started:</p>
-            <div style="text-align:center;margin:32px 0;">
-              <a href="${inviteLink}" style="display:inline-block;padding:14px 32px;background:#2563EB;color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;">Set My Password</a>
-            </div>
-            <p style="color:#94A3B8;font-size:13px;line-height:1.5;">If the button doesn't work, copy and paste this link:<br/><a href="${inviteLink}" style="color:#2563EB;word-break:break-all;">${inviteLink}</a></p>
-            <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;"/>
-            <p style="color:#94A3B8;font-size:12px;">This invite link will expire in 48 hours.</p>
-          </div>
-        </div>
+      <body style="margin:0;padding:0;background-color:#f4f7f6;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f4f7f6;padding:40px 0;">
+          <tr>
+            <td align="center">
+              <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+                <tr>
+                  <td style="background:linear-gradient(135deg, #5266F9 0%, #3B4CCA 100%);padding:40px 30px;text-align:center;">
+                    <div style="background:rgba(255,255,255,0.2);width:60px;height:60px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
+                      <span style="font-size:30px;color:white;font-weight:bold;line-height:60px;display:inline-block;text-align:center;width:100%;">C</span>
+                    </div>
+                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Craftboard Project</h1>
+                    <p style="color:rgba(255,255,255,0.9);margin:10px 0 0;font-size:16px;">You have been invited to join the team!</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:40px 30px;">
+                    <p style="color:#1e293b;font-size:18px;font-weight:600;margin:0 0 16px;">Welcome aboard! 👋</p>
+                    <p style="color:#475569;font-size:16px;line-height:1.6;margin:0 0 32px;">An administrator has invited you to collaborate on <strong>Craftboard Project</strong>. We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.</p>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td align="center">
+                          <a href="${inviteLink}" style="display:inline-block;padding:16px 36px;background-color:#111827;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;letter-spacing:0.3px;box-shadow:0 4px 6px rgba(17,24,39,0.2);">Accept Invitation & Set Password</a>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="color:#64748B;font-size:14px;line-height:1.5;margin:32px 0 0;">If the button doesn't work, copy and paste this link into your browser:<br/><a href="${inviteLink}" style="color:#5266F9;word-break:break-all;text-decoration:none;">${inviteLink}</a></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background-color:#F8FAFC;padding:24px 30px;text-align:center;border-top:1px solid #E2E8F0;">
+                    <p style="color:#94A3B8;font-size:13px;margin:0;">This invite link will automatically expire in 48 hours for security reasons.</p>
+                    <p style="color:#CBD5E1;font-size:12px;margin:8px 0 0;">&copy; ${new Date().getFullYear()} Craftboard Project. All rights reserved.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       </body>
       </html>
     `,

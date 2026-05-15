@@ -50,6 +50,7 @@ router.post('/', checkPermission('can_create_task'), (req, res) => {
     
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Create Task', 'task', info.lastInsertRowid, `Created task: ${title}`);
     
+    req.app.get('io').emit('tasks_updated');
     res.json({ message: 'Task created', taskId: info.lastInsertRowid });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -70,6 +71,7 @@ router.put('/:id', checkPermission('can_edit_task'), (req, res) => {
     
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Edit Task', 'task', id, `Edited task: ${title}`);
 
+    req.app.get('io').emit('tasks_updated');
     res.json({ message: 'Task updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -84,6 +86,7 @@ router.patch('/:id/status', (req, res) => {
   try {
     db.prepare('UPDATE tasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Update Task Status', 'task', id, `Updated task ${id} status to ${status}`);
+    req.app.get('io').emit('tasks_updated');
     res.json({ message: 'Status updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -96,6 +99,7 @@ router.put('/:id/submit-approval', (req, res) => {
   try {
     db.prepare("UPDATE tasks SET approval_status = 'submitted' WHERE id = ?").run(id);
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Submit Task', 'task', id, `Submitted task ${id} for approval`);
+    req.app.get('io').emit('tasks_updated');
     res.json({ message: 'Task submitted for approval' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -109,6 +113,7 @@ router.put('/:id/approve', (req, res) => {
   try {
     db.prepare("UPDATE tasks SET approval_status = 'approved' WHERE id = ?").run(id);
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Approve Task', 'task', id, `Approved task ${id}`);
+    req.app.get('io').emit('tasks_updated');
     res.json({ message: 'Task approved successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -121,6 +126,7 @@ router.delete('/:id', checkPermission('can_delete_task'), (req, res) => {
   try {
     db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Delete Task', 'task', id, `Deleted task ${id}`);
+    req.app.get('io').emit('tasks_updated');
     res.json({ message: 'Task deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

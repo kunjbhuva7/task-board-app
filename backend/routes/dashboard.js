@@ -34,12 +34,12 @@ router.get('/stats', (req, res) => {
 // GET /api/dashboard/my-stats
 router.get('/my-stats', (req, res) => {
   try {
-    const todo = db.prepare('SELECT count(*) as count FROM tasks WHERE assigned_to = ? AND status = "todo"').get(req.user.id).count;
-    const inProgress = db.prepare('SELECT count(*) as count FROM tasks WHERE assigned_to = ? AND status = "in_progress"').get(req.user.id).count;
-    const done = db.prepare('SELECT count(*) as count FROM tasks WHERE assigned_to = ? AND status = "done"').get(req.user.id).count;
+    const todo = db.prepare('SELECT count(*) as count FROM tasks WHERE (assigned_to = ? OR created_by = ?) AND status = "todo"').get(req.user.id, req.user.id).count;
+    const inProgress = db.prepare('SELECT count(*) as count FROM tasks WHERE (assigned_to = ? OR created_by = ?) AND status = "in_progress"').get(req.user.id, req.user.id).count;
+    const done = db.prepare('SELECT count(*) as count FROM tasks WHERE (assigned_to = ? OR created_by = ?) AND status = "done"').get(req.user.id, req.user.id).count;
     
-    const dueToday = db.prepare('SELECT * FROM tasks WHERE assigned_to = ? AND date(due_date) = date("now")').all(req.user.id);
-    const recentlyUpdated = db.prepare('SELECT * FROM tasks WHERE assigned_to = ? ORDER BY updated_at DESC LIMIT 5').all(req.user.id);
+    const dueToday = db.prepare('SELECT * FROM tasks WHERE (assigned_to = ? OR created_by = ?) AND date(due_date) = date("now")').all(req.user.id, req.user.id);
+    const recentlyUpdated = db.prepare('SELECT * FROM tasks WHERE (assigned_to = ? OR created_by = ?) ORDER BY updated_at DESC LIMIT 5').all(req.user.id, req.user.id);
 
     res.json({
       counts: { todo, inProgress, done },

@@ -8,6 +8,7 @@ import { DndContext, closestCorners, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import TaskModal from '../../components/TaskModal';
+import { io } from 'socket.io-client';
 
 // --- KANBAN COMPONENTS ---
 const SortableTask = ({ task, onEdit, onDelete, canDelete, onSubmitApproval, onApprove, isAdmin }) => {
@@ -99,6 +100,14 @@ const MyTasks = () => {
   useEffect(() => {
     fetchTasks();
     if (user.role === 'admin' || canCreateTask) fetchUsers();
+
+    // Set up Socket.io connection for real-time updates
+    const socket = io(import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000');
+    socket.on('tasks_updated', () => {
+      fetchTasks();
+    });
+
+    return () => socket.disconnect();
   }, [user, canCreateTask]);
 
   // Click outside to close dropdown
