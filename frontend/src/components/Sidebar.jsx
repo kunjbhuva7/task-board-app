@@ -12,16 +12,18 @@ const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
     <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.2)', backdropFilter:'blur(2px)' }} onClick={onClose} />
     {/* Panel */}
     <div style={{
-      position:'absolute', left:'260px', top:0, height:'100%', width:'340px',
-      background:'white', boxShadow:'4px 0 24px rgba(0,0,0,0.12)',
+      position:'absolute', left:'240px', top:0, height:'100%', width:'420px',
+      background:'#0F172A', borderRight:'1px solid rgba(255,255,255,0.08)',
+      boxShadow:'4px 0 24px rgba(0,0,0,0.5)',
       display:'flex', flexDirection:'column', animation:'slideInLeft 0.2s ease'
     }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem', borderBottom:'1px solid #F1F5F9' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
-          <Icon size={20} color="#5266F9" />
-          <h3 style={{ margin:0, fontWeight:'700', color:'#0F172A', fontSize:'1rem' }}>{title}</h3>
+          <Icon size={20} color="#818CF8" />
+          <h3 style={{ margin:0, fontWeight:'700', color:'#F8FAFC', fontSize:'1rem' }}>{title}</h3>
         </div>
-        <button onClick={onClose} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', padding:'4px' }}>
+        <button onClick={onClose} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', padding:'4px' }}
+          onMouseEnter={e=>e.currentTarget.style.color='#F8FAFC'} onMouseLeave={e=>e.currentTarget.style.color='#94A3B8'}>
           <X size={18} />
         </button>
       </div>
@@ -57,14 +59,11 @@ const Sidebar = () => {
   return (
     <>
       <div className="sidebar">
-        <div className="sidebar-header" style={{ padding:'1.5rem', borderBottom:'none' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'white', padding:'0.75rem', borderRadius:'12px', width:'100%', boxShadow:'0 1px 3px rgba(0,0,0,0.07)', border:'1px solid #F1F5F9' }}>
-            <div style={{ width:'34px', height:'34px', background:'linear-gradient(135deg,#5266F9,#7C3AED)', borderRadius:'9px', display:'flex', justifyContent:'center', alignItems:'center', color:'white', fontWeight:'bold', fontSize:'1rem', flexShrink:0 }}>
-              {user.name.charAt(0).toUpperCase()}
-            </div>
+        <div className="sidebar-header" style={{ padding:'1.5rem', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'rgba(255,255,255,0.05)', padding:'0.85rem', borderRadius:'12px', width:'100%', border:'1px solid rgba(255,255,255,0.1)' }}>
             <div style={{ flex:1, overflow:'hidden', minWidth:0 }}>
-              <div style={{ fontSize:'0.875rem', fontWeight:'700', color:'#111827', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden' }}>{user.name}</div>
-              <div style={{ fontSize:'0.72rem', color:'#6B7280', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden' }}>{user.email}</div>
+              <div style={{ fontSize:'0.9rem', fontWeight:'700', color:'#F8FAFC', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden' }}>{user.name}</div>
+              <div style={{ fontSize:'0.75rem', color:'#94A3B8', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden', marginTop:'2px' }}>{user.email}</div>
             </div>
           </div>
         </div>
@@ -139,7 +138,7 @@ const Sidebar = () => {
             placeholder="Search tasks, users..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{ width:'100%', padding:'0.75rem 1rem', borderRadius:'10px', border:'1px solid #E5E7EB', outline:'none', fontSize:'0.95rem', marginBottom:'1rem' }}
+            style={{ width:'100%', padding:'0.75rem 1rem', borderRadius:'10px', background:'rgba(0,0,0,0.2)', border:'1px solid rgba(255,255,255,0.1)', color:'#F8FAFC', outline:'none', fontSize:'0.95rem', marginBottom:'1rem' }}
           />
           <p style={{ color:'#94A3B8', fontSize:'0.875rem', textAlign:'center', marginTop:'2rem' }}>
             🔍 Global search coming soon!<br/>
@@ -154,20 +153,20 @@ const Sidebar = () => {
           <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
             {notifications.map(n => (
               <div key={n.id} style={{
-                padding:'0.9rem', borderRadius:'10px', border:'1px solid #F1F5F9',
-                background: n.read ? '#FAFAFA' : 'linear-gradient(135deg,#EEF0FF,#F5F3FF)',
-                display:'flex', gap:'0.75rem', alignItems:'flex-start'
+                padding:'1rem', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.08)',
+                background: n.read ? 'rgba(255,255,255,0.02)' : 'rgba(129,140,248,0.1)',
+                display:'flex', gap:'0.85rem', alignItems:'flex-start'
               }}>
-                <div style={{ width:'32px', height:'32px', borderRadius:'50%', background: n.read ? '#E5E7EB' : '#5266F9', display:'flex', justifyContent:'center', alignItems:'center', flexShrink:0 }}>
-                  {n.read ? <CheckCircle size={15} color="#94A3B8" /> : <Bell size={15} color="white" />}
+                <div style={{ width:'36px', height:'36px', borderRadius:'50%', background: n.read ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg,#6366F1,#8B5CF6)', display:'flex', justifyContent:'center', alignItems:'center', flexShrink:0, boxShadow: n.read ? 'none' : '0 2px 10px rgba(99,102,241,0.3)' }}>
+                  {n.read ? <CheckCircle size={16} color="#64748B" /> : <Bell size={16} color="white" />}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <p style={{ margin:0, fontSize:'0.85rem', color: n.read ? '#6B7280' : '#0F172A', fontWeight: n.read ? '400' : '600', lineHeight:'1.4' }}>{n.message}</p>
-                  <span style={{ fontSize:'0.75rem', color:'#94A3B8', display:'flex', alignItems:'center', gap:'0.3rem', marginTop:'0.35rem' }}>
-                    <Clock size={11} /> {n.time}
+                  <p style={{ margin:0, fontSize:'0.88rem', color: n.read ? '#94A3B8' : '#F8FAFC', fontWeight: n.read ? '400' : '600', lineHeight:'1.4' }}>{n.message}</p>
+                  <span style={{ fontSize:'0.75rem', color:'#64748B', display:'flex', alignItems:'center', gap:'0.3rem', marginTop:'0.45rem' }}>
+                    <Clock size={12} /> {n.time}
                   </span>
                 </div>
-                {!n.read && <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:'#5266F9', flexShrink:0, marginTop:'4px' }}></div>}
+                {!n.read && <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:'#818CF8', flexShrink:0, marginTop:'6px', boxShadow:'0 0 8px #818CF8' }}></div>}
               </div>
             ))}
           </div>
@@ -178,39 +177,41 @@ const Sidebar = () => {
       {openPanel === 'calendar' && (
         <PanelOverlay title="Calendar" icon={Calendar} onClose={() => setOpenPanel(null)}>
           {/* Month Header */}
-          <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-            <h4 style={{ margin:0, color:'#0F172A', fontWeight:'700' }}>{monthNames[today.getMonth()]} {today.getFullYear()}</h4>
+          <div style={{ textAlign:'center', marginBottom:'1.5rem', marginTop:'0.5rem' }}>
+            <h4 style={{ margin:0, color:'#F8FAFC', fontWeight:'700', fontSize:'1.1rem' }}>{monthNames[today.getMonth()]} {today.getFullYear()}</h4>
           </div>
           {/* Days of week */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:'2px', marginBottom:'4px' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:'4px', marginBottom:'8px' }}>
             {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-              <div key={d} style={{ textAlign:'center', fontSize:'0.7rem', fontWeight:'700', color:'#94A3B8', padding:'4px' }}>{d}</div>
+              <div key={d} style={{ textAlign:'center', fontSize:'0.75rem', fontWeight:'700', color:'#64748B', padding:'4px' }}>{d}</div>
             ))}
           </div>
           {/* Calendar grid */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:'2px' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(7, 1fr)', gap:'4px' }}>
             {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
               const isToday = day === today.getDate();
               return (
                 <div key={day} style={{
-                  textAlign:'center', padding:'6px 2px', borderRadius:'8px', fontSize:'0.8rem',
-                  background: isToday ? '#5266F9' : 'transparent',
-                  color: isToday ? 'white' : '#374151',
-                  fontWeight: isToday ? '700' : '400',
-                  cursor:'pointer', transition:'background 0.15s',
+                  textAlign:'center', padding:'10px 4px', borderRadius:'8px', fontSize:'0.85rem',
+                  background: isToday ? 'linear-gradient(135deg,#6366F1,#8B5CF6)' : 'transparent',
+                  color: isToday ? 'white' : '#CBD5E1',
+                  fontWeight: isToday ? '700' : '500',
+                  boxShadow: isToday ? '0 4px 12px rgba(99,102,241,0.4)' : 'none',
+                  cursor:'pointer', transition:'all 0.15s',
                 }}
-                onMouseEnter={e => { if (!isToday) e.currentTarget.style.background='#EEF0FF'; }}
+                onMouseEnter={e => { if (!isToday) e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}
                 onMouseLeave={e => { if (!isToday) e.currentTarget.style.background='transparent'; }}>
                   {day}
                 </div>
               );
             })}
           </div>
-          <div style={{ marginTop:'1.5rem', padding:'1rem', background:'#F8FAFC', borderRadius:'10px', border:'1px solid #F1F5F9' }}>
-            <p style={{ margin:0, color:'#64748B', fontSize:'0.85rem', textAlign:'center' }}>
-              📅 Full calendar integration coming soon!<br/>
-              <span style={{ fontSize:'0.78rem', color:'#94A3B8' }}>Task deadlines will appear here.</span>
+          <div style={{ marginTop:'2rem', padding:'1.5rem', background:'rgba(255,255,255,0.03)', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.08)' }}>
+            <p style={{ margin:0, color:'#94A3B8', fontSize:'0.9rem', textAlign:'center', lineHeight:'1.5' }}>
+              <Calendar size={24} color="#64748B" style={{marginBottom:'0.5rem'}}<br/>
+              Full calendar integration coming soon!<br/>
+              <span style={{ fontSize:'0.8rem', color:'#64748B' }}>Task deadlines will appear here.</span>
             </p>
           </div>
         </PanelOverlay>
