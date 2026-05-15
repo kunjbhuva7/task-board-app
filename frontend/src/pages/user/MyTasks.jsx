@@ -62,6 +62,7 @@ const MyTasks = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [collapsed, setCollapsed]   = useState({});
   const [dropdown, setDropdown]     = useState(null);
+  const [dropdownPos, setDropdownPos] = useState({top:0, right:0});
   const [activeTab, setActiveTab]   = useState('list');
   const [dragTask, setDragTask]     = useState(null);
   const [search, setSearch]         = useState('');
@@ -264,7 +265,7 @@ const MyTasks = () => {
                   if (gTasks.length === 0 && group.id !== 'todo' && group.id !== 'in_progress') return null;
                   const isCol = collapsed[group.id];
                   return (
-                    <div key={group.id} style={{ background:'rgba(0,0,0,0.02)', backdropFilter:'blur(20px)', borderRadius:'16px', border:'1px solid rgba(0,0,0,0.08)', overflow:'hidden', boxShadow:'0 4px 20px rgba(0,0,0,0.3)' }}>
+                    <div key={group.id} style={{ background:'rgba(255,255,255,0.5)', backdropFilter:'blur(20px)', borderRadius:'16px', border:'1px solid rgba(99,102,241,0.1)', boxShadow:'0 4px 16px rgba(0,0,0,0.06)' }}>
                       {/* Group header */}
                       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0.8rem 1.1rem', background:'rgba(255,255,255,0.7)', borderBottom: isCol?'none':'1px solid rgba(0,0,0,0.08)' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'0.6rem', cursor:'pointer' }} onClick={() => setCollapsed(p => ({...p,[group.id]:!p[group.id]}))}>
@@ -327,41 +328,15 @@ const MyTasks = () => {
                                     </td>
                                     <td style={{ padding:'0.8rem 0.9rem', textAlign:'right', position:'relative' }}>
                                       <button style={{ background:'transparent', border:'none', cursor:'pointer', color:'#64748B', display:'flex', padding:'3px', borderRadius:'6px' }}
-                                        onClick={e => { e.stopPropagation(); setDropdown(dropdown===task.id?null:task.id); }}>
+                                        onClick={e => {
+                                          e.stopPropagation();
+                                          if (dropdown === task.id) { setDropdown(null); return; }
+                                          const rect = e.currentTarget.getBoundingClientRect();
+                                          setDropdownPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+                                          setDropdown(task.id);
+                                        }}>
                                         <MoreHorizontal size={16}/>
                                       </button>
-                                      {dropdown === task.id && (
-                                        <div style={{ position:'absolute', right:28, top:8, background:'rgba(15,23,42,0.95)', backdropFilter:'blur(16px)', border:'1px solid rgba(0,0,0,0.08)', borderRadius:'12px', boxShadow:'0 12px 32px rgba(0,0,0,0.5)', zIndex:99, width:165, textAlign:'left', padding:'0.4rem 0', animation:'fadeIn 0.15s ease' }}>
-                                          <div style={{ padding:'0.35rem 0.9rem', fontSize:'0.68rem', fontWeight:'800', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
-                                          {GROUPS.map(g => (
-                                            <div key={g.id} onClick={() => changeStatus(task.id, g.id)}
-                                              style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', background:task.status===g.id?'rgba(129,140,248,0.15)':'transparent', color:task.status===g.id?'#818CF8':'#1E293B', fontWeight:task.status===g.id?'700':'400' }}
-                                              onMouseEnter={e => { if(task.status!==g.id) e.currentTarget.style.background='rgba(0,0,0,0.04)'; }}
-                                              onMouseLeave={e => { if(task.status!==g.id) e.currentTarget.style.background='transparent'; }}>
-                                              {g.label}
-                                            </div>
-                                          ))}
-                                          {canEditTask && (
-                                            <>
-                                              <div style={{ height:1, background:'rgba(0,0,0,0.08)', margin:'0.35rem 0' }}/>
-                                              <div onClick={() => { setDropdown(null); setEditingTask(task); setShowModal(true); }}
-                                                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#1E293B' }}
-                                                onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.04)'}
-                                                onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                                                Edit Task
-                                              </div>
-                                            </>
-                                          )}
-                                          {canDeleteTask && (
-                                            <div onClick={() => { setDropdown(null); deleteTask(task.id); }}
-                                              style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#EF4444' }}
-                                              onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
-                                              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                                              🗑️ Delete Task
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
                                     </td>
                                   </tr>
                                 );
@@ -383,6 +358,44 @@ const MyTasks = () => {
           </>
         )}
       </div>
+
+      {/* Fixed dropdown — rendered outside clipped containers */}
+      {dropdown && (() => {
+        const dt = tasks.find(t => t.id === dropdown);
+        if (!dt) return null;
+        return (
+          <div style={{ position:'fixed', top: dropdownPos.top, right: dropdownPos.right, zIndex:9999, background:'rgba(255,255,255,0.97)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,0,0,0.1)', borderRadius:'12px', boxShadow:'0 12px 36px rgba(0,0,0,0.15)', width:170, padding:'0.4rem 0', animation:'fadeIn 0.15s ease' }}>
+            <div style={{ padding:'0.35rem 0.9rem', fontSize:'0.68rem', fontWeight:'800', color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.05em' }}>Change Status</div>
+            {GROUPS.map(g => (
+              <div key={g.id} onClick={() => changeStatus(dt.id, g.id)}
+                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', background:dt.status===g.id?'rgba(99,102,241,0.08)':'transparent', color:dt.status===g.id?'#6366F1':'#1E293B', fontWeight:dt.status===g.id?'700':'500' }}
+                onMouseEnter={e => { if(dt.status!==g.id) e.currentTarget.style.background='rgba(0,0,0,0.04)'; }}
+                onMouseLeave={e => { if(dt.status!==g.id) e.currentTarget.style.background='transparent'; }}>
+                {g.label}
+              </div>
+            ))}
+            {canEditTask && (
+              <>
+                <div style={{ height:1, background:'rgba(0,0,0,0.07)', margin:'0.35rem 0' }}/>
+                <div onClick={() => { setDropdown(null); setEditingTask(dt); setShowModal(true); }}
+                  style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#1E293B' }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.04)'}
+                  onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                  ✏️ Edit Task
+                </div>
+              </>
+            )}
+            {canDeleteTask && (
+              <div onClick={() => { setDropdown(null); deleteTask(dt.id); }}
+                style={{ padding:'0.45rem 0.9rem', cursor:'pointer', fontSize:'0.85rem', color:'#EF4444' }}
+                onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
+                onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                🗑️ Delete Task
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {showModal && (
         <TaskModal task={editingTask} users={users}

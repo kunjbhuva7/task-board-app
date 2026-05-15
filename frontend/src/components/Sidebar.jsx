@@ -1,23 +1,25 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronRight, Clock, CheckCircle } from 'lucide-react';
+import api from '../api/axios';
 
 const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
   <div
     style={{ position:'fixed', inset:0, zIndex:200, display:'flex' }}
     onClick={e => e.target === e.currentTarget && onClose()}>
     {/* Backdrop */}
-    <div style={{ position:'absolute', inset:0, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(2px)' }} onClick={onClose} />
+    <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.15)', backdropFilter:'blur(2px)' }} onClick={onClose} />
     {/* Panel */}
     <div style={{
-      position:'absolute', left:'240px', top:0, height:'100%', width:'420px',
-      background:'rgba(255,255,255,0.95)', borderRight:'1px solid rgba(0,0,0,0.08)',
-      boxShadow:'4px 0 24px rgba(0,0,0,0.1)',
-      display:'flex', flexDirection:'column', animation:'slideInLeft 0.2s ease'
+      position:'absolute', left:'240px', top:0, height:'100%', width:'400px',
+      background:'rgba(255,255,255,0.97)', borderRight:'1px solid rgba(0,0,0,0.08)',
+      boxShadow:'4px 0 32px rgba(0,0,0,0.12)',
+      display:'flex', flexDirection:'column', animation:'slideInLeft 0.2s ease',
+      zIndex:201
     }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem', borderBottom:'1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem', borderBottom:'1px solid rgba(0,0,0,0.06)', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
           <Icon size={20} color="#6366F1" />
           <h3 style={{ margin:0, fontWeight:'700', color:'#1E293B', fontSize:'1rem' }}>{title}</h3>
@@ -40,15 +42,34 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [openPanel, setOpenPanel] = useState(null); // 'notification' | 'calendar' | 'search'
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [taskDueDates, setTaskDueDates] = useState([]);
+
+  useEffect(() => {
+    // Fetch real notifications from activity log
+    api.get('/activity').then(res => {
+      const acts = res.data.slice(0, 15).map((a, i) => ({
+        id: a.id,
+        type: a.target_type,
+        message: `${a.user_name || 'System'} — ${a.action}${a.details ? ': ' + a.details : ''}`,
+        time: new Date(a.created_at).toLocaleString(),
+        read: i > 2,
+      }));
+      setNotifications(acts);
+    }).catch(() => {});
+
+    // Fetch tasks for calendar due dates
+    api.get('/tasks').then(res => {
+      const dates = (res.data || []).filter(t => t.due_date).map(t => ({
+        date: t.due_date?.slice(0,10),
+        title: t.title,
+        status: t.status,
+      }));
+      setTaskDueDates(dates);
+    }).catch(() => {});
+  }, []);
 
   const handleLogout = () => { logout(); navigate('/login'); };
-
-  // Sample notifications (would be real data from API in future)
-  const notifications = [
-    { id:1, type:'task', message:'New task "Design Homepage" was assigned to you', time:'2 min ago', read:false },
-    { id:2, type:'task', message:'Task "API Integration" moved to Done', time:'1 hour ago', read:false },
-    { id:3, type:'system', message:'Welcome to Craftboard! Your account is ready.', time:'2 days ago', read:true },
-  ];
 
   // Today's date info for calendar
   const today = new Date();
@@ -191,6 +212,8 @@ const Sidebar = () => {
             {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
               const isToday = day === today.getDate();
+              const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+              const hasTasks = taskDueDates.some(t => t.date === dateStr);
               return (
                 <div key={day} style={{
                   textAlign:'center', padding:'10px 4px', borderRadius:'8px', fontSize:'0.85rem',
@@ -198,11 +221,12 @@ const Sidebar = () => {
                   color: isToday ? 'white' : '#475569',
                   fontWeight: isToday ? '700' : '500',
                   boxShadow: isToday ? '0 4px 12px rgba(99,102,241,0.4)' : 'none',
-                  cursor:'pointer', transition:'all 0.15s',
+                  cursor:'pointer', transition:'all 0.15s', position:'relative',
                 }}
-                onMouseEnter={e => { if (!isToday) e.currentTarget.style.background='rgba(0,0,0,0.04)'; }}
+                onMouseEnter={e => { if (!isToday) e.currentTarget.style.background='rgba(99,102,241,0.08)'; }}
                 onMouseLeave={e => { if (!isToday) e.currentTarget.style.background='transparent'; }}>
                   {day}
+                  {hasTasks && <div style={{ position:'absolute', bottom:'3px', left:'50%', transform:'translateX(-50%)', width:'5px', height:'5px', borderRadius:'50%', background: isToday ? 'white' : '#6366F1' }} />}
                 </div>
               );
             })}

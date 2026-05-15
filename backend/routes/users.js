@@ -77,12 +77,22 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
   try {
+    // Null out task references so we don't violate any constraints
+    db.prepare('UPDATE tasks SET assigned_to = NULL WHERE assigned_to = ?').run(id);
+    db.prepare('UPDATE tasks SET created_by = NULL WHERE created_by = ?').run(id);
+    // Delete permissions first (FK reference)
     db.prepare('DELETE FROM permissions WHERE user_id = ?').run(id);
-    db.prepare('DELETE FROM users WHERE id = ?').run(id);
-    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Delete User', 'user', id, `Deleted user ${id}`);
+    // Delete the user
+    const result = db.prepare('DELETE FROM users WHERE id = ?').run(id);
+    if (result.changes === 0) return res.status(404).json({ message: 'User not found' });
+    // Log activity (best-effort, don't let it block the response)
+    try {
+      db.prepare('INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)').run(req.user.id, 'Delete User', 'user', id, `Deleted user ${id}`);
+    } catch (logErr) { console.error('Activity log error:', logErr.message); }
     res.json({ message: 'User deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Delete user error:', error.message);
+    res.status(500).json({ message: 'Server error: ' + error.message });
   }
 });
 

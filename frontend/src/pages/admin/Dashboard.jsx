@@ -44,22 +44,22 @@ const Dashboard = () => {
         <h2>Admin Dashboard</h2>
       </div>
 
-      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'1.5rem', marginBottom:'2rem'}}>
-        <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'rgba(99,102,241,0.15)', padding:'1rem', borderRadius:'10px', color:'#6366F1'}}><Users size={22}/></div>
-          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Total Users</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.totalUsers || 0}</div></div>
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:'1.25rem', marginBottom:'2rem'}}>
+        <div style={{display:'flex', alignItems:'center', gap:'1rem', background:'linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.05))', border:'1px solid rgba(99,102,241,0.15)', borderRadius:'16px', padding:'1.25rem', backdropFilter:'blur(12px)'}}>
+          <div style={{background:'rgba(99,102,241,0.15)', padding:'0.85rem', borderRadius:'12px', color:'#6366F1', flexShrink:0}}><Users size={22}/></div>
+          <div><div style={{fontSize:'0.72rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Total Users</div><div style={{fontSize:'1.8rem', fontWeight:'800', color:'#4F46E5', lineHeight:1.1}}>{stats?.totalUsers || 0}</div></div>
         </div>
-        <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'rgba(59,130,246,0.15)', padding:'1rem', borderRadius:'10px', color:'#3B82F6'}}><Clock size={22}/></div>
-          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Active Tasks</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.activeTasks || 0}</div></div>
+        <div style={{display:'flex', alignItems:'center', gap:'1rem', background:'linear-gradient(135deg,rgba(59,130,246,0.08),rgba(96,165,250,0.05))', border:'1px solid rgba(59,130,246,0.15)', borderRadius:'16px', padding:'1.25rem', backdropFilter:'blur(12px)'}}>
+          <div style={{background:'rgba(59,130,246,0.15)', padding:'0.85rem', borderRadius:'12px', color:'#3B82F6', flexShrink:0}}><Clock size={22}/></div>
+          <div><div style={{fontSize:'0.72rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Active Tasks</div><div style={{fontSize:'1.8rem', fontWeight:'800', color:'#2563EB', lineHeight:1.1}}>{stats?.activeTasks || 0}</div></div>
         </div>
-        <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'rgba(16,185,129,0.15)', padding:'1rem', borderRadius:'10px', color:'#10B981'}}><CheckCircle size={22}/></div>
-          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Completed This Week</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.tasksCompletedThisWeek || 0}</div></div>
+        <div style={{display:'flex', alignItems:'center', gap:'1rem', background:'linear-gradient(135deg,rgba(16,185,129,0.08),rgba(52,211,153,0.05))', border:'1px solid rgba(16,185,129,0.15)', borderRadius:'16px', padding:'1.25rem', backdropFilter:'blur(12px)'}}>
+          <div style={{background:'rgba(16,185,129,0.15)', padding:'0.85rem', borderRadius:'12px', color:'#10B981', flexShrink:0}}><CheckCircle size={22}/></div>
+          <div><div style={{fontSize:'0.72rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Completed This Week</div><div style={{fontSize:'1.8rem', fontWeight:'800', color:'#059669', lineHeight:1.1}}>{stats?.tasksCompletedThisWeek || 0}</div></div>
         </div>
-        <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'rgba(245,158,11,0.15)', padding:'1rem', borderRadius:'10px', color:'#F59E0B'}}><Send size={22}/></div>
-          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Pending Invites</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.pendingInvites || 0}</div></div>
+        <div style={{display:'flex', alignItems:'center', gap:'1rem', background:'linear-gradient(135deg,rgba(245,158,11,0.08),rgba(251,191,36,0.05))', border:'1px solid rgba(245,158,11,0.15)', borderRadius:'16px', padding:'1.25rem', backdropFilter:'blur(12px)'}}>
+          <div style={{background:'rgba(245,158,11,0.15)', padding:'0.85rem', borderRadius:'12px', color:'#F59E0B', flexShrink:0}}><Send size={22}/></div>
+          <div><div style={{fontSize:'0.72rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Pending Invites</div><div style={{fontSize:'1.8rem', fontWeight:'800', color:'#D97706', lineHeight:1.1}}>{stats?.pendingInvites || 0}</div></div>
         </div>
       </div>
 
