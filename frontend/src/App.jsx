@@ -22,28 +22,24 @@ const ProtectedRoute = ({ children, requireAdmin }) => {
   const { user, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}><div className="spinner spinner-primary" style={{width: 40, height: 40}}></div></div>;
+    return (
+      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', height:'100vh' }}>
+        <div style={{ textAlign:'center' }}>
+          <div className="spinner" style={{ width:40, height:40, margin:'0 auto', borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white' }}></div>
+          <p style={{ color:'rgba(255,255,255,0.8)', marginTop:'1rem', fontWeight:'600', fontSize:'0.9rem' }}>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) return <Navigate to="/login" />;
-
-  if (requireAdmin && user.role !== 'admin') {
-    return <Navigate to="/user/dashboard" />;
-  }
+  if (requireAdmin && user.role !== 'admin') return <Navigate to="/user/dashboard" />;
 
   return (
     <div className="app-container">
       <Sidebar />
       <div className="main-content">
-        <div className="topbar">
-          <div style={{display:'flex', gap:'1rem', alignItems:'center', background: 'var(--bg-main)', padding: '0.5rem 1rem', borderRadius: '999px'}}>
-            <div style={{width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'}}>
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <strong style={{fontSize: '0.9rem'}}>{user.name}</strong>
-          </div>
-        </div>
-        <div className="page-content">
+        <div className="page-content" style={{ height:'100%', display:'flex', flexDirection:'column' }}>
           {children}
         </div>
       </div>

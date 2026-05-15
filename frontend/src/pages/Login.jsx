@@ -22,7 +22,7 @@ const Login = () => {
     try {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.token, res.data.user);
-      toast.success('Logged in successfully');
+      toast.success('Welcome back!');
       if (res.data.user.role === 'admin') navigate('/admin/dashboard');
       else navigate('/user/dashboard');
     } catch (error) {
@@ -33,137 +33,118 @@ const Login = () => {
   };
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      minHeight: '100vh', 
-      background: '#F9FAFB', 
-      fontFamily: "'Inter', sans-serif",
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '1.5rem'
+    <div style={{
+      display: 'flex', minHeight: '100vh',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '1.5rem',
+      fontFamily: "'Inter', sans-serif"
     }}>
-      <div style={{ 
-        width: '100%', 
-        maxWidth: '520px', 
-        padding: '3.5rem 3rem', 
-        background: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        border: '1px solid #E5E7EB'
+      {/* Glass Card */}
+      <div style={{
+        width: '100%', maxWidth: '440px',
+        background: 'rgba(255,255,255,0.18)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderRadius: '24px',
+        border: '1px solid rgba(255,255,255,0.35)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
+        padding: '3rem 2.5rem',
       }}>
-        {/* Logo Section */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
-          <div style={{ 
-            width: '32px', 
-            height: '32px', 
-            background: '#2563EB', 
-            borderRadius: '6px', 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            color: 'white',
-            fontWeight: 'bold',
-            fontSize: '18px'
-          }}>T</div>
-          <span style={{ fontSize: '24px', fontWeight: '800', color: '#111827' }}>TaskBoard</span>
+        {/* Logo */}
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginBottom:'2rem' }}>
+          <div style={{
+            width:'48px', height:'48px',
+            background: 'white',
+            borderRadius:'14px',
+            display:'flex', justifyContent:'center', alignItems:'center',
+            fontWeight:'900', fontSize:'22px', color:'#6366F1',
+            boxShadow:'0 4px 16px rgba(0,0,0,0.15)'
+          }}>C</div>
+          <span style={{ fontSize:'1.5rem', fontWeight:'800', color:'white', letterSpacing:'-0.5px' }}>Craftboard</span>
         </div>
 
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ fontSize: '30px', fontWeight: '800', color: '#111827', marginBottom: '0.75rem', letterSpacing: '-0.025em' }}>Sign in to your account</h2>
-          <p style={{ color: '#4B5563', fontSize: '16px' }}>
-            Enter your details to manage your tasks
+        <div style={{ textAlign:'center', marginBottom:'2rem' }}>
+          <h2 style={{ fontSize:'1.6rem', fontWeight:'800', color:'white', margin:'0 0 0.4rem', letterSpacing:'-0.5px' }}>
+            Welcome back
+          </h2>
+          <p style={{ color:'rgba(255,255,255,0.7)', fontSize:'0.9rem', margin:0 }}>
+            Sign in to manage your tasks
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1.1rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-              Email address<span style={{ color: '#EF4444' }}>*</span>
+            <label style={{ display:'block', fontSize:'0.82rem', fontWeight:'700', color:'rgba(255,255,255,0.85)', marginBottom:'6px', letterSpacing:'0.02em' }}>
+              Email Address
             </label>
-            <input 
-              type="email" 
-              required 
-              style={{ 
-                width: '100%', 
-                height: '46px', 
-                padding: '0 14px', 
-                borderRadius: '8px', 
-                border: '1px solid #D1D5DB',
-                outline: 'none',
-                fontSize: '16px',
-                transition: 'all 0.2s',
-                background: '#fff'
-              }} 
-              className="login-input-field"
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
-            />
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-              Password<span style={{ color: '#EF4444' }}>*</span>
-            </label>
-            <input 
-              type="password" 
-              required 
-              style={{ 
-                width: '100%', 
-                height: '46px', 
-                padding: '0 14px', 
-                borderRadius: '8px', 
-                border: '1px solid #D1D5DB',
-                outline: 'none',
-                fontSize: '16px',
-                transition: 'all 0.2s',
-                background: '#fff'
-              }} 
-              className="login-input-field"
-              value={password} 
-              onChange={e => setPassword(e.target.value)} 
+            <input
+              type="email" required
+              placeholder="admin@company.com"
+              value={email} onChange={e => setEmail(e.target.value)}
+              style={{
+                width:'100%', height:'46px', padding:'0 14px',
+                borderRadius:'12px', outline:'none', fontSize:'0.9rem',
+                background:'rgba(255,255,255,0.2)',
+                border:'1px solid rgba(255,255,255,0.35)',
+                color:'white', backdropFilter:'blur(8px)',
+                transition:'all 0.2s',
+              }}
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <input type="checkbox" id="remember" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-            <label htmlFor="remember" style={{ fontSize: '14px', color: '#374151', cursor: 'pointer', fontWeight: '500' }}>Remember me</label>
+          <div>
+            <label style={{ display:'block', fontSize:'0.82rem', fontWeight:'700', color:'rgba(255,255,255,0.85)', marginBottom:'6px', letterSpacing:'0.02em' }}>
+              Password
+            </label>
+            <input
+              type="password" required
+              placeholder="••••••••"
+              value={password} onChange={e => setPassword(e.target.value)}
+              style={{
+                width:'100%', height:'46px', padding:'0 14px',
+                borderRadius:'12px', outline:'none', fontSize:'0.9rem',
+                background:'rgba(255,255,255,0.2)',
+                border:'1px solid rgba(255,255,255,0.35)',
+                color:'white', backdropFilter:'blur(8px)',
+                transition:'all 0.2s',
+              }}
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}
+            />
           </div>
 
-          <button 
-            type="submit" 
-            style={{ 
-              width: '100%', 
-              height: '48px', 
-              fontSize: '16px', 
-              fontWeight: '600',
-              borderRadius: '8px', 
-              background: '#2563EB',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              transition: 'background 0.2s',
-              marginTop: '0.5rem'
-            }} 
-            disabled={loading}
+          <button
+            type="submit" disabled={loading}
+            style={{
+              width:'100%', height:'48px',
+              fontSize:'0.95rem', fontWeight:'700',
+              borderRadius:'12px',
+              background: loading ? 'rgba(255,255,255,0.5)' : 'white',
+              color:'#6366F1', border:'none', cursor: loading ? 'not-allowed' : 'pointer',
+              display:'flex', justifyContent:'center', alignItems:'center',
+              boxShadow:'0 4px 16px rgba(0,0,0,0.15)',
+              transition:'all 0.2s', marginTop:'0.4rem',
+            }}
+            onMouseEnter={e => { if(!loading) e.currentTarget.style.transform='translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; }}
           >
-            {loading ? <div className="spinner-fast" style={{ borderTopColor: 'white' }}></div> : 'Sign in'}
+            {loading
+              ? <div className="spinner" style={{ borderColor:'rgba(99,102,241,0.3)', borderTopColor:'#6366F1' }}></div>
+              : 'Sign In →'
+            }
           </button>
-
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '14px', color: '#2563EB', cursor: 'pointer', fontWeight: '500' }}>Forgot your password?</span>
-          </div>
         </form>
+
+        <p style={{ textAlign:'center', marginTop:'1.5rem', color:'rgba(255,255,255,0.55)', fontSize:'0.8rem' }}>
+          Admin credentials provided by your manager
+        </p>
       </div>
 
-      <style>{`
-        .login-input-field:focus {
-          border-color: #2563EB !important;
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-      `}</style>
+      {/* Floating orbs for depth */}
+      <div style={{ position:'fixed', top:'15%', right:'20%', width:'300px', height:'300px', borderRadius:'50%', background:'rgba(255,255,255,0.06)', pointerEvents:'none' }}/>
+      <div style={{ position:'fixed', bottom:'20%', left:'15%', width:'200px', height:'200px', borderRadius:'50%', background:'rgba(255,255,255,0.05)', pointerEvents:'none' }}/>
     </div>
   );
 };

@@ -8,96 +8,105 @@ const SetPassword = () => {
   const token = searchParams.get('token');
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail]   = useState('');
+  const [name, setName]     = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [confirm, setConfirm]   = useState('');
+  const [loading, setLoading]   = useState(false);
   const [verifying, setVerifying] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError]   = useState('');
 
   useEffect(() => {
-    if (!token) {
-      setError('Invalid link');
-      setVerifying(false);
-      return;
-    }
-
-    const verifyToken = async () => {
-      try {
-        const res = await api.get(`/auth/verify-token/${token}`);
-        setEmail(res.data.email);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Invalid or expired token');
-      } finally {
-        setVerifying(false);
-      }
-    };
-    verifyToken();
+    if (!token) { setError('Invalid invite link.'); setVerifying(false); return; }
+    api.get(`/auth/verify-token/${token}`)
+      .then(r => setEmail(r.data.email))
+      .catch(err => setError(err.response?.data?.message || 'Invalid or expired link'))
+      .finally(() => setVerifying(false));
   }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
+    if (password !== confirm) { toast.error('Passwords do not match'); return; }
     setLoading(true);
     try {
-      await api.post('/auth/set-password', { token, password, name });
-      toast.success('Account created successfully. You can now login.');
+      await api.post('/auth/set-password', { token, name, password });
+      toast.success('Account created! You can now log in.');
       navigate('/login');
     } catch (err) {
-      if (err.response?.data?.errors) {
-        err.response.data.errors.forEach(errItem => toast.error(errItem.msg));
-      } else {
-        toast.error(err.response?.data?.message || 'Failed to set password');
-      }
-    } finally {
-      setLoading(false);
-    }
+      if (err.response?.data?.errors) err.response.data.errors.forEach(e => toast.error(e.msg));
+      else toast.error(err.response?.data?.message || 'Something went wrong');
+    } finally { setLoading(false); }
   };
 
-  if (verifying) {
-    return <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}><div className="spinner spinner-primary"></div></div>;
-  }
+  const inp = {
+    width:'100%', height:'46px', padding:'0 14px', borderRadius:'12px',
+    outline:'none', fontSize:'0.9rem',
+    background:'rgba(255,255,255,0.2)', border:'1px solid rgba(255,255,255,0.35)',
+    color:'white', transition:'all 0.2s',
+  };
+  const lbl = { display:'block', fontSize:'0.82rem', fontWeight:'700', color:'rgba(255,255,255,0.85)', marginBottom:'6px' };
 
-  if (error) {
-    return (
-      <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh', background:'var(--bg-main)'}}>
-        <div className="card" style={{textAlign:'center', padding:'2rem'}}>
-          <h3 style={{color:'var(--danger)', marginBottom:'1rem'}}>Error</h3>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={() => navigate('/login')} style={{marginTop:'1rem'}}>Go to Login</button>
-        </div>
+  if (verifying) return (
+    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh' }}>
+      <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white' }}/>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh' }}>
+      <div style={{ background:'rgba(255,255,255,0.18)', backdropFilter:'blur(24px)', borderRadius:'20px', border:'1px solid rgba(255,255,255,0.3)', padding:'2.5rem', textAlign:'center', maxWidth:'380px' }}>
+        <div style={{ fontSize:'2.5rem', marginBottom:'1rem' }}>⚠️</div>
+        <h3 style={{ color:'white', marginBottom:'0.75rem' }}>Link Invalid</h3>
+        <p style={{ color:'rgba(255,255,255,0.7)', fontSize:'0.875rem', marginBottom:'1.5rem' }}>{error}</p>
+        <button onClick={() => navigate('/login')} className="btn" style={{ background:'white', color:'#6366F1', fontWeight:'700', padding:'0.6rem 1.5rem' }}>
+          Go to Login
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh', background:'var(--bg-main)'}}>
-      <div className="card" style={{width:'100%', maxWidth:'400px'}}>
-        <h2 style={{textAlign:'center', marginBottom:'1.5rem'}}>Setup Your Account</h2>
-        <form onSubmit={handleSubmit}>
-          <div style={{marginBottom:'1rem'}}>
-            <label className="label">Email</label>
-            <input type="email" readOnly className="input" value={email} style={{background:'#F1F5F9', color:'#94A3B8'}} />
+    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', padding:'1.5rem' }}>
+      <div style={{ width:'100%', maxWidth:'440px', background:'rgba(255,255,255,0.18)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderRadius:'24px', border:'1px solid rgba(255,255,255,0.35)', boxShadow:'0 24px 64px rgba(0,0,0,0.2)', padding:'3rem 2.5rem' }}>
+        {/* Logo */}
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'10px', marginBottom:'1.5rem' }}>
+          <div style={{ width:'44px', height:'44px', background:'white', borderRadius:'12px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'900', fontSize:'20px', color:'#6366F1', boxShadow:'0 4px 16px rgba(0,0,0,0.15)' }}>C</div>
+          <span style={{ fontSize:'1.4rem', fontWeight:'800', color:'white' }}>Craftboard</span>
+        </div>
+
+        <div style={{ textAlign:'center', marginBottom:'2rem' }}>
+          <h2 style={{ fontSize:'1.5rem', fontWeight:'800', color:'white', margin:'0 0 0.4rem' }}>Setup Your Account</h2>
+          <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.85rem', margin:0 }}>Set your name and password to get started</p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+          <div>
+            <label style={lbl}>Email</label>
+            <input type="email" readOnly value={email} style={{ ...inp, opacity:0.7, cursor:'not-allowed' }}/>
           </div>
-          <div style={{marginBottom:'1rem'}}>
-            <label className="label">Full Name</label>
-            <input type="text" required className="input" placeholder="e.g. John Doe" value={name} onChange={e=>setName(e.target.value)} />
+          <div>
+            <label style={lbl}>Full Name</label>
+            <input type="text" required placeholder="e.g. John Doe" value={name} onChange={e => setName(e.target.value)} style={inp}
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}/>
           </div>
-          <div style={{marginBottom:'1rem'}}>
-            <label className="label">New Password</label>
-            <input type="password" required className="input" placeholder="Min 8 chars, 1 number, 1 special char" value={password} onChange={e=>setPassword(e.target.value)} />
+          <div>
+            <label style={lbl}>Password</label>
+            <input type="password" required placeholder="Min 8 chars, 1 number, 1 symbol" value={password} onChange={e => setPassword(e.target.value)} style={inp}
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}/>
           </div>
-          <div style={{marginBottom:'1.5rem'}}>
-            <label className="label">Confirm Password</label>
-            <input type="password" required className="input" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
+          <div>
+            <label style={lbl}>Confirm Password</label>
+            <input type="password" required placeholder="Re-enter password" value={confirm} onChange={e => setConfirm(e.target.value)} style={inp}
+              onFocus={e => { e.target.style.background='rgba(255,255,255,0.28)'; e.target.style.borderColor='rgba(255,255,255,0.7)'; }}
+              onBlur={e => { e.target.style.background='rgba(255,255,255,0.2)'; e.target.style.borderColor='rgba(255,255,255,0.35)'; }}/>
           </div>
-          <button type="submit" className="btn btn-primary" style={{width:'100%'}} disabled={loading}>
-            {loading ? <div className="spinner"></div> : 'Complete Setup'}
+
+          <button type="submit" disabled={loading} style={{ width:'100%', height:'48px', fontSize:'0.95rem', fontWeight:'700', borderRadius:'12px', background:'white', color:'#6366F1', border:'none', cursor: loading?'not-allowed':'pointer', display:'flex', justifyContent:'center', alignItems:'center', boxShadow:'0 4px 16px rgba(0,0,0,0.15)', marginTop:'0.4rem', transition:'all 0.2s' }}
+            onMouseEnter={e => { if(!loading) e.currentTarget.style.transform='translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; }}>
+            {loading ? <div className="spinner" style={{ borderColor:'rgba(99,102,241,0.3)', borderTopColor:'#6366F1' }}/> : 'Complete Setup →'}
           </button>
         </form>
       </div>

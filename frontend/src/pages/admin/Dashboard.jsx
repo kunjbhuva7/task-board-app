@@ -39,69 +39,55 @@ const Dashboard = () => {
   }));
 
   return (
-    <div>
+    <div style={{padding: '2rem'}}>
       <div className="page-header">
         <h2>Admin Dashboard</h2>
       </div>
 
       <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'1.5rem', marginBottom:'2rem'}}>
         <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'var(--primary-light)', padding:'1rem', borderRadius:'8px', color:'var(--primary)'}}><Users size={24}/></div>
-          <div>
-            <div className="label">Total Users</div>
-            <div style={{fontSize:'1.5rem', fontWeight:'bold'}}>{stats?.totalUsers || 0}</div>
-          </div>
+          <div style={{background:'rgba(99,102,241,0.15)', padding:'1rem', borderRadius:'10px', color:'#6366F1'}}><Users size={22}/></div>
+          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Total Users</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.totalUsers || 0}</div></div>
         </div>
         <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'#DBEAFE', padding:'1rem', borderRadius:'8px', color:'#1D4ED8'}}><Clock size={24}/></div>
-          <div>
-            <div className="label">Active Tasks</div>
-            <div style={{fontSize:'1.5rem', fontWeight:'bold'}}>{stats?.activeTasks || 0}</div>
-          </div>
+          <div style={{background:'rgba(59,130,246,0.15)', padding:'1rem', borderRadius:'10px', color:'#3B82F6'}}><Clock size={22}/></div>
+          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Active Tasks</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.activeTasks || 0}</div></div>
         </div>
         <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'#DCFCE7', padding:'1rem', borderRadius:'8px', color:'#15803D'}}><CheckCircle size={24}/></div>
-          <div>
-            <div className="label">Completed (Week)</div>
-            <div style={{fontSize:'1.5rem', fontWeight:'bold'}}>{stats?.tasksCompletedThisWeek || 0}</div>
-          </div>
+          <div style={{background:'rgba(16,185,129,0.15)', padding:'1rem', borderRadius:'10px', color:'#10B981'}}><CheckCircle size={22}/></div>
+          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Completed This Week</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.tasksCompletedThisWeek || 0}</div></div>
         </div>
         <div className="card" style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-          <div style={{background:'#FEF3C7', padding:'1rem', borderRadius:'8px', color:'#B45309'}}><Send size={24}/></div>
-          <div>
-            <div className="label">Pending Invites</div>
-            <div style={{fontSize:'1.5rem', fontWeight:'bold'}}>{stats?.pendingInvites || 0}</div>
-          </div>
+          <div style={{background:'rgba(245,158,11,0.15)', padding:'1rem', borderRadius:'10px', color:'#F59E0B'}}><Send size={22}/></div>
+          <div><div style={{fontSize:'0.75rem', fontWeight:'700', color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em'}}>Pending Invites</div><div style={{fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>{stats?.pendingInvites || 0}</div></div>
         </div>
       </div>
 
       <div style={{display:'grid', gridTemplateColumns:'2fr 1fr', gap:'1.5rem'}}>
         <div className="card">
-          <h3 style={{marginBottom:'1rem'}}>Tasks by Status</h3>
-          <div style={{height:'300px'}}>
+          <h3 style={{marginBottom:'1.25rem', color:'#1E293B', fontSize:'1rem'}}>Tasks by Status</h3>
+          <div style={{height:'260px'}}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)"/>
+                <XAxis dataKey="name" style={{fontSize:'0.72rem'}}/>
+                <YAxis style={{fontSize:'0.72rem'}}/>
+                <Tooltip contentStyle={{borderRadius:'10px', border:'1px solid #E2E8F0', boxShadow:'0 8px 24px rgba(0,0,0,0.08)'}}/>
+                <Bar dataKey="count" radius={[6,6,0,0]} fill="#6366F1"/>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-
         <div className="card">
-          <h3 style={{marginBottom:'1rem'}}>Recent Activity</h3>
-          <div style={{display:'flex', flexDirection:'column', gap:'1rem'}}>
+          <h3 style={{marginBottom:'1.25rem', color:'#1E293B', fontSize:'1rem'}}>Recent Activity</h3>
+          <div style={{display:'flex', flexDirection:'column', gap:'0.85rem'}}>
             {stats?.recentActivity?.map(act => (
-              <div key={act.id} style={{borderBottom:'1px solid var(--border)', paddingBottom:'0.5rem'}}>
-                <div style={{fontWeight:'500'}}>{act.user_name || 'System'} <span style={{fontWeight:'normal', color:'var(--text-secondary)'}}>{act.action}</span></div>
-                <div style={{fontSize:'0.875rem', color:'var(--text-muted)'}}>{act.details}</div>
-                <div style={{fontSize:'0.75rem', color:'var(--text-muted)', marginTop:'0.25rem'}}>{new Date(act.created_at).toLocaleString()}</div>
+              <div key={act.id} style={{borderBottom:'1px solid rgba(241,245,249,0.8)', paddingBottom:'0.75rem'}}>
+                <div style={{fontWeight:'600', color:'#1E293B', fontSize:'0.82rem'}}>{act.user_name || 'System'} <span style={{fontWeight:'400', color:'#64748B'}}>{act.action}</span></div>
+                <div style={{fontSize:'0.75rem', color:'#94A3B8', marginTop:'2px'}}>{new Date(act.created_at).toLocaleString()}</div>
               </div>
             ))}
-            {!stats?.recentActivity?.length && <div className="text-muted">No recent activity</div>}
+            {!stats?.recentActivity?.length && <div style={{color:'#94A3B8', fontSize:'0.85rem'}}>No recent activity</div>}
           </div>
         </div>
       </div>
