@@ -178,27 +178,23 @@ const Users = () => {
 
       {showModal && (
         <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && setShowModal(false)}>
-          <div className="modal-content">
-            <h3 style={{marginBottom:'1.5rem'}}>Add New User</h3>
+          <div className="modal-content" style={{maxWidth: '450px', padding: '2.5rem', borderRadius: '16px'}}>
+            <h3 style={{marginBottom:'2rem', fontSize: '1.25rem', color: '#0F172A', fontWeight: '700'}}>Add New User</h3>
             <form onSubmit={handleCreateUser}>
-              <div style={{marginBottom:'1rem'}}>
-                <label className="label">Name</label>
-                <input type="text" required className="input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-              </div>
-              <div style={{marginBottom:'1rem'}}>
-                <label className="label">Email</label>
-                <input type="email" required className="input" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-              </div>
               <div style={{marginBottom:'1.5rem'}}>
-                <label className="label">Role</label>
-                <select className="input" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                <label className="label" style={{marginBottom: '0.5rem', color: '#475569', fontWeight: '600'}}>Email Address</label>
+                <input type="email" required className="input" placeholder="e.g. name@company.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{padding: '0.75rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.95rem'}} />
+              </div>
+              <div style={{marginBottom:'2rem'}}>
+                <label className="label" style={{marginBottom: '0.5rem', color: '#475569', fontWeight: '600'}}>Role</label>
+                <select className="input" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} style={{padding: '0.75rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.95rem'}}>
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
               <div style={{display:'flex', justifyContent:'flex-end', gap:'1rem'}}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                <button type="button" className="btn" onClick={() => setShowModal(false)} style={{background: 'white', color: '#475569', border: '1px solid #E2E8F0', padding: '0.6rem 1.2rem', fontWeight: '600'}}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={submitting} style={{background: '#0F172A', color: 'white', padding: '0.6rem 1.2rem', fontWeight: '600', border: 'none'}}>
                   {submitting ? <div className="spinner"></div> : 'Create User'}
                 </button>
               </div>

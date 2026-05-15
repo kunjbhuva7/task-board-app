@@ -55,6 +55,7 @@ router.get('/verify-token/:token', (req, res) => {
 // POST /api/auth/set-password
 router.post('/set-password', [
   body('token').notEmpty(),
+  body('name').isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
     .matches(/\d/).withMessage('Must contain a number')
     .matches(/[A-Z]/).withMessage('Must contain an uppercase letter')
@@ -63,7 +64,7 @@ router.post('/set-password', [
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { token, password } = req.body;
+  const { token, password, name } = req.body;
 
   try {
     const user = db.prepare('SELECT * FROM users WHERE invite_token = ?').get(token);
@@ -73,10 +74,10 @@ router.post('/set-password', [
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
 
-    const updateStmt = db.prepare('UPDATE users SET password_hash = ?, invite_token = NULL, invite_token_expiry = NULL WHERE id = ?');
-    updateStmt.run(hash, user.id);
+    const updateStmt = db.prepare('UPDATE users SET name = ?, password_hash = ?, invite_token = NULL, invite_token_expiry = NULL WHERE id = ?');
+    updateStmt.run(name, hash, user.id);
 
-    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(user.id, 'Set Password', 'user', user.id, 'User set their password via invite');
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(user.id, 'Set Password', 'user', user.id, 'User set their name and password via invite');
 
     res.json({ message: 'Password set successfully' });
   } catch (error) {

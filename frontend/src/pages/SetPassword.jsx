@@ -9,6 +9,7 @@ const SetPassword = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,8 +45,8 @@ const SetPassword = () => {
 
     setLoading(true);
     try {
-      await api.post('/auth/set-password', { token, password });
-      toast.success('Password set successfully. You can now login.');
+      await api.post('/auth/set-password', { token, password, name });
+      toast.success('Account created successfully. You can now login.');
       navigate('/login');
     } catch (err) {
       if (err.response?.data?.errors) {
@@ -77,23 +78,26 @@ const SetPassword = () => {
   return (
     <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh', background:'var(--bg-main)'}}>
       <div className="card" style={{width:'100%', maxWidth:'400px'}}>
-        <h2 style={{textAlign:'center', marginBottom:'1.5rem'}}>Set Your Password</h2>
+        <h2 style={{textAlign:'center', marginBottom:'1.5rem'}}>Setup Your Account</h2>
         <form onSubmit={handleSubmit}>
           <div style={{marginBottom:'1rem'}}>
             <label className="label">Email</label>
-            <input type="email" readOnly className="input" value={email} style={{background:'#F1F5F9'}} />
+            <input type="email" readOnly className="input" value={email} style={{background:'#F1F5F9', color:'#94A3B8'}} />
+          </div>
+          <div style={{marginBottom:'1rem'}}>
+            <label className="label">Full Name</label>
+            <input type="text" required className="input" placeholder="e.g. John Doe" value={name} onChange={e=>setName(e.target.value)} />
           </div>
           <div style={{marginBottom:'1rem'}}>
             <label className="label">New Password</label>
-            <input type="password" required className="input" value={password} onChange={e=>setPassword(e.target.value)} />
-
+            <input type="password" required className="input" placeholder="Min 8 chars, 1 number, 1 special char" value={password} onChange={e=>setPassword(e.target.value)} />
           </div>
           <div style={{marginBottom:'1.5rem'}}>
             <label className="label">Confirm Password</label>
             <input type="password" required className="input" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} />
           </div>
           <button type="submit" className="btn btn-primary" style={{width:'100%'}} disabled={loading}>
-            {loading ? <div className="spinner"></div> : 'Set Password'}
+            {loading ? <div className="spinner"></div> : 'Complete Setup'}
           </button>
         </form>
       </div>

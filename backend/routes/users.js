@@ -17,10 +17,10 @@ router.get('/', (req, res) => {
 
 // POST /api/users - create new user + send invite
 router.post('/', async (req, res) => {
-  const { name, email, role } = req.body;
+  const { email, role } = req.body;
 
-  if (!name || name.length < 2) return res.status(400).json({ message: 'Name is required (min 2 chars)' });
   if (!email || !/\S+@\S+\.\S+/.test(email)) return res.status(400).json({ message: 'Valid email is required' });
+  const name = email.split('@')[0]; // Temporary name until they set it
 
   const inviteToken = uuidv4();
   const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();

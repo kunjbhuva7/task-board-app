@@ -51,7 +51,7 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Serve frontend in production (for Railway/Hosting)
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
-app.get('{*path}', (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
@@ -60,6 +60,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
