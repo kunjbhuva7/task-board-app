@@ -139,8 +139,10 @@ const MyTasks = () => {
       <div style={hdrStyle}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.1rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
-            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'white', boxShadow:'0 4px 12px rgba(255, 126, 95, 0.4)' }}>A</div>
-            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B', margin:0, letterSpacing:'-0.3px' }}>Atome</h1>
+            <img src="/logo.png" alt="Logo" style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+            <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', margin:0, letterSpacing:'-0.3px' }}>
+              Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
+            </h1>
           </div>
         </div>
 

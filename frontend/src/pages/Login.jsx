@@ -48,15 +48,10 @@ const Login = () => {
       }}>
         {/* Logo */}
         <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.6rem', marginBottom:'2rem' }}>
-          <div style={{
-            width:'40px', height:'40px',
-            background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)',
-            borderRadius:'12px',
-            display:'flex', justifyContent:'center', alignItems:'center',
-            fontWeight:'800', fontSize:'1.2rem', color:'white',
-            boxShadow:'0 4px 14px rgba(255, 126, 95, 0.35)'
-          }}>A</div>
-          <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>Atome</span>
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+          <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>
+            Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
+          </span>
         </div>
 
         <div style={{ textAlign:'center', marginBottom:'2rem' }}>

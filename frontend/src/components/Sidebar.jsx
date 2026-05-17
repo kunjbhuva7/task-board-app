@@ -144,8 +144,10 @@ const Sidebar = () => {
       <div className="sidebar">
         <div className="sidebar-header" style={{ padding:'1.5rem', borderBottom:'1px solid rgba(0,0,0,0.05)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
-            <div style={{ width:'38px', height:'38px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', borderRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'800', fontSize:'1.1rem', color:'white', boxShadow:'0 4px 12px rgba(255, 126, 95, 0.4)' }}>A</div>
-            <div style={{ fontSize:'1.4rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.3px', lineHeight:1 }}>Atome</div>
+            <img src="/logo.png" alt="Logo" style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+            <div style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', letterSpacing:'-0.3px', lineHeight:1 }}>
+              Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
+            </div>
           </div>
         </div>
 
