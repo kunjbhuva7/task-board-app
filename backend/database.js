@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'database.db');
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'database.db');
 console.log('Connecting to DB at:', dbPath);
 const db = new Database(dbPath);
 console.log('DB connected.');

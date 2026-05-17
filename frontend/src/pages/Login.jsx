@@ -48,7 +48,7 @@ const Login = () => {
       }}>
         {/* Logo */}
         <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.6rem', marginBottom:'2rem' }}>
-          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain', mixBlendMode: 'multiply' }} />
           <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>
             Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
           </span>
