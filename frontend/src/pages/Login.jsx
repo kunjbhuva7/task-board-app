@@ -47,14 +47,14 @@ const Login = () => {
         padding: '3rem 2.5rem',
       }}>
         {/* Logo */}
-        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.6rem', marginBottom:'2rem' }}>
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.1rem', marginBottom:'1.2rem' }}>
           <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
           <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>
             Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
           </span>
         </div>
 
-        <div style={{ textAlign:'center', marginBottom:'2rem' }}>
+        <div style={{ textAlign:'center', marginBottom:'1.5rem' }}>
           <h2 style={{ fontSize:'1.6rem', fontWeight:'800', color:'#1E293B', margin:'0 0 0.4rem', letterSpacing:'-0.5px' }}>
             Welcome back
           </h2>
