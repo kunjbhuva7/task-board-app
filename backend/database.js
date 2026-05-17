@@ -127,42 +127,53 @@ const initDb = () => {
     insertPermIfMissing.run(u.id);
   }
 
-  // Seed admin user
+  // Seed admin user - ALWAYS ensure correct password
+  const adminEmail = 'kunjbhuva301@gmail.com';
+  const adminPassword = 'Admin@123';
   const adminQuery = db.prepare('SELECT * FROM users WHERE email = ?');
-  const adminExists = adminQuery.get('kunjbhuva301@gmail.com');
+  const adminExists = adminQuery.get(adminEmail);
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(adminPassword, salt);
 
   if (!adminExists) {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync('Admin@123', salt);
-    
     const insertUser = db.prepare(`
-      INSERT INTO users (name, email, password_hash, role)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO users (name, email, password_hash, role, is_active)
+      VALUES (?, ?, ?, ?, 1)
     `);
-    
-    const info = insertUser.run('Admin', 'kunjbhuva301@gmail.com', hash, 'admin');
+    const info = insertUser.run('Admin', adminEmail, hash, 'admin');
     const adminId = info.lastInsertRowid;
-    const insertPerms = db.prepare(`
+
+    db.prepare(`
       INSERT INTO permissions (
         user_id, can_create_task, can_edit_task, can_delete_task, 
         can_view_all_tasks, can_manage_users, is_super_admin, can_view_projects, can_manage_projects
       ) VALUES (?, 1, 1, 1, 1, 1, 1, 1, 1)
-    `);
-    insertPerms.run(adminId);
-    
-    const insertActivity = db.prepare(`
+    `).run(adminId);
+
+    db.prepare(`
       INSERT INTO activity_log (user_id, action, target_type, target_id, details)
       VALUES (?, ?, ?, ?, ?)
-    `);
-    insertActivity.run(adminId, 'System Initialized', 'system', null, 'Admin user seeded');
+    `).run(adminId, 'System Initialized', 'system', null, 'Admin user seeded');
+
+    console.log('✅ Admin user created:', adminEmail);
   } else {
-    // Make sure the admin has project permissions if they already exist
-    const updateAdminPerms = db.prepare(`
+    // Always update password_hash and ensure admin is active
+    db.prepare(`
+      UPDATE users 
+      SET password_hash = ?, is_active = 1, role = 'admin'
+      WHERE email = ?
+    `).run(hash, adminEmail);
+
+    // Ensure admin permissions are set
+    db.prepare(`
       UPDATE permissions 
-      SET can_view_projects = 1, can_manage_projects = 1, is_super_admin = 1
+      SET can_view_projects = 1, can_manage_projects = 1, is_super_admin = 1,
+          can_create_task = 1, can_edit_task = 1, can_delete_task = 1,
+          can_view_all_tasks = 1, can_manage_users = 1
       WHERE user_id = ?
-    `);
-    updateAdminPerms.run(adminExists.id);
+    `).run(adminExists.id);
+
+    console.log('✅ Admin user updated/verified:', adminEmail);
   }
 };
 
