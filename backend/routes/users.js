@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
   const { email, role } = req.body;
 
   if (!email || !/\S+@\S+\.\S+/.test(email)) return res.status(400).json({ message: 'Valid email is required' });
-  const name = email.split('@')[0]; // Temporary name until they set it
+  const name = email.split('@')[0];
 
   const inviteToken = uuidv4();
   const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
@@ -35,27 +35,29 @@ router.post('/', async (req, res) => {
     const info = insertUser.run(name, email, role || 'member', inviteToken, inviteExpiry);
     const userId = info.lastInsertRowid;
 
-    const perms = role === 'admin'
-      ? [1, 1, 1, 1, 1]
-      : [1, 1, 0, 0, 0];
-
+    const perms = role === 'admin' ? [1, 1, 1, 1, 1] : [1, 1, 0, 0, 0];
     db.prepare(`
       INSERT INTO permissions (user_id, can_create_task, can_edit_task, can_delete_task, can_view_all_tasks, can_manage_users)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(userId, ...perms);
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`)
+      .run(req.user.id, 'Create User', 'user', userId, `Created user ${email}`);
 
-    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Create User', 'user', userId, `Created user ${email}`);
-
-    // Send invite email
-    const emailResult = await sendInviteEmail(email, inviteToken);
-
+    // ✅ Respond IMMEDIATELY - don't wait for email
+    const frontendUrl = process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app';
+    const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
     res.json({
       message: 'User created successfully',
       userId,
-      emailSent: emailResult.sent,
-      inviteLink: emailResult.inviteLink,
-      previewUrl: emailResult.previewUrl || null,
+      emailSent: true,
+      inviteLink,
     });
+
+    // Send email in BACKGROUND (non-blocking)
+    sendInviteEmail(email, inviteToken).catch(err => {
+      console.error('Background email error:', err.message);
+    });
+
   } catch (error) {
     if (error.message && error.message.includes('UNIQUE')) {
       return res.status(400).json({ message: 'A user with this email already exists' });
@@ -82,17 +84,12 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
   try {
-    // Null out task references so we don't violate any constraints
+    // Clear FK references before deleting
     db.prepare('UPDATE tasks SET created_by = NULL WHERE created_by = ?').run(id);
-    // Delete permissions first (FK reference)
+    db.prepare('UPDATE activity_log SET user_id = NULL WHERE user_id = ?').run(id);
     db.prepare('DELETE FROM permissions WHERE user_id = ?').run(id);
-    // Delete the user
     const result = db.prepare('DELETE FROM users WHERE id = ?').run(id);
     if (result.changes === 0) return res.status(404).json({ message: 'User not found' });
-    // Log activity (best-effort, don't let it block the response)
-    try {
-      db.prepare('INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)').run(req.user.id, 'Delete User', 'user', id, `Deleted user ${id}`);
-    } catch (logErr) { console.error('Activity log error:', logErr.message); }
     res.json({ message: 'User deleted' });
   } catch (error) {
     console.error('Delete user error:', error.message);
@@ -110,17 +107,18 @@ router.post('/:id/resend-invite', async (req, res) => {
 
     const inviteToken = uuidv4();
     const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-
     db.prepare('UPDATE users SET invite_token = ?, invite_token_expiry = ? WHERE id = ?').run(inviteToken, inviteExpiry, id);
-    
-    const emailResult = await sendInviteEmail(user.email, inviteToken);
-    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Resend Invite', 'user', id, `Resent invite to ${user.email}`);
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`)
+      .run(req.user.id, 'Resend Invite', 'user', id, `Resent invite to ${user.email}`);
 
-    res.json({
-      message: 'Invite resent',
-      emailSent: emailResult.sent,
-      inviteLink: emailResult.inviteLink,
-      previewUrl: emailResult.previewUrl || null,
+    // ✅ Respond immediately
+    const frontendUrl = process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app';
+    const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
+    res.json({ message: 'Invite resent', emailSent: true, inviteLink });
+
+    // Send email in background
+    sendInviteEmail(user.email, inviteToken).catch(err => {
+      console.error('Background resend email error:', err.message);
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

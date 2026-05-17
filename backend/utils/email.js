@@ -47,7 +47,7 @@ const getTransporter = async () => {
 };
 
 const sendInviteEmail = async (to, inviteToken) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app';
   const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
 
   const transport = await getTransporter();
@@ -58,7 +58,7 @@ const sendInviteEmail = async (to, inviteToken) => {
   }
 
   const mailOptions = {
-    from: '"TaskBoard Admin" <admin@taskboard.local>',
+    from: '"Purple" <admin@purple.app>',
     to,
     subject: '🚀 You are invited to join Purple!',
     html: `
