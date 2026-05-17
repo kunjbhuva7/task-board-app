@@ -72,6 +72,8 @@ console.log('Loading dashboardRoutes...');
 const dashboardRoutes = require('./routes/dashboard');
 console.log('Loading eventRoutes...');
 const eventRoutes = require('./routes/events');
+console.log('Loading projectRoutes...');
+const projectRoutes = require('./routes/projects');
 console.log('Finished loading routes.');
 
 app.use('/api/auth', authRoutes);
@@ -81,6 +83,7 @@ app.use('/api/permissions', permissionRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Cron Job for Event Reminders (Checks every minute)
 cron.schedule('* * * * *', async () => {

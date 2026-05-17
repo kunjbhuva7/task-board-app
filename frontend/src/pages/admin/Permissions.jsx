@@ -23,7 +23,7 @@ const PERM_CATEGORIES = {
     ]
   },
   tasks: {
-    label: 'Task Management',
+    label: 'Task & Project Management',
     items: [
       { key: 'can_view_all_tasks', label: 'View All Tasks', desc: 'See tasks from all users' },
       { key: 'can_create_task', label: 'Create Tasks', desc: 'Create new tasks' },
@@ -31,6 +31,8 @@ const PERM_CATEGORIES = {
       { key: 'can_delete_task', label: 'Delete Tasks', desc: 'Permanently remove tasks' },
       { key: 'can_manage_tasks', label: 'Manage Tasks', desc: 'Super override over all tasks' },
       { key: 'can_approve_requests', label: 'Approve Requests', desc: 'Approve task status changes' },
+      { key: 'can_view_projects', label: 'View Projects', desc: 'Access the projects page' },
+      { key: 'can_manage_projects', label: 'Manage Projects', desc: 'Create, edit, and delete projects' },
     ]
   },
   admin: {

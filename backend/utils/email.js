@@ -60,7 +60,7 @@ const sendInviteEmail = async (to, inviteToken) => {
   const mailOptions = {
     from: '"TaskBoard Admin" <admin@taskboard.local>',
     to,
-    subject: '🚀 You are invited to join TaskBoard!',
+    subject: '🚀 You are invited to join Purple!',
     html: `
       <!DOCTYPE html>
       <html>
@@ -70,32 +70,29 @@ const sendInviteEmail = async (to, inviteToken) => {
             <td align="center">
               <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);">
                 <tr>
-                  <td style="background:linear-gradient(135deg, #5266F9 0%, #3B4CCA 100%);padding:40px 30px;text-align:center;">
-                    <div style="background:rgba(255,255,255,0.2);width:60px;height:60px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
-                      <span style="font-size:30px;color:white;font-weight:bold;line-height:60px;display:inline-block;text-align:center;width:100%;">C</span>
-                    </div>
-                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Atome</h1>
-                    <p style="color:rgba(255,255,255,0.9);margin:10px 0 0;font-size:16px;">You have been invited to join the team!</p>
+                  <td style="background:linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%);padding:40px 30px;text-align:center;">
+                    <h1 style="color:#ffffff;margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px;">Purple</h1>
+                    <p style="color:rgba(255,255,255,0.95);margin:10px 0 0;font-size:16px;">You have been invited to join the team!</p>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:40px 30px;">
                     <p style="color:#1e293b;font-size:18px;font-weight:600;margin:0 0 16px;">Welcome aboard! 👋</p>
-                    <p style="color:#475569;font-size:16px;line-height:1.6;margin:0 0 32px;">An administrator has invited you to collaborate on <strong>Atome</strong>. We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.</p>
+                    <p style="color:#475569;font-size:16px;line-height:1.6;margin:0 0 32px;">An administrator has invited you to collaborate on <strong>Purple</strong>. We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.</p>
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td align="center">
-                          <a href="${inviteLink}" style="display:inline-block;padding:16px 36px;background-color:#111827;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;letter-spacing:0.3px;box-shadow:0 4px 6px rgba(17,24,39,0.2);">Accept Invitation & Set Password</a>
+                          <a href="${inviteLink}" style="display:inline-block;padding:16px 36px;background-color:#1E293B;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;letter-spacing:0.3px;box-shadow:0 4px 6px rgba(17,24,39,0.2);">Accept Invitation & Set Password</a>
                         </td>
                       </tr>
                     </table>
-                    <p style="color:#64748B;font-size:14px;line-height:1.5;margin:32px 0 0;">If the button doesn't work, copy and paste this link into your browser:<br/><a href="${inviteLink}" style="color:#5266F9;word-break:break-all;text-decoration:none;">${inviteLink}</a></p>
+                    <p style="color:#64748B;font-size:14px;line-height:1.5;margin:32px 0 0;">If the button doesn't work, copy and paste this link into your browser:<br/><a href="${inviteLink}" style="color:#FF7E5F;word-break:break-all;text-decoration:none;">${inviteLink}</a></p>
                   </td>
                 </tr>
                 <tr>
                   <td style="background-color:#F8FAFC;padding:24px 30px;text-align:center;border-top:1px solid #E2E8F0;">
                     <p style="color:#94A3B8;font-size:13px;margin:0;">This invite link will automatically expire in 48 hours for security reasons.</p>
-                    <p style="color:#CBD5E1;font-size:12px;margin:8px 0 0;">&copy; ${new Date().getFullYear()} Atome. All rights reserved.</p>
+                    <p style="color:#CBD5E1;font-size:12px;margin:8px 0 0;">&copy; ${new Date().getFullYear()} Purple. All rights reserved.</p>
                   </td>
                 </tr>
               </table>

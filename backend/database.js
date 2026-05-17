@@ -60,8 +60,18 @@ const initDb = () => {
       created_by INTEGER REFERENCES users(id),
       due_date DATE,
       approval_status TEXT DEFAULT 'approved',
+      project_id INTEGER REFERENCES projects(id),
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Projects table
+    CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     -- Activity log
@@ -93,7 +103,8 @@ const initDb = () => {
     ['can_manage_roles', 0], ['can_manage_tasks', 0], ['can_approve_requests', 0],
     ['can_view_analytics', 0], ['can_manage_events', 0], ['can_manage_notifications', 0],
     ['can_manage_settings', 0], ['can_view_reports', 0], ['can_export_data', 0],
-    ['is_read_only', 0], ['is_super_admin', 0], ['can_view_all_tasks', 1]
+    ['is_read_only', 0], ['is_super_admin', 0], ['can_view_all_tasks', 1],
+    ['can_view_projects', 0], ['can_manage_projects', 0]
   ];
   
   const existingColumns = db.prepare("PRAGMA table_info(permissions)").all().map(c => c.name);
@@ -102,6 +113,12 @@ const initDb = () => {
       db.exec(`ALTER TABLE permissions ADD COLUMN ${col} INTEGER DEFAULT ${defaultVal}`);
     }
   });
+
+  // Also add project_id to tasks if it doesn't exist
+  const taskColumns = db.prepare("PRAGMA table_info(tasks)").all().map(c => c.name);
+  if (!taskColumns.includes('project_id')) {
+    db.exec('ALTER TABLE tasks ADD COLUMN project_id INTEGER REFERENCES projects(id)');
+  }
 
   // Auto-create permission rows for users that don't have one yet
   const allUsers = db.prepare('SELECT id FROM users').all();
@@ -112,7 +129,7 @@ const initDb = () => {
 
   // Seed admin user
   const adminQuery = db.prepare('SELECT * FROM users WHERE email = ?');
-  const adminExists = adminQuery.get('admin@company.com');
+  const adminExists = adminQuery.get('kunjbhuva301@gmail.com');
 
   if (!adminExists) {
     const salt = bcrypt.genSaltSync(10);
@@ -123,13 +140,13 @@ const initDb = () => {
       VALUES (?, ?, ?, ?)
     `);
     
-    const info = insertUser.run('Admin', 'admin@company.com', hash, 'admin');
+    const info = insertUser.run('Admin', 'kunjbhuva301@gmail.com', hash, 'admin');
     const adminId = info.lastInsertRowid;
     const insertPerms = db.prepare(`
       INSERT INTO permissions (
         user_id, can_create_task, can_edit_task, can_delete_task, 
-        can_view_all_tasks, can_manage_users, is_super_admin
-      ) VALUES (?, 1, 1, 1, 1, 1, 1)
+        can_view_all_tasks, can_manage_users, is_super_admin, can_view_projects, can_manage_projects
+      ) VALUES (?, 1, 1, 1, 1, 1, 1, 1, 1)
     `);
     insertPerms.run(adminId);
     
@@ -138,6 +155,14 @@ const initDb = () => {
       VALUES (?, ?, ?, ?, ?)
     `);
     insertActivity.run(adminId, 'System Initialized', 'system', null, 'Admin user seeded');
+  } else {
+    // Make sure the admin has project permissions if they already exist
+    const updateAdminPerms = db.prepare(`
+      UPDATE permissions 
+      SET can_view_projects = 1, can_manage_projects = 1, is_super_admin = 1
+      WHERE user_id = ?
+    `);
+    updateAdminPerms.run(adminExists.id);
   }
 };
 

@@ -581,3 +581,373 @@ A client connected: X1k9MZSy0NwnFI0DAAA0
 A client connected: kzHULhAiyYW7wr-iAAA1
 Client disconnected: kzHULhAiyYW7wr-iAAA1
 Client disconnected: X1k9MZSy0NwnFI0DAAA0
+[2026-05-17T06:53:46.550Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 11:57:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.614Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 11:58:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.616Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 11:59:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.618Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:00:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.621Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:01:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.624Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:02:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.629Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:03:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.631Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:04:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.633Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:05:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.634Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:06:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.636Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:07:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.653Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:08:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.655Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:09:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.656Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:10:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.658Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:11:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.659Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:12:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.660Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:13:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.662Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:14:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.663Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:15:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.667Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:16:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.668Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:17:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.669Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:18:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.674Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:19:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.675Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:20:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.677Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:21:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.677Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:22:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:53:46.679Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:23:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:57:22.932Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:24:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:57:23.032Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:25:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:57:23.034Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:26:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+[2026-05-17T06:57:23.039Z] [PID: 19761] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Sun May 17 2026 12:27:00 GMT+0530 (India Standard Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+A client connected: j7XJHorRBsP_wOF6AAA4
+Client disconnected: j7XJHorRBsP_wOF6AAA4
+A client connected: GAjuIwGRjfDXmssLAAA7
+Client disconnected: GAjuIwGRjfDXmssLAAA7
+A client connected: n-Qc0rF0cfsJ7firAAA-
+Client disconnected: n-Qc0rF0cfsJ7firAAA-
+A client connected: exZO0T6Q308dUs25AABB
+Dashboard stats error: SqliteError: no such column: "done" - should this be a string literal in single-quotes?
+    at Database.prepare (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/routes/dashboard.js:19:39
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:295:15
+    at processParams (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:582:12)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:291:5) {
+  code: 'SQLITE_ERROR'
+}
+Dashboard stats error: SqliteError: no such column: "done" - should this be a string literal in single-quotes?
+    at Database.prepare (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/routes/dashboard.js:19:39
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:295:15
+    at processParams (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:582:12)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:291:5) {
+  code: 'SQLITE_ERROR'
+}
+Client disconnected: exZO0T6Q308dUs25AABB
+A client connected: ievwCeaG7b9umWktAABE
+Client disconnected: ievwCeaG7b9umWktAABE
+Dashboard stats error: SqliteError: no such column: "done" - should this be a string literal in single-quotes?
+    at Database.prepare (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/routes/dashboard.js:19:39
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:295:15
+    at processParams (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:582:12)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:291:5) {
+  code: 'SQLITE_ERROR'
+}
+A client connected: bz1hEQvG3krRmW_gAABH
+Dashboard stats error: SqliteError: no such column: "done" - should this be a string literal in single-quotes?
+    at Database.prepare (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/routes/dashboard.js:19:39
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/lib/layer.js:152:17)
+    at /Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:295:15
+    at processParams (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:582:12)
+    at next (/Users/kunjbhuva/Desktop/Gold/task-board/backend/node_modules/router/index.js:291:5) {
+  code: 'SQLITE_ERROR'
+}
+Client disconnected: bz1hEQvG3krRmW_gAABH
+A client connected: 7c-PCdWiu0d_UcKfAABK
+Client disconnected: 7c-PCdWiu0d_UcKfAABK
+A client connected: vrqPS1QEHgzQoH8VAABN
+Client disconnected: vrqPS1QEHgzQoH8VAABN
+A client connected: Z3ENLhOEbXy2bGWvAABP
+Client disconnected: Z3ENLhOEbXy2bGWvAABP
+A client connected: cLutKFbXnOGDYadsAABR
+✉️  Email sent to: kunjbhuva301@gmail.com | Subject: New Task Created: TaskBoard Created
+Client disconnected: cLutKFbXnOGDYadsAABR
+A client connected: t9O9bC9aumOHjA1EAABT
+Client disconnected: t9O9bC9aumOHjA1EAABT
+A client connected: 4fWcEpycBGPSAoIiAABV
+Client disconnected: 4fWcEpycBGPSAoIiAABV
+A client connected: uP38teNuD_sEg78vAABX
+Client disconnected: uP38teNuD_sEg78vAABX
+A client connected: jtvwk7B0zCVOE44MAABZ
+Client disconnected: jtvwk7B0zCVOE44MAABZ
+A client connected: 2Uk7JdZPpWtDWN2BAABb
+Client disconnected: 2Uk7JdZPpWtDWN2BAABb
+A client connected: JFoTAD9zgNRd7RNpAABd
+Client disconnected: JFoTAD9zgNRd7RNpAABd
+A client connected: Y2fHhnOGYuKPMhq2AABf
+Client disconnected: Y2fHhnOGYuKPMhq2AABf
+A client connected: 1MXv_frKlRms0JLBAABh
+Client disconnected: 1MXv_frKlRms0JLBAABh
+A client connected: FclkkuODfm4myT19AABj
+Client disconnected: FclkkuODfm4myT19AABj
+A client connected: w2PjsuQxvS84DPgfAABl
+Client disconnected: w2PjsuQxvS84DPgfAABl
+A client connected: XNa9HjSXeznxfX5nAABn
+Client disconnected: XNa9HjSXeznxfX5nAABn
+A client connected: UVAnGMb9hYkhfr2xAABp
+Client disconnected: UVAnGMb9hYkhfr2xAABp
+A client connected: olfb52c8w_FpX7dTAABr
+Client disconnected: olfb52c8w_FpX7dTAABr
+A client connected: s2V6INqdMbpt73IaAABt
+Client disconnected: s2V6INqdMbpt73IaAABt
+A client connected: FtBPKcD1zADNmCDBAABv
+Client disconnected: FtBPKcD1zADNmCDBAABv
+A client connected: 50qDxGJkb2OlSJFdAABx
+Client disconnected: 50qDxGJkb2OlSJFdAABx
+A client connected: BqpRxboGf6SYhNVNAABz
+Client disconnected: BqpRxboGf6SYhNVNAABz
+A client connected: KG_BdJUg4MvWxEv8AAB1
+Client disconnected: KG_BdJUg4MvWxEv8AAB1
+A client connected: tOx1fNLoGJUJ_YUhAAB3
+Client disconnected: tOx1fNLoGJUJ_YUhAAB3
+A client connected: wew-t4Xtfvk9G4XGAAB5
+Client disconnected: wew-t4Xtfvk9G4XGAAB5
+A client connected: 2a9zc919umgln6cKAAB7
+Client disconnected: 2a9zc919umgln6cKAAB7
+A client connected: 9UxNWZijUIY0mAPnAAB9
+Client disconnected: 9UxNWZijUIY0mAPnAAB9
+A client connected: h1mWwfHtJW2Lb1W8AAB_
+Client disconnected: h1mWwfHtJW2Lb1W8AAB_
+A client connected: koUYKgOwuhG9ubzgAACB
+Client disconnected: koUYKgOwuhG9ubzgAACB
+A client connected: djDn-4DpZBh2fksUAACD
+Client disconnected: djDn-4DpZBh2fksUAACD
+A client connected: phpvpbeOUFimqn99AACF
+Client disconnected: phpvpbeOUFimqn99AACF
+A client connected: _XokmPx89sMG83RZAACH
+Client disconnected: _XokmPx89sMG83RZAACH
+A client connected: AWW0xB6XV71k3EQ6AACJ
+Client disconnected: AWW0xB6XV71k3EQ6AACJ
+A client connected: P1kXxnI9GfAmwASlAACL
+Client disconnected: P1kXxnI9GfAmwASlAACL
+A client connected: _LWcNwA8R9FG7kZvAACN
+Client disconnected: _LWcNwA8R9FG7kZvAACN
+A client connected: BMFxkKooJIh4EluaAACP
+Client disconnected: BMFxkKooJIh4EluaAACP
+A client connected: IicZbG4_1JwLuP68AACR
+Client disconnected: IicZbG4_1JwLuP68AACR
+A client connected: qV7gTrOB1R93nmctAACT
+Client disconnected: qV7gTrOB1R93nmctAACT
+A client connected: 3ZXiQ8LY8F7m5GoeAACV
+Client disconnected: 3ZXiQ8LY8F7m5GoeAACV
+A client connected: Bu9GLrF44ONYHcT1AACX
+Client disconnected: Bu9GLrF44ONYHcT1AACX
+A client connected: LuEJJOb7lAroXh9AAACZ
+Client disconnected: LuEJJOb7lAroXh9AAACZ
+A client connected: t-xqusNhJv4gcL7vAACb
+Client disconnected: t-xqusNhJv4gcL7vAACb
+A client connected: 3W1gSZ7XvUgfSVZLAACd
+Client disconnected: 3W1gSZ7XvUgfSVZLAACd
+A client connected: VexbcJzXUIxPNBVaAACf
+Client disconnected: VexbcJzXUIxPNBVaAACf
+A client connected: tJp06IbHf_Sakuk0AACh
+Client disconnected: tJp06IbHf_Sakuk0AACh
+A client connected: b1s3V5H4ZAmDMiJ-AACj
+Client disconnected: b1s3V5H4ZAmDMiJ-AACj
+A client connected: 5KFmLMsdHhotpq3PAACl
+Client disconnected: 5KFmLMsdHhotpq3PAACl
+A client connected: F-a3GE99uQNCXTUzAACn
+Client disconnected: F-a3GE99uQNCXTUzAACn
+A client connected: eeI6nqPayHFU1c-SAACp
+Client disconnected: eeI6nqPayHFU1c-SAACp
+A client connected: VY0i5PdczlWypCi_AACr
+Client disconnected: VY0i5PdczlWypCi_AACr
+A client connected: xIsysSJ5Fi4bTENzAACt
+Client disconnected: xIsysSJ5Fi4bTENzAACt
+A client connected: avuCJR96K-gvgReKAACv
+Client disconnected: avuCJR96K-gvgReKAACv
+A client connected: 0iDOSHhY8HLmkjw3AACx
+Client disconnected: 0iDOSHhY8HLmkjw3AACx
+A client connected: ntN-W6lJacmxDCv8AACz
+Client disconnected: ntN-W6lJacmxDCv8AACz
+A client connected: miMDua40WUbkbbetAAC1
+Client disconnected: miMDua40WUbkbbetAAC1
+A client connected: TSOjDYhEXuzgbU0hAAC3
+Client disconnected: TSOjDYhEXuzgbU0hAAC3
+A client connected: LYpwRl7LTxt66yqYAAC5
+Client disconnected: LYpwRl7LTxt66yqYAAC5
+A client connected: 3LBqNkeJndjUektBAAC7
+Client disconnected: 3LBqNkeJndjUektBAAC7
+A client connected: hibZHY5GqJz66Qx2AAC9
+Client disconnected: hibZHY5GqJz66Qx2AAC9
+A client connected: XRxtsbWOjJEMEsKJAAC_
+Client disconnected: XRxtsbWOjJEMEsKJAAC_
+A client connected: 6EwFWufXQRNNEr2mAADB
+Client disconnected: 6EwFWufXQRNNEr2mAADB
+A client connected: qUQmVBuIcunK1XFtAADD
+Client disconnected: qUQmVBuIcunK1XFtAADD
+A client connected: BuJb_npVrNOEQZigAADF
+Client disconnected: BuJb_npVrNOEQZigAADF
+A client connected: 3my5aAoMN1nc-W51AADH
+Client disconnected: 3my5aAoMN1nc-W51AADH
+A client connected: hAG1sc0raGZe3kuoAADJ
+Client disconnected: hAG1sc0raGZe3kuoAADJ
+A client connected: PXjbz0tGHzbV2XEVAADL
+Client disconnected: PXjbz0tGHzbV2XEVAADL
+A client connected: agXO1uAB3G3o4sZJAADN
+Client disconnected: agXO1uAB3G3o4sZJAADN
+A client connected: QXvG5-3sYdqqYEhKAADP
+Client disconnected: QXvG5-3sYdqqYEhKAADP
+A client connected: XtWFcAPcwlN4oXClAADR
+Client disconnected: XtWFcAPcwlN4oXClAADR
+A client connected: XKhHFIZF1qEvCdaLAADT
+Client disconnected: XKhHFIZF1qEvCdaLAADT
+A client connected: sTm1TO-DhmlGPyzcAADV
+Client disconnected: sTm1TO-DhmlGPyzcAADV
+A client connected: 33EGKzkigshM3v52AADX
+Client disconnected: 33EGKzkigshM3v52AADX
+A client connected: E-dhRC8S5qVvcnuvAADZ
+Client disconnected: E-dhRC8S5qVvcnuvAADZ
+A client connected: gZqlShJvLtAXQJJOAADb
+Client disconnected: gZqlShJvLtAXQJJOAADb
+A client connected: mgkgdqXfHIqbaJTXAADd
+Client disconnected: mgkgdqXfHIqbaJTXAADd
+A client connected: 6Ms6qY6RYa57MdUJAADf
+Client disconnected: 6Ms6qY6RYa57MdUJAADf
+A client connected: aBgr4srp9N5Zhz2qAADh
+Client disconnected: aBgr4srp9N5Zhz2qAADh
+A client connected: h7CTWPzoB--hjJ61AADj
+Client disconnected: h7CTWPzoB--hjJ61AADj
+A client connected: Lxc7WRYVui3b5sVvAADl
+Client disconnected: Lxc7WRYVui3b5sVvAADl
+A client connected: DAEKBbwxOPoxuASgAADn
+Client disconnected: DAEKBbwxOPoxuASgAADn
+A client connected: gD7c9Az7vbvhx7ofAADp
+Client disconnected: gD7c9Az7vbvhx7ofAADp
+A client connected: 4YKKI4WJN-8nOxmIAADr
+Client disconnected: 4YKKI4WJN-8nOxmIAADr
+A client connected: JkpS7aQqPOCsWiEnAADt
+Client disconnected: JkpS7aQqPOCsWiEnAADt
+A client connected: bp1ydz5_pjv53VCnAADv
+Client disconnected: bp1ydz5_pjv53VCnAADv
+A client connected: a7yKco2mrr-wNW7CAADx
+Client disconnected: a7yKco2mrr-wNW7CAADx
+A client connected: NAmdqM9_0hk-s8yXAADz
+Client disconnected: NAmdqM9_0hk-s8yXAADz
+A client connected: WS6hxrd75sswqmMyAAD1
+Client disconnected: WS6hxrd75sswqmMyAAD1
+A client connected: zBm6spdROfpR5gbqAAD3
+Client disconnected: zBm6spdROfpR5gbqAAD3
+A client connected: VvoieOyWKb4n7vfqAAD5
+Client disconnected: VvoieOyWKb4n7vfqAAD5
+A client connected: o2oAaj7nDAU_SnrdAAD7
+Client disconnected: o2oAaj7nDAU_SnrdAAD7
+A client connected: Bc0UH6HN6OrfuAWHAAD9
+Client disconnected: Bc0UH6HN6OrfuAWHAAD9
+A client connected: -mQpvu3PRnW_Y47DAAD_
+Client disconnected: -mQpvu3PRnW_Y47DAAD_
+A client connected: qR97xiIVzcAc5G3yAAEB
+Client disconnected: qR97xiIVzcAc5G3yAAEB
+A client connected: JJ8vbkWbdClo-YnBAAED
+Client disconnected: JJ8vbkWbdClo-YnBAAED
+A client connected: EvD3dUiBsFPsC2bUAAEF
+Client disconnected: EvD3dUiBsFPsC2bUAAEF
+A client connected: KoG6Nub-QOH8_2z6AAEH
+Client disconnected: KoG6Nub-QOH8_2z6AAEH
+A client connected: JO6UoIqU_LvtDYYuAAEJ
+Client disconnected: JO6UoIqU_LvtDYYuAAEJ
+A client connected: AsiV9AVWlZs0BQw5AAEL
+Client disconnected: AsiV9AVWlZs0BQw5AAEL
+A client connected: Gl0iGIBvL3hnl3UQAAEN
+Client disconnected: Gl0iGIBvL3hnl3UQAAEN
+A client connected: TeYccXgpeRsrqexJAAEP
+Client disconnected: TeYccXgpeRsrqexJAAEP
+A client connected: ejjbeFvMe_3zkzmAAAER
+Client disconnected: ejjbeFvMe_3zkzmAAAER
+A client connected: W5sFIYN85rr-V16eAAET
+Client disconnected: W5sFIYN85rr-V16eAAET
+A client connected: AhZIHa5v088uJDwbAAEV
+Client disconnected: AhZIHa5v088uJDwbAAEV
+A client connected: 0jkUCw349JUrp0DlAAEX
+Client disconnected: 0jkUCw349JUrp0DlAAEX
+A client connected: 9rABE3DwjiODJlzEAAEZ
+Client disconnected: 9rABE3DwjiODJlzEAAEZ
+A client connected: 7BMqf0P6tm5io8s8AAEb
+Client disconnected: 7BMqf0P6tm5io8s8AAEb
+A client connected: Y878lV-2VWUg4SmYAAEd
+Client disconnected: Y878lV-2VWUg4SmYAAEd
+A client connected: rKnZ6r1zX-bkymxAAAEf
+Client disconnected: rKnZ6r1zX-bkymxAAAEf
+A client connected: W8wHlAdHEEcsDQtJAAEh
+Client disconnected: W8wHlAdHEEcsDQtJAAEh
+A client connected: KDjq11wgVo7T9S83AAEj
+Client disconnected: KDjq11wgVo7T9S83AAEj
+A client connected: _pcAzYysZiPFlOo4AAEl
+Client disconnected: _pcAzYysZiPFlOo4AAEl
+A client connected: ctZl8ZK-8yxaOKqfAAEn
+Client disconnected: ctZl8ZK-8yxaOKqfAAEn
+A client connected: rdYfrZz5i04s74u8AAEp
+Client disconnected: rdYfrZz5i04s74u8AAEp
+A client connected: adxONjHL0_3DxWmWAAEr
+Client disconnected: adxONjHL0_3DxWmWAAEr
+A client connected: C59TojEIxw86jW3tAAEt
+Client disconnected: C59TojEIxw86jW3tAAEt
+A client connected: YoVYlRjvNKoaR0_aAAEv
+A client connected: AWBRQp6Js8_bExZfAAEy
+Client disconnected: YoVYlRjvNKoaR0_aAAEv
+A client connected: EtzSjXe8cOq8pKS-AAE0
+Client disconnected: EtzSjXe8cOq8pKS-AAE0
+A client connected: QmVHGB23X6TJsL4DAAE2
+Client disconnected: QmVHGB23X6TJsL4DAAE2
+A client connected: HC2Xv_vuCgZ-RFKkAAE4
+Client disconnected: HC2Xv_vuCgZ-RFKkAAE4
+A client connected: fLwVZ3HFaNeZQYutAAE6
+Client disconnected: fLwVZ3HFaNeZQYutAAE6
+A client connected: KWwuahLA4NN2rI3NAAE8
+Client disconnected: KWwuahLA4NN2rI3NAAE8
+A client connected: Tlx2mTWgFla5hoxAAAE-
+Client disconnected: Tlx2mTWgFla5hoxAAAE-
+A client connected: gqZTNa8CKYMsOYPPAAFA
+Client disconnected: gqZTNa8CKYMsOYPPAAFA
+A client connected: _9xAlgyjykwAb99MAAFC
+Client disconnected: AWBRQp6Js8_bExZfAAEy
+Client disconnected: _9xAlgyjykwAb99MAAFC
+A client connected: aG9hKZLqCf_RX8VRAAFH
+A client connected: 0b545_RbIw7IU1NlAAFJ
+Client disconnected: 0b545_RbIw7IU1NlAAFJ
+A client connected: hzr3SF4EeI6FqmOZAAFL
+Client disconnected: hzr3SF4EeI6FqmOZAAFL
+A client connected: 1_wbbA4Zuw_L6GCWAAFN
+Client disconnected: 1_wbbA4Zuw_L6GCWAAFN
+A client connected: Q71pwGYjMX2y1fVNAAFP
+Client disconnected: Q71pwGYjMX2y1fVNAAFP
+A client connected: zV5jAGpo7lcN1CuhAAFR
+Client disconnected: zV5jAGpo7lcN1CuhAAFR
+A client connected: _82_0JJ8UBez-nruAAFT
+Client disconnected: _82_0JJ8UBez-nruAAFT
+A client connected: bwh9owax9AyPc6KdAAFV
+Client disconnected: bwh9owax9AyPc6KdAAFV
+A client connected: odbJxye6QUAh5ybAAAFX
+Client disconnected: odbJxye6QUAh5ybAAAFX
+A client connected: ICK9r2aUdQVS5lakAAFZ
+Client disconnected: ICK9r2aUdQVS5lakAAFZ
+A client connected: FA7zjRZcrsWgbkQ0AAFb
+Client disconnected: FA7zjRZcrsWgbkQ0AAFb
+A client connected: jtmWLJ5ZsXLTL6fyAAFd
+Client disconnected: jtmWLJ5ZsXLTL6fyAAFd
+A client connected: NmnStU8CHsnFgXlJAAFf
+Client disconnected: NmnStU8CHsnFgXlJAAFf
+A client connected: BWRLULc84O04VZYwAAFh

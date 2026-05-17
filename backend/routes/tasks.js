@@ -32,7 +32,7 @@ router.get('/', (req, res) => {
 
 // POST /api/tasks
 router.post('/', checkPermission('can_create_task'), (req, res) => {
-  const { title, description, priority, due_date } = req.body;
+  const { title, description, priority, due_date, project_id } = req.body;
   if (!title) return res.status(400).json({ message: 'Title is required' });
 
   try {
@@ -40,10 +40,10 @@ router.post('/', checkPermission('can_create_task'), (req, res) => {
     const initialApprovalStatus = isMember ? 'pending' : 'approved';
 
     const insert = db.prepare(`
-      INSERT INTO tasks (title, description, priority, created_by, due_date, approval_status) 
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO tasks (title, description, priority, created_by, due_date, approval_status, project_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
-    const info = insert.run(title, description, priority || 'medium', req.user.id, due_date || null, initialApprovalStatus);
+    const info = insert.run(title, description, priority || 'medium', req.user.id, due_date || null, initialApprovalStatus, project_id || null);
     
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Create Task', 'task', info.lastInsertRowid, `Created task: ${title}`);
     
@@ -64,14 +64,14 @@ router.post('/', checkPermission('can_create_task'), (req, res) => {
 // PUT /api/tasks/:id
 router.put('/:id', checkPermission('can_edit_task'), (req, res) => {
   const { id } = req.params;
-  const { title, description, priority, due_date, status } = req.body;
+  const { title, description, priority, due_date, status, project_id } = req.body;
 
   try {
     db.prepare(`
       UPDATE tasks 
-      SET title = ?, description = ?, priority = ?, due_date = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+      SET title = ?, description = ?, priority = ?, due_date = ?, status = ?, project_id = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(title, description, priority, due_date, status, id);
+    `).run(title, description, priority, due_date, status, project_id || null, id);
     
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Edit Task', 'task', id, `Edited task: ${title}`);
 
@@ -99,7 +99,7 @@ router.put('/:id', checkPermission('can_edit_task'), (req, res) => {
               </div>
             </div>
             <div style="background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-              <p style="margin: 0; font-size: 13px; color: #94a3b8;">© ${new Date().getFullYear()} Atome</p>
+              <p style="margin: 0; font-size: 13px; color: #94a3b8;">© ${new Date().getFullYear()} Purple</p>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ router.patch('/:id/status', (req, res) => {
               </div>
             </div>
             <div style="background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-              <p style="margin: 0; font-size: 13px; color: #94a3b8;">© ${new Date().getFullYear()} Atome</p>
+              <p style="margin: 0; font-size: 13px; color: #94a3b8;">© ${new Date().getFullYear()} Purple</p>
             </div>
           </div>
         </div>

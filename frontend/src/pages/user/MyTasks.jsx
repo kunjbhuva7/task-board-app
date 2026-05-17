@@ -23,28 +23,39 @@ const pc = p => {
   return { bg:'#FEF3C7', text:'#D97706', dot:'#F59E0B' };
 };
 
-// ── Kanban Card ──────────────────────────────────────────────────────────────
 const KanbanCard = ({ task, onEdit, onDelete, canEdit, canDelete }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const pColor = pc(task.priority);
   return (
     <div ref={setNodeRef} {...attributes} {...listeners}
+      className="kanban-card-hover"
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1,
-        background:'rgba(0,0,0,0.04)', borderRadius:'12px', padding:'1rem',
-        boxShadow:'0 2px 10px rgba(0,0,0,0.2)', cursor:'grab',
-        border:'1px solid rgba(0,0,0,0.08)' }}>
-      <div style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.9rem', marginBottom:'0.4rem' }}>{task.title}</div>
-      <div style={{ fontSize:'0.8rem', color:'#64748B', marginBottom:'0.85rem', lineHeight:1.4,
-        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-        {task.description || <span style={{ color:'#64748B', fontStyle:'italic' }}>No description</span>}
+        background: '#ffffff', borderRadius:'14px', padding:'1.2rem',
+        boxShadow: isDragging ? '0 12px 24px rgba(0,0,0,0.15)' : '0 2px 8px rgba(0,0,0,0.06)', cursor:'grab',
+        border:'1px solid rgba(0,0,0,0.05)', position: 'relative' }}>
+        
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+        <div style={{ fontWeight:'700', color:'#1E293B', fontSize:'0.95rem', lineHeight: '1.3' }}>{task.title}</div>
+        <span style={{ 
+          background: pColor.bg, color: pColor.text, fontSize: '0.65rem', fontWeight: '700', 
+          padding: '3px 8px', borderRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.5px',
+          whiteSpace: 'nowrap', marginLeft: '8px' 
+        }}>{task.priority}</span>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(0,0,0,0.08)', paddingTop:'0.6rem' }}>
-        <span style={{ fontSize:'0.72rem', color:'#64748B' }}>
-          <Calendar size={11} style={{ verticalAlign:'middle', marginRight:3 }} />
+      
+      <div style={{ fontSize:'0.85rem', color:'#64748B', marginBottom:'1.2rem', lineHeight:1.5,
+        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+        {task.description || <span style={{ color:'#94A3B8', fontStyle:'italic' }}>No description</span>}
+      </div>
+      
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid #F1F5F9', paddingTop:'0.8rem' }}>
+        <span style={{ fontSize:'0.75rem', color:'#64748B', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>
+          <Calendar size={13} color="#94A3B8" />
           {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'No date'}
         </span>
-        <div style={{ display:'flex', gap:'4px' }} onPointerDown={e => e.stopPropagation()}>
-          {canEdit && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#64748B', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onEdit(task)}><Edit2 size={13}/></button>}
-          {canDelete && <button style={{ background:'none', border:'none', cursor:'pointer', color:'#64748B', padding:'3px', display:'flex', borderRadius:'4px' }} onClick={() => onDelete(task.id)}><Trash2 size={13}/></button>}
+        <div style={{ display:'flex', gap:'6px' }} onPointerDown={e => e.stopPropagation()}>
+          {canEdit && <button className="icon-btn-hover" style={{ background:'#F8FAFC', border:'1px solid #E2E8F0', cursor:'pointer', color:'#64748B', padding:'5px', display:'flex', borderRadius:'6px' }} onClick={() => onEdit(task)}><Edit2 size={13}/></button>}
+          {canDelete && <button className="icon-btn-hover" style={{ background:'#FEF2F2', border:'1px solid #FEE2E2', cursor:'pointer', color:'#EF4444', padding:'5px', display:'flex', borderRadius:'6px' }} onClick={() => onDelete(task.id)}><Trash2 size={13}/></button>}
         </div>
       </div>
     </div>

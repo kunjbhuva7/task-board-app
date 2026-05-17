@@ -15,6 +15,7 @@ import UserDashboard from './pages/user/Dashboard';
 import MyTasks from './pages/user/MyTasks';
 import UserAllTasks from './pages/user/AllTasks';
 import Profile from './pages/user/Profile';
+import Projects from './pages/Projects';
 
 import Sidebar from './components/Sidebar';
 
@@ -65,7 +66,9 @@ function App() {
         <Route path="/admin/users" element={<ProtectedRoute requiredPerm="can_view_users"><Users /></ProtectedRoute>} />
         <Route path="/admin/permissions" element={<ProtectedRoute requiredPerm="can_manage_roles"><Permissions /></ProtectedRoute>} />
         <Route path="/admin/tasks" element={<ProtectedRoute requiredPerm="can_manage_tasks"><AdminAllTasks /></ProtectedRoute>} />
-        <Route path="/admin/activity" element={<ProtectedRoute requiredPerm="can_view_reports"><ActivityLog /></ProtectedRoute>} />
+        <Route path="/admin/activity" element={<ProtectedRoute requiredPerm="is_super_admin"><ActivityLog /></ProtectedRoute>} />
+        
+        <Route path="/projects" element={<ProtectedRoute requiredPerm="can_view_projects"><Projects /></ProtectedRoute>} />
 
         {/* User Routes */}
         <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />

@@ -3,15 +3,21 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
 
-const TaskModal = ({ task, onClose, onSave, users }) => {
+const TaskModal = ({ task, onClose, onSave }) => {
+  const [projects, setProjects] = useState([]);
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',
     priority: task?.priority || 'medium',
     status: task?.status || 'todo',
-    due_date: task?.due_date || ''
+    due_date: task?.due_date || '',
+    project_id: task?.project_id || ''
   });
   const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    api.get('/projects').then(res => setProjects(res.data)).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,10 +102,18 @@ const TaskModal = ({ task, onClose, onSave, users }) => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
+              <div>
+                <label style={labelStyle}>Project</label>
+                <select style={inputStyle} value={formData.project_id} onChange={e => setFormData({...formData, project_id: e.target.value})} onFocus={(e) => e.target.style.borderColor = '#FF7E5F'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}>
+                  <option value="">No Project</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              
               {task && (
                 <div>
                   <label style={labelStyle}>Status</label>
-                  <select style={inputStyle} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} onFocus={(e) => e.target.style.borderColor = '#2563EB'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}>
+                  <select style={inputStyle} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} onFocus={(e) => e.target.style.borderColor = '#FF7E5F'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}>
                     <option value="todo">To Do</option>
                     <option value="in_progress">In Progress</option>
                     <option value="review">In Review</option>
@@ -113,7 +127,7 @@ const TaskModal = ({ task, onClose, onSave, users }) => {
               <button type="button" onClick={onClose} style={{ padding: '0 1.25rem', height: '44px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'} onMouseLeave={e => e.currentTarget.style.background = 'white'}>
                 Cancel
               </button>
-              <button type="submit" disabled={loading} style={{ padding: '0 1.5rem', height: '44px', borderRadius: '8px', border: 'none', background: '#2563EB', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'background 0.2s', boxShadow: '0 1px 2px rgba(37, 99, 235, 0.1)' }} onMouseEnter={e => e.currentTarget.style.background = '#1D4ED8'} onMouseLeave={e => e.currentTarget.style.background = '#2563EB'}>
+              <button type="submit" disabled={loading} style={{ padding: '0 1.5rem', height: '44px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'box-shadow 0.2s', boxShadow: '0 4px 12px rgba(255, 126, 95, 0.3)' }} onMouseEnter={e => e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 126, 95, 0.4)'} onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 126, 95, 0.3)'}>
                 {loading ? <div className="spinner-fast" style={{ borderTopColor: 'white', width: '18px', height: '18px' }}></div> : (task ? 'Save Changes' : 'Create Task')}
               </button>
             </div>

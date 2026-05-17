@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun } from 'lucide-react';
+import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -192,6 +192,11 @@ const Sidebar = () => {
 
           {/* Tasks - always visible */}
           <NavLink to="/user/tasks" className="sidebar-item"><FolderKanban size={17} /> My Tasks</NavLink>
+
+          {/* Projects - Admin/Permitted only */}
+          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_projects) && (
+            <NavLink to="/projects" className="sidebar-item"><Folder size={17} /> Projects</NavLink>
+          )}
 
           {/* Admin-level pages — only shown if user has relevant permissions */}
           {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_tasks) && (
