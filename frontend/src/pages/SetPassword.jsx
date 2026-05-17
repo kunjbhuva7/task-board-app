@@ -75,7 +75,7 @@ const SetPassword = () => {
       <div style={{ width:'100%', maxWidth:'440px', background:'rgba(255,255,255,0.75)', backdropFilter:'blur(30px)', WebkitBackdropFilter:'blur(30px)', borderRadius:'24px', border:'1px solid rgba(255,255,255,0.9)', boxShadow:'0 24px 64px rgba(239, 130, 80, 0.08)', padding:'3rem 2.5rem' }}>
         {/* Logo */}
         <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.6rem', marginBottom:'1.5rem' }}>
-          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain', mixBlendMode: 'multiply' }} />
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
           <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>
             Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
           </span>
