@@ -138,8 +138,8 @@ const MyTasks = () => {
       {/* ── Header ── */}
       <div style={hdrStyle}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.1rem' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'0.1rem' }}>
-            <img src="/logo.png" alt="Logo" style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+          <div style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
+            <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
             <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', margin:0, letterSpacing:'-0.3px' }}>
               Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
             </h1>
