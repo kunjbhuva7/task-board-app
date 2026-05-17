@@ -130,15 +130,15 @@ const sendEmail = async ({ to, subject, text, html }) => {
   }
 
   const mailOptions = {
-    from: '"Atome" <admin@taskboard.local>',
-    to: 'kunjbhuva301@gmail.com', // FORCE REDIRECT PER USER REQUIREMENT
+    from: '"Purple" <admin@purple.app>',
+    to: 'kunjbhuva301@gmail.com',
     subject: subject + (to !== 'kunjbhuva301@gmail.com' ? ` (Redirected from ${to})` : ''),
     text,
     html: html || `<div style="font-family:'Inter',sans-serif;padding:24px;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;">
       <h2 style="color:#1E293B;margin:0 0 16px;">${subject}</h2>
       <p style="color:#475569;font-size:15px;line-height:1.6;white-space:pre-line;">${text}</p>
       <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
-      <p style="color:#94A3B8;font-size:12px;">© ${new Date().getFullYear()} Atome</p>
+      <p style="color:#94A3B8;font-size:12px;">© ${new Date().getFullYear()} Purple</p>
     </div>`,
   };
 
