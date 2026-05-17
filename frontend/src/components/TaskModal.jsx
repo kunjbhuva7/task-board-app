@@ -71,12 +71,12 @@ const TaskModal = ({ task, onClose, onSave, users }) => {
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1.25rem' }}>
               <label style={labelStyle}>Task Title <span style={{color: '#EF4444'}}>*</span></label>
-              <input type="text" required maxLength="100" style={inputStyle} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. Design homepage UI" onFocus={(e) => e.target.style.borderColor = '#2563EB'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'} />
+              <input type="text" required maxLength="100" style={inputStyle} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} onFocus={(e) => e.target.style.borderColor = '#2563EB'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'} />
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>
               <label style={labelStyle}>Description</label>
-              <textarea style={{...inputStyle, height: 'auto', padding: '12px 14px', resize: 'vertical', minHeight: '100px'}} rows="4" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Add details about this task..." onFocus={(e) => e.target.style.borderColor = '#2563EB'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}></textarea>
+              <textarea style={{...inputStyle, height: 'auto', padding: '12px 14px', resize: 'vertical', minHeight: '100px'}} rows="4" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} onFocus={(e) => e.target.style.borderColor = '#2563EB'} onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}></textarea>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>

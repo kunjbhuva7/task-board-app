@@ -1,3 +1,4 @@
+console.log("Starting...");
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -56,14 +57,22 @@ io.on('connection', (socket) => {
 app.use(cors());
 app.use(express.json());
 
-// Routes
+console.log('Loading routes...');
+console.log('Loading authRoutes...');
 const authRoutes = require('./routes/auth');
+console.log('Loading userRoutes...');
 const userRoutes = require('./routes/users');
+console.log('Loading taskRoutes...');
 const taskRoutes = require('./routes/tasks');
+console.log('Loading permissionRoutes...');
 const permissionRoutes = require('./routes/permissions');
+console.log('Loading activityRoutes...');
 const activityRoutes = require('./routes/activity');
+console.log('Loading dashboardRoutes...');
 const dashboardRoutes = require('./routes/dashboard');
+console.log('Loading eventRoutes...');
 const eventRoutes = require('./routes/events');
+console.log('Finished loading routes.');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -129,6 +138,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
+console.log('Starting server.listen()...');
 server.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });

@@ -28,7 +28,9 @@ router.post('/', async (req, res) => {
       INSERT INTO events (title, event_date, event_time, created_by)
       VALUES (?, ?, ?, ?)
     `);
-    insert.run(title, event_date, event_time, req.user.id);
+    const info = insert.run(title, event_date, event_time, req.user.id);
+
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Create Event', 'event', info.lastInsertRowid, `Scheduled event: ${title}`);
 
     // Send email notification right away
     await sendEmail({
@@ -40,6 +42,21 @@ router.post('/', async (req, res) => {
     res.json({ message: 'Event scheduled successfully' });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+// DELETE /api/events/:id
+router.delete('/:id', (req, res) => {
+  try {
+    const event = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    db.prepare('DELETE FROM events WHERE id = ?').run(req.params.id);
+    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Delete Event', 'event', req.params.id, `Deleted event: ${event.title}`);
+
+    res.json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error('Delete event error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

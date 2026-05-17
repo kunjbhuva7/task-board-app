@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle } from 'lucide-react';
+import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -13,20 +14,20 @@ const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
     <div style={{ position:'absolute', inset:0, background:'rgba(15, 23, 42, 0.4)', backdropFilter:'blur(8px)' }} onClick={onClose} />
     <div style={{
       position:'relative', width:'90vw', maxWidth:'1000px', height:'90vh',
-      background:'rgba(255,255,255,0.98)', border:'1px solid rgba(226, 232, 240, 0.8)',
+      background:'var(--glass-strong)', border:'1px solid var(--border)',
       boxShadow:'0 25px 50px -12px rgba(0, 0, 0, 0.25)', borderRadius:'24px',
       display:'flex', flexDirection:'column', animation:'fadeIn 0.2s ease',
       zIndex:201, overflow:'hidden'
     }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem 2rem', borderBottom:'1px solid rgba(226, 232, 240, 0.8)', background:'rgba(248, 250, 252, 0.5)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1.5rem 2rem', borderBottom:'1px solid var(--border)', background:'var(--table-head-bg)' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
-          <div style={{ padding:'0.5rem', background:'rgba(79, 70, 229, 0.1)', borderRadius:'10px', display:'flex' }}>
-            <Icon size={22} color="#4F46E5" />
+          <div style={{ padding:'0.5rem', background:'rgba(255, 126, 95, 0.1)', borderRadius:'10px', display:'flex' }}>
+            <Icon size={22} color="#FF7E5F" />
           </div>
-          <h3 style={{ margin:0, fontWeight:'800', color:'#0F172A', fontSize:'1.25rem', letterSpacing:'-0.02em' }}>{title}</h3>
+          <h3 style={{ margin:0, fontWeight:'800', color:'var(--text-primary)', fontSize:'1.25rem', letterSpacing:'-0.02em' }}>{title}</h3>
         </div>
-        <button onClick={onClose} style={{ background:'rgba(241, 245, 249, 1)', border:'1px solid rgba(226, 232, 240, 1)', borderRadius:'50%', cursor:'pointer', color:'#64748B', display:'flex', padding:'8px', transition:'all 0.2s' }}
-          onMouseEnter={e=>{e.currentTarget.style.color='#0F172A'; e.currentTarget.style.background='#E2E8F0';}} onMouseLeave={e=>{e.currentTarget.style.color='#64748B'; e.currentTarget.style.background='rgba(241, 245, 249, 1)';}}>
+        <button onClick={onClose} style={{ background:'var(--card-bg)', border:'1px solid var(--border)', borderRadius:'50%', cursor:'pointer', color:'var(--text-muted)', display:'flex', padding:'8px', transition:'all 0.2s' }}
+          onMouseEnter={e=>{e.currentTarget.style.color='var(--text-primary)';}} onMouseLeave={e=>{e.currentTarget.style.color='var(--text-muted)';}}>
           <X size={18} />
         </button>
       </div>
@@ -39,6 +40,7 @@ const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
 
 const Sidebar = () => {
   const { user, permissions, logout } = useContext(AuthContext);
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const { canViewAllTasks } = usePermissions();
   const navigate = useNavigate();
   const [openPanel, setOpenPanel] = useState(null);
@@ -51,6 +53,7 @@ const Sidebar = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [eventForm, setEventForm] = useState({ title: '', event_time: '' });
   const [addingEvent, setAddingEvent] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
 
   const fetchEvents = () => {
     api.get('/events').then(res => setEvents(res.data || [])).catch(() => {});
@@ -103,6 +106,22 @@ const Sidebar = () => {
       toast.error('Failed to schedule event');
     } finally {
       setAddingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = (id) => {
+    setEventToDelete(id);
+  };
+
+  const executeDeleteEvent = async () => {
+    if (!eventToDelete) return;
+    try {
+      await api.delete(`/events/${eventToDelete}`);
+      toast.success('Event deleted');
+      fetchEvents();
+      setEventToDelete(null);
+    } catch (err) {
+      toast.error('Failed to delete event');
     }
   };
 
@@ -187,12 +206,23 @@ const Sidebar = () => {
           )}
         </div>
 
-        <div className="sidebar-footer" style={{ padding:'1.5rem', borderTop:'1px solid rgba(0,0,0,0.05)' }}>
+        <div className="sidebar-footer" style={{ padding:'1rem 1.5rem 1.5rem', borderTop:'1px solid var(--border)' }}>
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', background: darkMode ? 'rgba(255,126,95,0.1)' : 'rgba(0,0,0,0.04)', border: darkMode ? '1px solid rgba(255,126,95,0.25)' : '1px solid rgba(0,0,0,0.08)', color:'var(--text-secondary)', fontSize:'0.875rem', fontWeight:'600', cursor:'pointer', padding:'0.6rem 0.75rem', borderRadius:'10px', transition:'all 0.2s', marginBottom:'0.5rem' }}
+            onMouseEnter={e => { e.currentTarget.style.background = darkMode ? 'rgba(255,126,95,0.2)' : 'rgba(0,0,0,0.08)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = darkMode ? 'rgba(255,126,95,0.1)' : 'rgba(0,0,0,0.04)'; }}>
+            <span style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>{darkMode ? <Sun size={16} color="#FF7E5F" /> : <Moon size={16} />} {darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+            <div style={{ width:'32px', height:'18px', borderRadius:'20px', background: darkMode ? '#FF7E5F' : '#CBD5E1', position:'relative', transition:'background 0.3s' }}>
+              <div style={{ width:'14px', height:'14px', borderRadius:'50%', background:'white', position:'absolute', top:'2px', left: darkMode ? '16px' : '2px', transition:'left 0.3s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }} />
+            </div>
+          </button>
           <button
             onClick={handleLogout}
-            style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'transparent', border:'none', color:'#6B7280', fontSize:'0.875rem', fontWeight:'600', cursor:'pointer', padding:'0.5rem', borderRadius:'8px', transition:'all 0.2s', width:'100%' }}
-            onMouseEnter={e => { e.currentTarget.style.background='#FEF2F2'; e.currentTarget.style.color='#EF4444'; }}
-            onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#6B7280'; }}>
+            style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'transparent', border:'none', color:'var(--text-muted)', fontSize:'0.875rem', fontWeight:'600', cursor:'pointer', padding:'0.5rem', borderRadius:'8px', transition:'all 0.2s', width:'100%' }}
+            onMouseEnter={e => { e.currentTarget.style.background='rgba(239,68,68,0.08)'; e.currentTarget.style.color='#EF4444'; }}
+            onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text-muted)'; }}>
             <LogOut size={17} /> Logout
           </button>
         </div>
@@ -360,9 +390,19 @@ const Sidebar = () => {
                               {new Date(ev.event_date + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} at {ev.event_time}
                             </div>
                           </div>
-                          <span style={{ fontSize:'0.7rem', padding:'0.2rem 0.55rem', borderRadius:'20px', background: ev.reminder_sent ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', color: ev.reminder_sent ? '#059669' : '#D97706', fontWeight:'700' }}>
-                            {ev.reminder_sent ? '✓ Reminded' : '⏰ Pending'}
-                          </span>
+                          <div style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
+                            <span style={{ fontSize:'0.7rem', padding:'0.2rem 0.55rem', borderRadius:'20px', background: ev.reminder_sent ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', color: ev.reminder_sent ? '#059669' : '#D97706', fontWeight:'700' }}>
+                              {ev.reminder_sent ? '✓ Reminded' : '⏰ Pending'}
+                            </span>
+                            <button onClick={() => handleDeleteEvent(ev.id)}
+                              style={{ background:'transparent', border:'none', color:'#EF4444', cursor:'pointer', padding:'4px', borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.2s' }}
+                              onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.1)'}
+                              onMouseLeave={e => e.currentTarget.style.background='transparent'}
+                              title="Delete Event"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -373,6 +413,28 @@ const Sidebar = () => {
 
           </div>
         </PanelOverlay>
+      )}
+
+      {/* ── Delete Confirmation Modal ── */}
+      {eventToDelete && (
+        <div style={{ position:'fixed', inset:0, zIndex:300, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(15, 23, 42, 0.4)', backdropFilter:'blur(4px)' }} onClick={() => setEventToDelete(null)} />
+          <div style={{
+            position:'relative', background:'white', width:'90%', maxWidth:'400px',
+            padding:'2rem', borderRadius:'20px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)',
+            textAlign:'center', animation:'fadeIn 0.2s ease', zIndex:301
+          }}>
+            <div style={{ width:'60px', height:'60px', borderRadius:'50%', background:'rgba(239,68,68,0.1)', color:'#EF4444', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1.5rem' }}>
+              <AlertTriangle size={30} />
+            </div>
+            <h3 style={{ margin:'0 0 0.5rem', fontSize:'1.25rem', color:'#0F172A', fontWeight:'800' }}>Delete Event?</h3>
+            <p style={{ margin:'0 0 2rem', color:'#64748B', fontSize:'0.95rem', lineHeight:1.5 }}>Are you sure you want to delete this event? No further notifications will be sent to anyone.</p>
+            <div style={{ display:'flex', gap:'1rem', justifyContent:'center' }}>
+              <button onClick={() => setEventToDelete(null)} style={{ flex:1, padding:'0.75rem', border:'1px solid rgba(0,0,0,0.1)', background:'white', borderRadius:'10px', color:'#475569', fontWeight:'600', cursor:'pointer' }}>Cancel</button>
+              <button onClick={executeDeleteEvent} style={{ flex:1, padding:'0.75rem', border:'none', background:'#EF4444', color:'white', borderRadius:'10px', fontWeight:'600', cursor:'pointer', boxShadow:'0 4px 14px rgba(239,68,68,0.4)' }}>Delete Event</button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

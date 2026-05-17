@@ -17,6 +17,7 @@ const Profile = () => {
       await api.put(`/auth/profile`, { name });
       toast.success('Profile updated');
       fetchUser();
+      await new Promise(resolve => setTimeout(resolve, 3000));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -36,6 +37,7 @@ const Profile = () => {
       const res = await api.put('/auth/password', { current: passData.current, newPass: passData.newPass });
       toast.success(res.data.message || 'Password updated successfully');
       setPassData({ current: '', newPass: '', confirm: '' });
+      await new Promise(resolve => setTimeout(resolve, 3000));
     } catch (err) {
       if (err.response?.data?.errors) {
         toast.error(err.response.data.errors[0].msg);
@@ -88,8 +90,8 @@ const Profile = () => {
               <label style={{ display:'block', fontSize:'0.85rem', fontWeight:'600', color:'#475569', marginBottom:'0.4rem' }}>Confirm New Password</label>
               <input type="password" required value={passData.confirm} onChange={e => setPassData({...passData, confirm: e.target.value})} style={{ width:'100%', padding:'0.75rem 1rem', borderRadius:'8px', border:'1px solid var(--border)', background:'rgba(255, 255, 255, 0.8)', color:'#1E293B', outline:'none', transition:'border-color 0.2s' }} onFocus={e => e.target.style.borderColor='#FF7E5F'} onBlur={e => e.target.style.borderColor='var(--border)'} />
             </div>
-            <button type="submit" disabled={passLoading} style={{ background:'rgba(241, 245, 249, 1)', color:'#1E293B', border:'1px solid var(--border)', padding:'0.8rem', borderRadius:'8px', fontWeight:'600', cursor:'pointer', display:'flex', justifyContent:'center', alignItems:'center', marginTop:'0.5rem', transition:'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.background='#E2E8F0'; }} onMouseLeave={e => { e.currentTarget.style.background='rgba(241, 245, 249, 1)'; }}>
-              {passLoading ? <div className="spinner-fast" style={{ width:18, height:18, borderTopColor:'#1E293B' }}></div> : 'Update Password'}
+            <button type="submit" disabled={passLoading} style={{ background:'linear-gradient(135deg,#FF7E5F,#FEB47B)', color:'white', border:'none', padding:'0.8rem', borderRadius:'8px', fontWeight:'600', cursor:'pointer', display:'flex', justifyContent:'center', alignItems:'center', marginTop:'0.5rem', transition:'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='linear-gradient(135deg,#e66e52,#e8a060)'} onMouseLeave={e => e.currentTarget.style.background='linear-gradient(135deg,#FF7E5F,#FEB47B)'}>
+              {passLoading ? <div className="spinner" style={{ width:18, height:18, borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white', animationDuration:'0.4s' }}></div> : 'Update Password'}
             </button>
           </form>
         </div>

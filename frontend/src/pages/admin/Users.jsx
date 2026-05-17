@@ -98,7 +98,13 @@ const Users = () => {
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
       {/* ── Page Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '800', color: '#0F172A' }}>Manage Users</h2>
+          <p style={{ margin: '0.3rem 0 0', color: '#64748B', fontSize: '0.875rem' }}>
+            {users.length} member{users.length !== 1 ? 's' : ''} in your workspace
+          </p>
+        </div>
         <button
           onClick={() => setShowModal(true)}
           style={{
@@ -112,12 +118,6 @@ const Users = () => {
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(255,126,95,0.4)'; }}>
           <UserPlus size={18} /> Add New User
         </button>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '800', color: '#0F172A' }}>Manage Users</h2>
-          <p style={{ margin: '0.3rem 0 0', color: '#64748B', fontSize: '0.875rem' }}>
-            {users.length} member{users.length !== 1 ? 's' : ''} in your workspace
-          </p>
-        </div>
       </div>
 
       {/* ── Table ── */}

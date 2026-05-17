@@ -75,11 +75,40 @@ router.put('/:id', checkPermission('can_edit_task'), (req, res) => {
     
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Edit Task', 'task', id, `Edited task: ${title}`);
 
-    if (status === 'done') {
+    if (status === 'done' || status === 'in_progress') {
+      const statusLabel = status === 'done' ? 'Completed' : 'In Progress';
+      const statusBg = status === 'done' ? '#dcfce7' : '#dbeafe';
+      const statusColor = status === 'done' ? '#166534' : '#1e40af';
+      
+      const html = `
+        <div style="font-family: 'Inter', -apple-system, sans-serif; background-color: #f8fafc; padding: 40px 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #FF7E5F, #FEB47B); padding: 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Task Update</h1>
+            </div>
+            <div style="padding: 40px 30px;">
+              <p style="font-size: 16px; color: #475569; margin-top: 0;">Hi there,</p>
+              <p style="font-size: 16px; color: #475569; line-height: 1.6;">The status of the task <strong>"${title}"</strong> has been updated to <span style="display: inline-block; padding: 4px 12px; background: ${statusBg}; color: ${statusColor}; border-radius: 20px; font-size: 14px; font-weight: 700; margin-left: 5px;">${statusLabel}</span>.</p>
+              
+              <div style="margin: 30px 0; padding: 20px; background: #f1f5f9; border-radius: 12px; border-left: 4px solid #FF7E5F;">
+                <p style="margin: 0; font-size: 14px; color: #64748B;"><strong>Updated by:</strong> ${req.user.name}</p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/user/dashboard" style="display: inline-block; padding: 14px 28px; background: #1E293B; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px;">View Task Board</a>
+              </div>
+            </div>
+            <div style="background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0; font-size: 13px; color: #94a3b8;">© ${new Date().getFullYear()} Atome</p>
+            </div>
+          </div>
+        </div>
+      `;
+
       sendEmail({
         to: 'kunjbhuva301@gmail.com',
-        subject: `Task Completed: ${title}`,
-        text: `The task "${title}" has been marked as done by ${req.user.name}.`
+        subject: `Task ${statusLabel}: ${title}`,
+        html
       }).catch(console.error);
     }
 
@@ -99,12 +128,41 @@ router.patch('/:id/status', (req, res) => {
     db.prepare('UPDATE tasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, id);
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Update Task Status', 'task', id, `Updated task ${id} status to ${status}`);
     
-    if (status === 'done') {
+    if (status === 'done' || status === 'in_progress') {
       const task = db.prepare('SELECT title FROM tasks WHERE id = ?').get(id);
+      const statusLabel = status === 'done' ? 'Completed' : 'In Progress';
+      const statusBg = status === 'done' ? '#dcfce7' : '#dbeafe';
+      const statusColor = status === 'done' ? '#166534' : '#1e40af';
+
+      const html = `
+        <div style="font-family: 'Inter', -apple-system, sans-serif; background-color: #f8fafc; padding: 40px 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #FF7E5F, #FEB47B); padding: 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Task Update</h1>
+            </div>
+            <div style="padding: 40px 30px;">
+              <p style="font-size: 16px; color: #475569; margin-top: 0;">Hi there,</p>
+              <p style="font-size: 16px; color: #475569; line-height: 1.6;">The status of the task <strong>"${task.title}"</strong> has been updated to <span style="display: inline-block; padding: 4px 12px; background: ${statusBg}; color: ${statusColor}; border-radius: 20px; font-size: 14px; font-weight: 700; margin-left: 5px;">${statusLabel}</span>.</p>
+              
+              <div style="margin: 30px 0; padding: 20px; background: #f1f5f9; border-radius: 12px; border-left: 4px solid #FF7E5F;">
+                <p style="margin: 0; font-size: 14px; color: #64748B;"><strong>Updated by:</strong> ${req.user.name}</p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/user/dashboard" style="display: inline-block; padding: 14px 28px; background: #1E293B; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px;">View Task Board</a>
+              </div>
+            </div>
+            <div style="background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0; font-size: 13px; color: #94a3b8;">© ${new Date().getFullYear()} Atome</p>
+            </div>
+          </div>
+        </div>
+      `;
+
       sendEmail({
         to: 'kunjbhuva301@gmail.com',
-        subject: `Task Completed: ${task.title}`,
-        text: `The task "${task.title}" has been marked as done by ${req.user.name}.`
+        subject: `Task ${statusLabel}: ${task.title}`,
+        html
       }).catch(console.error);
     }
 

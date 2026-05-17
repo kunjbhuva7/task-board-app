@@ -31,11 +31,16 @@ const SetPassword = () => {
     try {
       await api.post('/auth/set-password', { token, name, password });
       toast.success('Account created! You can now log in.');
+      
+      // Wait for 4 seconds before navigating
+      await new Promise(resolve => setTimeout(resolve, 4000));
+      
       navigate('/login');
     } catch (err) {
       if (err.response?.data?.errors) err.response.data.errors.forEach(e => toast.error(e.msg));
       else toast.error(err.response?.data?.message || 'Something went wrong');
-    } finally { setLoading(false); }
+      setLoading(false);
+    }
   };
 
   const inp = {
@@ -48,7 +53,7 @@ const SetPassword = () => {
 
   if (verifying) return (
     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh' }}>
-      <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(0,0,0,0.15)', borderTopcolor:'#1E293B' }}/>
+      <div className="spinner" style={{ width:36, height:36, borderColor:'rgba(0,0,0,0.15)', borderTopcolor:'#1E293B', animationDuration: '0.4s' }}/>
     </div>
   );
 
@@ -86,19 +91,19 @@ const SetPassword = () => {
           </div>
           <div>
             <label style={lbl}>Full Name</label>
-            <input type="text" required placeholder="e.g. John Doe" value={name} onChange={e => setName(e.target.value)} style={inp}
+            <input type="text" required value={name} onChange={e => setName(e.target.value)} style={inp}
               onFocus={e => { e.target.style.background='rgba(255,255,255,0.9)'; e.target.style.borderColor='#6366F1'; }}
               onBlur={e => { e.target.style.background='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(0,0,0,0.1)'; }}/>
           </div>
           <div>
             <label style={lbl}>Password</label>
-            <input type="password" required placeholder="Min 8 chars, 1 number, 1 symbol" value={password} onChange={e => setPassword(e.target.value)} style={inp}
+            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} style={inp}
               onFocus={e => { e.target.style.background='rgba(255,255,255,0.9)'; e.target.style.borderColor='#6366F1'; }}
               onBlur={e => { e.target.style.background='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(0,0,0,0.1)'; }}/>
           </div>
           <div>
             <label style={lbl}>Confirm Password</label>
-            <input type="password" required placeholder="Re-enter password" value={confirm} onChange={e => setConfirm(e.target.value)} style={inp}
+            <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} style={inp}
               onFocus={e => { e.target.style.background='rgba(255,255,255,0.9)'; e.target.style.borderColor='#6366F1'; }}
               onBlur={e => { e.target.style.background='rgba(255,255,255,0.8)'; e.target.style.borderColor='rgba(0,0,0,0.1)'; }}/>
           </div>
@@ -106,7 +111,7 @@ const SetPassword = () => {
           <button type="submit" disabled={loading} style={{ width:'100%', height:'48px', fontSize:'0.95rem', fontWeight:'700', borderRadius:'12px', background:'white', color:'#6366F1', border:'none', cursor: loading?'not-allowed':'pointer', display:'flex', justifyContent:'center', alignItems:'center', boxShadow:'0 4px 16px rgba(0,0,0,0.15)', marginTop:'0.4rem', transition:'all 0.2s' }}
             onMouseEnter={e => { if(!loading) e.currentTarget.style.transform='translateY(-1px)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; }}>
-            {loading ? <div className="spinner" style={{ borderColor:'rgba(99,102,241,0.3)', borderTopColor:'#6366F1' }}/> : 'Complete Setup →'}
+            {loading ? <div className="spinner" style={{ borderColor:'rgba(99,102,241,0.3)', borderTopColor:'#6366F1', animationDuration: '0.4s' }}/> : 'Complete Setup'}
           </button>
         </form>
       </div>

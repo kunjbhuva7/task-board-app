@@ -5,12 +5,8 @@ const authMiddleware = require('../middleware/auth');
 
 router.use(authMiddleware);
 
-// GET /api/activity (admin only)
+// GET /api/activity (all authenticated users)
 router.get('/', (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Forbidden' });
-  }
-
   try {
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;

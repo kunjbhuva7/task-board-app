@@ -20,10 +20,10 @@ const Login = () => {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.token, res.data.user);
       toast.success('Welcome back!');
+      await new Promise(resolve => setTimeout(resolve, 3000));
       navigate('/user/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
-    } finally {
       setLoading(false);
     }
   };
@@ -125,7 +125,7 @@ const Login = () => {
             onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; }}
           >
             {loading
-              ? <div className="spinner" style={{ borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white' }}></div>
+              ? <div className="spinner" style={{ borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white', animationDuration:'0.4s' }}></div>
               : 'Sign In'
             }
           </button>
