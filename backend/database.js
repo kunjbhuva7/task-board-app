@@ -109,7 +109,7 @@ const initDb = () => {
     CREATE TRIGGER IF NOT EXISTS notify_admins AFTER INSERT ON activity_log
     BEGIN
       INSERT INTO notifications (user_id, message)
-      SELECT id, NEW.details FROM users WHERE role = 'admin' AND id != NEW.user_id;
+      SELECT id, NEW.details FROM users WHERE role = 'admin';
     END;
   `);
 

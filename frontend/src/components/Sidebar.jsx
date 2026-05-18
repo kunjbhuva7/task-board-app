@@ -64,7 +64,7 @@ const Sidebar = () => {
       setNotifications(res.data.map(n => ({
         id: n.id,
         message: n.message,
-        time: new Date(n.created_at).toLocaleString(),
+        time: new Date(n.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase(),
         read: n.is_read === 1
       })));
     }).catch(() => {});

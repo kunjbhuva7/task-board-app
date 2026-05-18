@@ -104,7 +104,7 @@ const ActivityLog = () => {
                       </td>
                       <td style={{padding:'0.9rem 1.1rem'}}>
                         <div style={{display:'flex', alignItems:'center', gap:'0.3rem', color:'#94A3B8', fontSize:'0.78rem'}}>
-                          <Clock size={12}/>{new Date(act.created_at).toLocaleString()}
+                          <Clock size={12}/>{new Date(act.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase()}
                         </div>
                       </td>
                     </tr>
@@ -117,10 +117,10 @@ const ActivityLog = () => {
             <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'1rem 1.1rem', borderTop:'1px solid rgba(0,0,0,0.06)', background:'rgba(248,250,252,0.5)'}}>
               <div style={{display:'flex', alignItems:'center', gap:'1rem', fontSize:'0.85rem', color:'#64748B'}}>
                 <span>Showing {startIndex + 1} to {Math.min(startIndex + perPage, filtered.length)} of {filtered.length} results</span>
-                <div style={{display:'flex', alignItems:'center', border:'1px solid #E2E8F0', borderRadius:'6px', background:'white'}}>
-                  <span style={{padding:'0.3rem 0.6rem', borderRight:'1px solid #E2E8F0', background:'#F8FAFC', borderTopLeftRadius:'6px', borderBottomLeftRadius:'6px'}}>Per page</span>
+                <div style={{display:'flex', alignItems:'stretch', border:'1px solid #E2E8F0', borderRadius:'6px', background:'white'}}>
+                  <div style={{display:'flex', alignItems:'center', justifyContent:'center', padding:'0 0.8rem', borderRight:'1px solid #E2E8F0', background:'#F8FAFC', borderTopLeftRadius:'6px', borderBottomLeftRadius:'6px', fontSize:'0.85rem', color:'#475569', height:'32px'}}>Per page</div>
                   <select value={perPage} onChange={e => {setPerPage(Number(e.target.value)); setPage(1);}}
-                    style={{border:'none', background:'transparent', padding:'0.3rem 1.8rem 0.3rem 0.6rem', fontSize:'0.85rem', color:'#1E293B', outline:'none', appearance:'none', WebkitAppearance:'none', cursor:'pointer', backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat:'no-repeat', backgroundPosition:'right 0.4rem center'}}>
+                    style={{border:'none', background:'transparent', padding:'0 1.8rem 0 0.8rem', fontSize:'0.85rem', color:'#1E293B', outline:'none', appearance:'none', WebkitAppearance:'none', cursor:'pointer', backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat:'no-repeat', backgroundPosition:'right 0.5rem center', height:'32px'}}>
                     <option value={5}>5</option>
                     <option value={10}>10</option>
                     <option value={25}>25</option>
