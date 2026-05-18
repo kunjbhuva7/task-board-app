@@ -1,17 +1,9 @@
 const nodemailer = require('nodemailer');
 
-let transporter = null;
-
-/**
- * Initialize transporter - uses Ethereal test account if no SMTP credentials provided.
- * Ethereal captures emails so you can view them at https://ethereal.email
- */
-const getTransporter = async () => {
-  if (transporter) return transporter;
-
-  // If real SMTP credentials are provided, use them
-  if (process.env.SMTP_USER && process.env.SMTP_PASS && process.env.SMTP_USER !== '' && process.env.SMTP_PASS !== '') {
-    transporter = nodemailer.createTransport({
+// Create transporter fresh every call (no caching issue)
+const getTransporter = () => {
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    return nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT) || 587,
       secure: false,
@@ -20,134 +12,130 @@ const getTransporter = async () => {
         pass: process.env.SMTP_PASS,
       },
     });
-    console.log('✅ Email: Using configured SMTP credentials');
-    return transporter;
   }
-
-  // Otherwise, create an Ethereal test account automatically
-  try {
-    const testAccount = await nodemailer.createTestAccount();
-    transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-    console.log('📧 Email: Using Ethereal test account');
-    console.log('   View sent emails at: https://ethereal.email');
-    console.log('   Login: ', testAccount.user, '/', testAccount.pass);
-    return transporter;
-  } catch (err) {
-    console.error('⚠️  Email: Could not create test account. Emails will not be sent.');
-    return null;
-  }
+  return null;
 };
 
 const sendInviteEmail = async (to, inviteToken) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app';
+  const frontendUrl = (process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app').replace(/\/$/, '');
   const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
+  const year = new Date().getFullYear();
 
-  const transport = await getTransporter();
+  const transport = getTransporter();
 
   if (!transport) {
-    console.log('⚠️  Email transport not available. Invite link:', inviteLink);
+    console.log('⚠️  No SMTP configured. Invite link:', inviteLink);
     return { sent: false, inviteLink };
   }
 
-  const mailOptions = {
-    from: '"Purple" <admin@purple.app>',
-    to,
-    subject: '🚀 You are invited to join Purple!',
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <body style="margin:0;padding:0;background-color:#f4f7f6;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f4f7f6;padding:40px 0;">
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Purple Invitation</title></head>
+<body style="margin:0;padding:0;background-color:#FFF5F2;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#FFF5F2;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" border="0" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(255,126,95,0.12);">
+          
+          <!-- HEADER -->
           <tr>
-            <td align="center">
-              <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+            <td style="background:linear-gradient(135deg,#FF7E5F 0%,#FEB47B 100%);padding:48px 40px;text-align:center;">
+              <div style="display:inline-block;background:rgba(255,255,255,0.25);border-radius:16px;padding:12px 28px;margin-bottom:16px;">
+                <span style="font-size:28px;font-weight:900;color:#ffffff;letter-spacing:-1px;font-family:'Inter',sans-serif;">Purple</span>
+              </div>
+              <p style="color:rgba(255,255,255,0.95);margin:0;font-size:16px;font-weight:500;">You have been invited to join the team!</p>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:48px 40px;">
+              <p style="color:#1E293B;font-size:20px;font-weight:700;margin:0 0 16px;">Welcome aboard! 👋</p>
+              <p style="color:#475569;font-size:16px;line-height:1.7;margin:0 0 36px;">
+                An administrator has invited you to collaborate on <strong style="color:#FF7E5F;">Purple</strong>. 
+                We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.
+              </p>
+
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="background:linear-gradient(135deg, #FF7E5F 0%, #FEB47B 100%);padding:40px 30px;text-align:center;">
-                    <h1 style="color:#ffffff;margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px;">Purple</h1>
-                    <p style="color:rgba(255,255,255,0.95);margin:10px 0 0;font-size:16px;">You have been invited to join the team!</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:40px 30px;">
-                    <p style="color:#1e293b;font-size:18px;font-weight:600;margin:0 0 16px;">Welcome aboard! 👋</p>
-                    <p style="color:#475569;font-size:16px;line-height:1.6;margin:0 0 32px;">An administrator has invited you to collaborate on <strong>Purple</strong>. We are excited to have you on the team. Click the button below to securely set your password and access your dashboard.</p>
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                      <tr>
-                        <td align="center">
-                          <a href="${inviteLink}" style="display:inline-block;padding:16px 36px;background-color:#1E293B;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;letter-spacing:0.3px;box-shadow:0 4px 6px rgba(17,24,39,0.2);">Accept Invitation & Set Password</a>
-                        </td>
-                      </tr>
-                    </table>
-                    <p style="color:#64748B;font-size:14px;line-height:1.5;margin:32px 0 0;">If the button doesn't work, copy and paste this link into your browser:<br/><a href="${inviteLink}" style="color:#FF7E5F;word-break:break-all;text-decoration:none;">${inviteLink}</a></p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="background-color:#F8FAFC;padding:24px 30px;text-align:center;border-top:1px solid #E2E8F0;">
-                    <p style="color:#94A3B8;font-size:13px;margin:0;">This invite link will automatically expire in 48 hours for security reasons.</p>
-                    <p style="color:#CBD5E1;font-size:12px;margin:8px 0 0;">&copy; ${new Date().getFullYear()} Purple. All rights reserved.</p>
+                  <td align="center">
+                    <a href="${inviteLink}"
+                      style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#FF7E5F,#FEB47B);color:#ffffff;text-decoration:none;border-radius:12px;font-weight:700;font-size:16px;letter-spacing:0.3px;box-shadow:0 6px 20px rgba(255,126,95,0.4);">
+                      Accept Invitation &amp; Set Password
+                    </a>
                   </td>
                 </tr>
               </table>
+
+              <p style="color:#94A3B8;font-size:13px;line-height:1.6;margin:36px 0 0;text-align:center;">
+                If the button doesn't work, copy and paste this link:<br/>
+                <a href="${inviteLink}" style="color:#FF7E5F;word-break:break-all;text-decoration:none;font-size:12px;">${inviteLink}</a>
+              </p>
             </td>
           </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background:#FFF5F2;padding:24px 40px;text-align:center;border-top:1px solid #FFE4DC;">
+              <p style="color:#94A3B8;font-size:13px;margin:0 0 6px;">This invite link will expire in 48 hours for security reasons.</p>
+              <p style="color:#CBD5E1;font-size:12px;margin:0;">&copy; ${year} Purple. All rights reserved.</p>
+            </td>
+          </tr>
+
         </table>
-      </body>
-      </html>
-    `,
-  };
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
   try {
-    const info = await transport.sendMail(mailOptions);
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) {
-      console.log('📬 Preview email at:', previewUrl);
-    }
-    console.log('✉️  Email sent to:', to);
-    return { sent: true, inviteLink, previewUrl: previewUrl || null };
+    await transport.sendMail({
+      from: '"Purple" <' + process.env.SMTP_USER + '>',
+      to,
+      subject: '🚀 You are invited to join Purple!',
+      html,
+    });
+    console.log('✉️  Invite email sent to:', to);
+    return { sent: true, inviteLink };
   } catch (error) {
-    console.error('❌ Error sending email:', error.message);
+    console.error('❌ Error sending invite email:', error.message);
     return { sent: false, inviteLink };
   }
 };
 
 /**
- * Generic email sender.
- * Usage: sendEmail({ to, subject, text, html })
+ * Generic email sender for task notifications etc.
  */
 const sendEmail = async ({ to, subject, text, html }) => {
-  const transport = await getTransporter();
+  const transport = getTransporter();
   if (!transport) {
-    console.log('⚠️  Email transport not available. Cannot send:', subject);
+    console.log('⚠️  No SMTP configured. Cannot send:', subject);
     return { sent: false };
   }
 
-  const mailOptions = {
-    from: '"Purple" <admin@purple.app>',
-    to: 'kunjbhuva301@gmail.com',
-    subject: subject + (to !== 'kunjbhuva301@gmail.com' ? ` (Redirected from ${to})` : ''),
-    text,
-    html: html || `<div style="font-family:'Inter',sans-serif;padding:24px;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;">
-      <h2 style="color:#1E293B;margin:0 0 16px;">${subject}</h2>
-      <p style="color:#475569;font-size:15px;line-height:1.6;white-space:pre-line;">${text}</p>
-      <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;" />
-      <p style="color:#94A3B8;font-size:12px;">© ${new Date().getFullYear()} Purple</p>
-    </div>`,
-  };
+  const year = new Date().getFullYear();
+  const defaultHtml = `
+    <div style="font-family:'Inter',sans-serif;padding:32px;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+      <div style="background:linear-gradient(135deg,#FF7E5F,#FEB47B);padding:20px 24px;border-radius:12px;margin-bottom:24px;">
+        <span style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">Purple</span>
+      </div>
+      <h2 style="color:#1E293B;margin:0 0 16px;font-size:18px;">${subject}</h2>
+      <p style="color:#475569;font-size:15px;line-height:1.7;white-space:pre-line;">${text}</p>
+      <hr style="border:none;border-top:1px solid #F1F5F9;margin:24px 0;" />
+      <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${year} Purple</p>
+    </div>`;
 
   try {
-    const info = await transport.sendMail(mailOptions);
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) console.log('📬 Preview email at:', previewUrl);
-    console.log('✉️  Email sent to:', to, '| Subject:', subject);
-    return { sent: true, previewUrl: previewUrl || null };
+    await transport.sendMail({
+      from: '"Purple" <' + process.env.SMTP_USER + '>',
+      to: 'kunjbhuva301@gmail.com',
+      subject: subject + (to !== 'kunjbhuva301@gmail.com' ? ` (from ${to})` : ''),
+      text,
+      html: html || defaultHtml,
+    });
+    console.log('✉️  Email sent | Subject:', subject);
+    return { sent: true };
   } catch (error) {
     console.error('❌ Error sending email:', error.message);
     return { sent: false };
