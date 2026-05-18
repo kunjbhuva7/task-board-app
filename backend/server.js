@@ -1,14 +1,25 @@
 console.log("Starting...");
+console.log("Loading express...");
 const express = require('express');
+console.log("Loading cors...");
 const cors = require('cors');
+console.log("Loading dotenv...");
 const dotenv = require('dotenv');
+console.log("Loading path...");
 const path = require('path');
+console.log("Loading http...");
 const http = require('http');
+console.log("Loading socket.io...");
 const { Server } = require('socket.io');
+console.log("Loading node-cron...");
 const cron = require('node-cron');
+console.log("Loading db...");
 const db = require('./database');
+console.log("Loading email utils...");
 const sendEmail = require('./utils/email');
+console.log("Loading redis...");
 const { createClient } = require('redis');
+console.log("Loading socket.io redis-adapter...");
 const { createAdapter } = require('@socket.io/redis-adapter');
 
 dotenv.config();
@@ -123,7 +134,7 @@ cron.schedule('* * * * *', async () => {
 const fs = require('fs');
 const frontendDist = path.join(__dirname, '../frontend/dist');
 
-if (fs.existsSync(frontendDist)) {
+if (fs.existsSync(path.join(frontendDist, 'index.html'))) {
   app.use(express.static(frontendDist));
   // Safely handle all other routes (React Router)
   app.use((req, res, next) => {
