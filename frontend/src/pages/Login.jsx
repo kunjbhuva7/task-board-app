@@ -11,7 +11,11 @@ const Login = () => {
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  if (user) navigate('/user/dashboard');
+  useEffect(() => {
+    if (user) {
+      navigate('/user/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

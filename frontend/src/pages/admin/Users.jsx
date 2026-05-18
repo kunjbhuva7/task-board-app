@@ -35,7 +35,7 @@ const Users = () => {
       toast.success('User created & invite sent!');
       if (res.data.previewUrl) {
         toast((t) => (
-          <span>Test email! <a href={res.data.previewUrl} target="_blank" rel="noopener noreferrer" style={{color:'#FF7E5F',fontWeight:'bold'}}>View</a></span>
+          <span>Test email! <a href={res.data.previewUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FF7E5F', fontWeight: 'bold' }}>View</a></span>
         ), { duration: 10000 });
       } else if (!res.data.emailSent && res.data.inviteLink) {
         toast('Email failed. Link: ' + res.data.inviteLink, { icon: '⚠️', duration: 10000 });
@@ -56,7 +56,7 @@ const Users = () => {
       toast.success('Invite resent!');
       if (res.data.previewUrl) {
         toast((t) => (
-          <span>Email preview: <a href={res.data.previewUrl} target="_blank" rel="noopener noreferrer" style={{color:'#FF7E5F',fontWeight:'bold'}}>View</a></span>
+          <span>Email preview: <a href={res.data.previewUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FF7E5F', fontWeight: 'bold' }}>View</a></span>
         ), { duration: 10000 });
       }
       fetchUsers();
