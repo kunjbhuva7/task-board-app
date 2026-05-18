@@ -256,7 +256,7 @@ const Users = () => {
               <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem' }}>Email Address *</label>
-                  <input type="email" required placeholder="name@company.com" value={formData.email}
+                  <input type="email" required placeholder="" value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                     style={inputSt}
                     onFocus={e => e.target.style.borderColor = '#FF7E5F'}
@@ -265,7 +265,7 @@ const Users = () => {
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '700', color: '#475569', marginBottom: '0.5rem' }}>Role</label>
                   <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}
-                    style={inputSt}
+                    style={{ ...inputSt, appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', paddingRight: '2.5rem' }}
                     onFocus={e => e.target.style.borderColor = '#FF7E5F'}
                     onBlur={e => e.target.style.borderColor = 'rgba(226,232,240,0.8)'}>
                     <option value="member">Member</option>

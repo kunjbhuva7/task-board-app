@@ -95,6 +95,22 @@ const initDb = () => {
       reminder_sent INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- Notifications table
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER REFERENCES users(id),
+      message TEXT NOT NULL,
+      is_read INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Trigger to auto-generate notifications on activity
+    CREATE TRIGGER IF NOT EXISTS notify_admins AFTER INSERT ON activity_log
+    BEGIN
+      INSERT INTO notifications (user_id, message)
+      SELECT id, NEW.details FROM users WHERE role = 'admin' AND id != NEW.user_id;
+    END;
   `);
 
   // Add columns if they do not exist (for existing databases)

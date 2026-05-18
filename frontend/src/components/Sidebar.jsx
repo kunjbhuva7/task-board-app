@@ -59,17 +59,19 @@ const Sidebar = () => {
     api.get('/events').then(res => setEvents(res.data || [])).catch(() => {});
   };
 
-  useEffect(() => {
-    api.get('/activity').then(res => {
-      const acts = res.data.slice(0, 15).map((a, i) => ({
-        id: a.id,
-        type: a.target_type,
-        message: `${a.user_name || 'System'} — ${a.action}${a.details ? ': ' + a.details : ''}`,
-        time: new Date(a.created_at).toLocaleString(),
-        read: i > 2,
-      }));
-      setNotifications(acts);
+  const fetchNotifications = () => {
+    api.get('/notifications').then(res => {
+      setNotifications(res.data.map(n => ({
+        id: n.id,
+        message: n.message,
+        time: new Date(n.created_at).toLocaleString(),
+        read: n.is_read === 1
+      })));
     }).catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchNotifications();
 
     api.get('/tasks').then(res => {
       const dates = (res.data || []).filter(t => t.due_date).map(t => ({
@@ -84,6 +86,20 @@ const Sidebar = () => {
   }, []);
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.put('/notifications/read-all');
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {}
+  };
+
+  const handleClearNotifications = async () => {
+    try {
+      await api.delete('/notifications');
+      setNotifications([]);
+    } catch (err) {}
+  };
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
@@ -253,8 +269,14 @@ const Sidebar = () => {
       {/* ── Notification Panel ── */}
       {openPanel === 'notification' && (
         <PanelOverlay title="Notifications" icon={Bell} onClose={() => setOpenPanel(null)}>
+          <div style={{ display:'flex', justifyContent:'flex-end', gap:'1rem', marginBottom:'1.2rem' }}>
+            <button onClick={handleMarkAllAsRead} style={{ background:'none', border:'none', color:'#4F46E5', fontWeight:'700', cursor:'pointer', fontSize:'0.82rem', padding:0 }}>Mark all as read</button>
+            <button onClick={handleClearNotifications} style={{ background:'none', border:'none', color:'#EF4444', fontWeight:'700', cursor:'pointer', fontSize:'0.82rem', padding:0 }}>Clear</button>
+          </div>
           <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
-            {notifications.map(n => (
+            {notifications.length === 0 ? (
+              <div style={{ textAlign:'center', color:'#94A3B8', padding:'2rem 0', fontSize:'0.9rem' }}>No notifications</div>
+            ) : notifications.map(n => (
               <div key={n.id} style={{
                 padding:'1rem', borderRadius:'12px', border:'1px solid rgba(226,232,240,0.8)',
                 background: n.read ? 'rgba(248,250,252,0.6)' : 'rgba(79,70,229,0.06)',
