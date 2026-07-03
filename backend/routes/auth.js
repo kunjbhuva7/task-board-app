@@ -201,4 +201,19 @@ router.put('/password', require('../middleware/auth'), [
   } catch (error) { res.status(500).json({ message: 'Server error' }); }
 });
 
+// Temporary: test SMTP connectivity (remove after debugging)
+router.get('/test-email', async (req, res) => {
+  try {
+    const sendEmail = require('../utils/email');
+    const result = await sendEmail({
+      to: 'kunjbhuva301@gmail.com',
+      subject: 'Purple SMTP Test',
+      text: 'If you received this, SMTP is working on Railway!'
+    });
+    res.json({ success: true, result, env_check: { SMTP_USER: !!process.env.SMTP_USER, SMTP_PASS: !!process.env.SMTP_PASS, SMTP_HOST: process.env.SMTP_HOST || 'not set' } });
+  } catch (err) {
+    res.json({ success: false, error: err.message, env_check: { SMTP_USER: !!process.env.SMTP_USER, SMTP_PASS: !!process.env.SMTP_PASS, SMTP_HOST: process.env.SMTP_HOST || 'not set' } });
+  }
+});
+
 module.exports = router;
