@@ -1,28 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const { db } = require('../database');
 const authMiddleware = require('../middleware/auth');
 const sendEmail = require('../utils/email');
 
 // GET /api/expenses/:id/receipt - Public receipt download (accessible from email)
-router.get('/:id/receipt', (req, res) => {
+router.get('/:id/receipt', async (req, res) => {
   const { id } = req.params;
   try {
-    const expense = db.prepare('SELECT receipt_filename, receipt_mimetype, receipt_data FROM expenses WHERE id = ?').get(id);
+    const expense = await db.get('SELECT receipt_filename, receipt_mimetype, receipt_data FROM expenses WHERE id = $1', [id]);
     if (!expense || !expense.receipt_data) {
       return res.status(404).send('Receipt not found');
     }
-    
+
     // Parse the data URI e.g. "data:image/png;base64,iVBORw0KGgoAAA..."
     const match = expense.receipt_data.match(/^data:([^;]+);base64,(.+)$/);
     if (!match) {
       return res.status(400).send('Invalid receipt data format');
     }
-    
+
     const contentType = match[1];
     const base64Data = match[2];
     const buffer = Buffer.from(base64Data, 'base64');
-    
+
     res.setHeader('Content-Type', contentType);
     if (expense.receipt_filename) {
       res.setHeader('Content-Disposition', `inline; filename="${expense.receipt_filename}"`);
@@ -46,46 +46,47 @@ router.use((req, res, next) => {
 });
 
 // GET /api/expenses - Get all expenses with optional filtering
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { category, search, startDate, endDate, payment_mode, tag } = req.query;
 
   try {
     let sql = 'SELECT * FROM expenses WHERE 1=1';
     const params = [];
+    let paramIndex = 1;
 
     if (category && category !== 'All') {
-      sql += ' AND category = ?';
+      sql += ` AND category = $${paramIndex++}`;
       params.push(category);
     }
 
     if (search) {
-      sql += ' AND description LIKE ?';
+      sql += ` AND description LIKE $${paramIndex++}`;
       params.push(`%${search}%`);
     }
 
     if (startDate) {
-      sql += ' AND expense_date >= ?';
+      sql += ` AND expense_date >= $${paramIndex++}`;
       params.push(startDate);
     }
 
     if (endDate) {
-      sql += ' AND expense_date <= ?';
+      sql += ` AND expense_date <= $${paramIndex++}`;
       params.push(endDate);
     }
 
     if (payment_mode && payment_mode !== 'All') {
-      sql += ' AND payment_mode = ?';
+      sql += ` AND payment_mode = $${paramIndex++}`;
       params.push(payment_mode);
     }
 
     if (tag && tag !== 'All') {
-      sql += ' AND tags LIKE ?';
+      sql += ` AND tags LIKE $${paramIndex++}`;
       params.push(`%${tag}%`);
     }
 
     sql += ' ORDER BY expense_date DESC, id DESC';
 
-    const expenses = db.prepare(sql).all(...params);
+    const expenses = await db.all(sql, params);
     res.json(expenses);
   } catch (error) {
     console.error('Error fetching expenses:', error);
@@ -94,7 +95,7 @@ router.get('/', (req, res) => {
 });
 
 // POST /api/expenses - Add new expense
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { amount, description, expense_date, category, payment_mode, tags, receipt_filename, receipt_mimetype, receipt_data } = req.body;
 
   if (!amount || isNaN(amount) || Number(amount) <= 0) {
@@ -108,44 +109,45 @@ router.post('/', (req, res) => {
   }
 
   try {
-    const insert = db.prepare(`
-      INSERT INTO expenses (amount, description, expense_date, category, payment_mode, tags, receipt_filename, receipt_mimetype, receipt_data, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const info = insert.run(
-      Number(amount),
-      description,
-      expense_date,
-      category || 'Other',
-      payment_mode || 'Cash',
-      tags || null,
-      receipt_filename || null,
-      receipt_mimetype || null,
-      receipt_data || null,
-      req.user.id
+    const result = await db.run(
+      `INSERT INTO expenses (amount, description, expense_date, category, payment_mode, tags, receipt_filename, receipt_mimetype, receipt_data, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [
+        Number(amount),
+        description,
+        expense_date,
+        category || 'Other',
+        payment_mode || 'Cash',
+        tags || null,
+        receipt_filename || null,
+        receipt_mimetype || null,
+        receipt_data || null,
+        req.user.id
+      ]
     );
+    const expenseId = result.rows[0].id;
 
     // Log Activity
-    db.prepare(`
-      INSERT INTO activity_log (user_id, action, target_type, target_id, details)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(
-      req.user.id,
-      'Create Expense',
-      'expense',
-      info.lastInsertRowid,
-      `Created expense: ${description} (₹${amount})`
+    await db.run(
+      `INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, 'Create Expense', 'expense', expenseId, `Created expense: ${description} (₹${amount})`]
+    );
+
+    // Inline notification for admins
+    const notifDetails = `Created expense: ${description} (₹${amount})`;
+    await db.run(
+      "INSERT INTO notifications (user_id, message) SELECT id, $1 FROM users WHERE role = 'admin'",
+      [notifDetails]
     );
 
     // Notify clients
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
-    // Trigger Email Notification (non-blocking) — only if the user has email notifications enabled
-    const pref = db.prepare('SELECT email_notifications FROM users WHERE id = ?').get(req.user.id);
+    // Trigger Email Notification (non-blocking)
+    const pref = await db.get('SELECT email_notifications FROM users WHERE id = $1', [req.user.id]);
     if (!pref || pref.email_notifications !== 0) {
       sendExpenseNotification({
-        id: info.lastInsertRowid,
+        id: expenseId,
         amount: Number(amount),
         description,
         expense_date,
@@ -158,7 +160,7 @@ router.post('/', (req, res) => {
 
     res.status(201).json({
       message: 'Expense recorded successfully',
-      expenseId: info.lastInsertRowid
+      expenseId
     });
   } catch (error) {
     console.error('Error creating expense:', error);
@@ -167,7 +169,7 @@ router.post('/', (req, res) => {
 });
 
 // PUT /api/expenses/:id - Update an expense
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { amount, description, expense_date, category, payment_mode, tags, receipt_filename, receipt_mimetype, receipt_data, clear_receipt } = req.body;
 
@@ -183,7 +185,7 @@ router.put('/:id', (req, res) => {
 
   try {
     // Check if expense exists
-    const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(id);
+    const existing = await db.get('SELECT * FROM expenses WHERE id = $1', [id]);
     if (!existing) {
       return res.status(404).json({ message: 'Expense not found' });
     }
@@ -203,37 +205,32 @@ router.put('/:id', (req, res) => {
       finalData = receipt_data;
     }
 
-    db.prepare(`
-      UPDATE expenses
-      SET amount = ?, description = ?, expense_date = ?, category = ?, payment_mode = ?, tags = ?, receipt_filename = ?, receipt_mimetype = ?, receipt_data = ?
-      WHERE id = ?
-    `).run(
-      Number(amount),
-      description,
-      expense_date,
-      category || 'Other',
-      payment_mode || 'Cash',
-      tags || null,
-      finalFilename,
-      finalMimetype,
-      finalData,
-      id
+    await db.run(
+      `UPDATE expenses
+       SET amount = $1, description = $2, expense_date = $3, category = $4, payment_mode = $5, tags = $6, receipt_filename = $7, receipt_mimetype = $8, receipt_data = $9
+       WHERE id = $10`,
+      [
+        Number(amount),
+        description,
+        expense_date,
+        category || 'Other',
+        payment_mode || 'Cash',
+        tags || null,
+        finalFilename,
+        finalMimetype,
+        finalData,
+        id
+      ]
     );
 
     // Log Activity
-    db.prepare(`
-      INSERT INTO activity_log (user_id, action, target_type, target_id, details)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(
-      req.user.id,
-      'Edit Expense',
-      'expense',
-      id,
-      `Edited expense: ${description} (₹${amount})`
+    await db.run(
+      `INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, 'Edit Expense', 'expense', id, `Edited expense: ${description} (₹${amount})`]
     );
 
     // Notify clients
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     res.json({ message: 'Expense updated successfully' });
   } catch (error) {
@@ -243,32 +240,26 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /api/expenses/:id - Delete an expense
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
     // Check if expense exists
-    const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(id);
+    const existing = await db.get('SELECT * FROM expenses WHERE id = $1', [id]);
     if (!existing) {
       return res.status(404).json({ message: 'Expense not found' });
     }
 
-    db.prepare('DELETE FROM expenses WHERE id = ?').run(id);
+    await db.run('DELETE FROM expenses WHERE id = $1', [id]);
 
     // Log Activity
-    db.prepare(`
-      INSERT INTO activity_log (user_id, action, target_type, target_id, details)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(
-      req.user.id,
-      'Delete Expense',
-      'expense',
-      id,
-      `Deleted expense: ${existing.description} (₹${existing.amount})`
+    await db.run(
+      `INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, 'Delete Expense', 'expense', id, `Deleted expense: ${existing.description} (₹${existing.amount})`]
     );
 
     // Notify clients
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     res.json({ message: 'Expense deleted successfully' });
   } catch (error) {
@@ -285,7 +276,7 @@ const getCategoryEmailStyle = (cat) => {
     'Other': '📦', 'Shopping': '🛍️'
   };
   const emoji = emojis[c] || '📦';
-  
+
   if (c === 'Food') return { bg: '#FFF1EE', color: '#FF7E5F', emoji };
   if (c === 'Travel') return { bg: '#EEF2FF', color: '#3B82F6', emoji };
   if (c === 'Bills') return { bg: '#FEE2E2', color: '#EF4444', emoji };
@@ -306,10 +297,10 @@ const getPaymentModeEmailStyle = (mode) => {
 
 const renderEmailTags = (tagsStr) => {
   if (!tagsStr) return '<span style="color:#64748B;font-size:14px;">-</span>';
-  
+
   const tags = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
   if (tags.length === 0) return '<span style="color:#64748B;font-size:14px;">-</span>';
-  
+
   const tagStyles = {
     'Lunch': { bg: '#FFF1EE', color: '#FF7E5F', emoji: '🍔' },
     'Weekend': { bg: '#EEF2FF', color: '#3B82F6', emoji: '🏖️' },
@@ -320,11 +311,11 @@ const renderEmailTags = (tagsStr) => {
     'Chai & Coffee': { bg: '#FEF3C7', color: '#B45309', emoji: '☕' },
     'Other': { bg: '#F1F5F9', color: '#64748B', emoji: '📦' }
   };
-  
+
   return tags.map(t => {
     const matchedKey = Object.keys(tagStyles).find(k => k.toLowerCase() === t.toLowerCase());
     const style = tagStyles[matchedKey] || { bg: '#F5F3FF', color: '#8B5CF6', emoji: '🏷️' };
-    
+
     return `<span style="display:inline-block;padding:4px 8px;background-color:${style.bg};color:${style.color};border-radius:20px;font-size:12px;font-weight:600;margin-right:4px;margin-bottom:4px;white-space:nowrap;font-family:sans-serif;">
       ${style.emoji} ${t}
     </span>`;
@@ -335,16 +326,16 @@ const sendExpenseNotification = async (expense) => {
   const { id, amount, description, expense_date, category, payment_mode, tags, hasReceipt } = expense;
 
   const now = new Date();
-  
+
   // Format Date: e.g. "27 May 2026"
   const dateOptions = { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric' };
   const formattedDate = now.toLocaleDateString('en-IN', dateOptions);
-  
+
   // Format Time: e.g. "06:16 PM"
   const timeOptions = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true };
   let formattedTime = now.toLocaleTimeString('en-IN', timeOptions);
   formattedTime = formattedTime.toUpperCase();
-  
+
   const istDateTime = `${formattedDate} • ${formattedTime} IST`;
 
   // Parse expense date

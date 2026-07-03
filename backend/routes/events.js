@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const { db } = require('../database');
 const authMiddleware = require('../middleware/auth');
 const sendEmail = require('../utils/email');
 
 router.use(authMiddleware);
 
 // GET /api/events
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const events = db.prepare('SELECT * FROM events ORDER BY event_date, event_time').all();
+    const events = await db.all('SELECT * FROM events ORDER BY event_date, event_time');
     res.json(events);
   } catch (error) {
+    console.error('GET events error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -24,13 +25,23 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const insert = db.prepare(`
-      INSERT INTO events (title, event_date, event_time, created_by)
-      VALUES (?, ?, ?, ?)
-    `);
-    const info = insert.run(title, event_date, event_time, req.user.id);
+    const result = await db.run(
+      `INSERT INTO events (title, event_date, event_time, created_by) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [title, event_date, event_time, req.user.id]
+    );
+    const eventId = result.rows[0].id;
 
-    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Create Event', 'event', info.lastInsertRowid, `Scheduled event: ${title}`);
+    await db.run(
+      `INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, 'Create Event', 'event', eventId, `Scheduled event: ${title}`]
+    );
+
+    // Inline notification for admins
+    const details = `Scheduled event: ${title}`;
+    await db.run(
+      "INSERT INTO notifications (user_id, message) SELECT id, $1 FROM users WHERE role = 'admin'",
+      [details]
+    );
 
     // Send email notification right away
     await sendEmail({
@@ -42,18 +53,22 @@ router.post('/', async (req, res) => {
     req.app.get('io')?.emit('tasks_updated');
     res.json({ message: 'Event scheduled successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('POST event error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 // DELETE /api/events/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const event = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
+    const event = await db.get('SELECT * FROM events WHERE id = $1', [req.params.id]);
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    db.prepare('DELETE FROM events WHERE id = ?').run(req.params.id);
-    db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Delete Event', 'event', req.params.id, `Deleted event: ${event.title}`);
+    await db.run('DELETE FROM events WHERE id = $1', [req.params.id]);
+    await db.run(
+      `INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, 'Delete Event', 'event', req.params.id, `Deleted event: ${event.title}`]
+    );
 
     req.app.get('io')?.emit('tasks_updated');
     res.json({ message: 'Event deleted successfully' });

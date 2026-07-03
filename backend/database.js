@@ -1,298 +1,280 @@
-const Database = require('better-sqlite3');
+/**
+ * PostgreSQL Database Layer for Purple
+ * Replaces better-sqlite3 with pg (async).
+ * Exports a db object with helper methods that mimic the old sync API
+ * but work with PostgreSQL via a connection pool.
+ *
+ * Env: DATABASE_URL (Railway auto-injects this when you add a PostgreSQL service)
+ * Fallback: postgres://localhost:5432/purple_dev (local dev)
+ */
+
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const path = require('path');
 
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'database.db');
-console.log('Connecting to DB at:', dbPath);
-const db = new Database(dbPath);
-console.log('DB connected.');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgres://localhost:5432/purple_dev',
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
-db.pragma('journal_mode = WAL');
-db.pragma('busy_timeout = 5000');
-db.pragma('synchronous = NORMAL');
+pool.on('error', (err) => {
+  console.error('❌ Unexpected PostgreSQL pool error:', err.message);
+});
 
-const initDb = () => {
-  db.exec(`
-    -- Users table
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT,
-      role TEXT DEFAULT 'member',
-      invite_token TEXT,
-      invite_token_expiry DATETIME,
-      is_active INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+// ── Helper: the db object exposed to routes ──
+const db = {
+  pool,
 
-    -- Permissions table
-    CREATE TABLE IF NOT EXISTS permissions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER UNIQUE REFERENCES users(id),
-      can_create_task INTEGER DEFAULT 1,
-      can_edit_task INTEGER DEFAULT 1,
-      can_delete_task INTEGER DEFAULT 0,
-      can_view_all_tasks INTEGER DEFAULT 1,
-      can_manage_users INTEGER DEFAULT 0,
-      can_view_users INTEGER DEFAULT 0,
-      can_create_users INTEGER DEFAULT 0,
-      can_edit_users INTEGER DEFAULT 0,
-      can_delete_users INTEGER DEFAULT 0,
-      can_manage_roles INTEGER DEFAULT 0,
-      can_manage_tasks INTEGER DEFAULT 0,
-      can_approve_requests INTEGER DEFAULT 0,
-      can_view_analytics INTEGER DEFAULT 0,
-      can_manage_events INTEGER DEFAULT 0,
-      can_manage_notifications INTEGER DEFAULT 0,
-      can_manage_settings INTEGER DEFAULT 0,
-      can_view_reports INTEGER DEFAULT 0,
-      can_export_data INTEGER DEFAULT 0,
-      is_read_only INTEGER DEFAULT 0,
-      is_super_admin INTEGER DEFAULT 0
-    );
+  // Run a query, return { rows, rowCount }
+  async query(text, params) {
+    return pool.query(text, params);
+  },
 
-    -- Tasks table
-    CREATE TABLE IF NOT EXISTS tasks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT,
-      status TEXT DEFAULT 'todo',
-      priority TEXT DEFAULT 'medium',
-      created_by INTEGER REFERENCES users(id),
-      due_date DATE,
-      approval_status TEXT DEFAULT 'approved',
-      project_id INTEGER REFERENCES projects(id),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+  // Get one row (or null)
+  async get(text, params) {
+    const { rows } = await pool.query(text, params);
+    return rows[0] || null;
+  },
 
-    -- Projects table
-    CREATE TABLE IF NOT EXISTS projects (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      description TEXT,
-      created_by INTEGER REFERENCES users(id),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+  // Get all rows
+  async all(text, params) {
+    const { rows } = await pool.query(text, params);
+    return rows;
+  },
 
-    -- Activity log
-    CREATE TABLE IF NOT EXISTS activity_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER REFERENCES users(id),
-      action TEXT NOT NULL,
-      target_type TEXT,
-      target_id INTEGER,
-      details TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+  // Run an INSERT/UPDATE/DELETE, return { rowCount, rows } (with RETURNING support)
+  async run(text, params) {
+    const res = await pool.query(text, params);
+    return res;
+  },
+};
 
-    -- Events table
-    CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      event_date DATE NOT NULL,
-      event_time TEXT NOT NULL,
-      created_by INTEGER REFERENCES users(id),
-      reminder_sent INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+// ── Schema initialization ──
+const initDb = async () => {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      -- Users table
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT,
+        role TEXT DEFAULT 'member',
+        invite_token TEXT,
+        invite_token_expiry TIMESTAMPTZ,
+        is_active INTEGER DEFAULT 1,
+        reset_token TEXT,
+        reset_token_expiry TIMESTAMPTZ,
+        email_notifications INTEGER DEFAULT 1,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-    -- Notifications table
-    CREATE TABLE IF NOT EXISTS notifications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER REFERENCES users(id),
-      message TEXT NOT NULL,
-      is_read INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+      -- Permissions table
+      CREATE TABLE IF NOT EXISTS permissions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        can_create_task INTEGER DEFAULT 1,
+        can_edit_task INTEGER DEFAULT 1,
+        can_delete_task INTEGER DEFAULT 0,
+        can_view_all_tasks INTEGER DEFAULT 1,
+        can_manage_users INTEGER DEFAULT 0,
+        can_view_users INTEGER DEFAULT 0,
+        can_create_users INTEGER DEFAULT 0,
+        can_edit_users INTEGER DEFAULT 0,
+        can_delete_users INTEGER DEFAULT 0,
+        can_manage_roles INTEGER DEFAULT 0,
+        can_manage_tasks INTEGER DEFAULT 0,
+        can_approve_requests INTEGER DEFAULT 0,
+        can_view_analytics INTEGER DEFAULT 0,
+        can_manage_events INTEGER DEFAULT 0,
+        can_manage_notifications INTEGER DEFAULT 0,
+        can_manage_settings INTEGER DEFAULT 0,
+        can_view_reports INTEGER DEFAULT 0,
+        can_export_data INTEGER DEFAULT 0,
+        is_read_only INTEGER DEFAULT 0,
+        is_super_admin INTEGER DEFAULT 0,
+        can_view_projects INTEGER DEFAULT 0,
+        can_manage_projects INTEGER DEFAULT 0
+      );
 
-    -- Trigger to auto-generate notifications on activity
-    CREATE TRIGGER IF NOT EXISTS notify_admins AFTER INSERT ON activity_log
-    BEGIN
-      INSERT INTO notifications (user_id, message)
-      SELECT id, NEW.details FROM users WHERE role = 'admin';
-    END;
+      -- Tasks table
+      CREATE TABLE IF NOT EXISTS tasks (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        status TEXT DEFAULT 'todo',
+        priority TEXT DEFAULT 'medium',
+        created_by INTEGER REFERENCES users(id),
+        due_date DATE,
+        approval_status TEXT DEFAULT 'approved',
+        project_id INTEGER,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-    -- Expenses table
-    CREATE TABLE IF NOT EXISTS expenses (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      amount REAL NOT NULL,
-      description TEXT NOT NULL,
-      expense_date DATE NOT NULL,
-      category TEXT DEFAULT 'Other',
-      payment_mode TEXT DEFAULT 'Cash',
-      tags TEXT,
-      receipt_filename TEXT,
-      receipt_mimetype TEXT,
-      receipt_data TEXT,
-      created_by INTEGER REFERENCES users(id),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+      -- Projects table
+      CREATE TABLE IF NOT EXISTS projects (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-    -- Reminders table
-    CREATE TABLE IF NOT EXISTS reminders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT,
-      reminder_date TEXT NOT NULL,
-      reminder_time TEXT NOT NULL,
-      priority TEXT DEFAULT 'medium',
-      repeat_type TEXT DEFAULT 'once',
-      category TEXT DEFAULT 'Other',
-      email_notify INTEGER DEFAULT 1,
-      notify_15min INTEGER DEFAULT 0,
-      notify_1hour INTEGER DEFAULT 0,
-      is_important INTEGER DEFAULT 0,
-      status TEXT DEFAULT 'upcoming',
-      snooze_until TEXT,
-      created_by INTEGER REFERENCES users(id),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      reminder_sent INTEGER DEFAULT 0,
-      pre_15min_sent INTEGER DEFAULT 0,
-      pre_1hour_sent INTEGER DEFAULT 0,
-      overdue_sent INTEGER DEFAULT 0
-    );
+      -- Activity log
+      CREATE TABLE IF NOT EXISTS activity_log (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        action TEXT NOT NULL,
+        target_type TEXT,
+        target_id INTEGER,
+        details TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-    -- Gym & Nutrition Tracker: flexible date-wise entries (one date = many entries)
-    CREATE TABLE IF NOT EXISTS gym_entries (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER REFERENCES users(id),
-      entry_date TEXT NOT NULL,
-      entry_time TEXT,
-      type TEXT NOT NULL,
-      data TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+      -- Events table
+      CREATE TABLE IF NOT EXISTS events (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        event_date DATE NOT NULL,
+        event_time TEXT NOT NULL,
+        created_by INTEGER REFERENCES users(id),
+        reminder_sent INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-    -- Per-day gym meta (protein/water goals, mood, day notes)
-    CREATE TABLE IF NOT EXISTS gym_days (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER REFERENCES users(id),
-      entry_date TEXT NOT NULL,
-      protein_goal INTEGER DEFAULT 150,
-      water_goal INTEGER DEFAULT 3000,
-      mood TEXT,
-      day_notes TEXT,
-      UNIQUE(user_id, entry_date)
-    );
+      -- Notifications table
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        message TEXT NOT NULL,
+        is_read INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-    CREATE INDEX IF NOT EXISTS idx_gym_entries_user_date ON gym_entries(user_id, entry_date);
-  `);
+      -- Expenses table
+      CREATE TABLE IF NOT EXISTS expenses (
+        id SERIAL PRIMARY KEY,
+        amount REAL NOT NULL,
+        description TEXT NOT NULL,
+        expense_date DATE NOT NULL,
+        category TEXT DEFAULT 'Other',
+        payment_mode TEXT DEFAULT 'Cash',
+        tags TEXT,
+        receipt_filename TEXT,
+        receipt_mimetype TEXT,
+        receipt_data TEXT,
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-  // Add columns if they do not exist (for existing databases)
-  const columnsToAdd = [
-    ['can_view_users', 0], ['can_create_users', 0], ['can_edit_users', 0], ['can_delete_users', 0],
-    ['can_manage_roles', 0], ['can_manage_tasks', 0], ['can_approve_requests', 0],
-    ['can_view_analytics', 0], ['can_manage_events', 0], ['can_manage_notifications', 0],
-    ['can_manage_settings', 0], ['can_view_reports', 0], ['can_export_data', 0],
-    ['is_read_only', 0], ['is_super_admin', 0], ['can_view_all_tasks', 1],
-    ['can_view_projects', 0], ['can_manage_projects', 0]
-  ];
-  
-  const existingColumns = db.prepare("PRAGMA table_info(permissions)").all().map(c => c.name);
-  columnsToAdd.forEach(([col, defaultVal]) => {
-    if (!existingColumns.includes(col)) {
-      db.exec(`ALTER TABLE permissions ADD COLUMN ${col} INTEGER DEFAULT ${defaultVal}`);
-    }
-  });
+      -- Reminders table
+      CREATE TABLE IF NOT EXISTS reminders (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        reminder_date TEXT NOT NULL,
+        reminder_time TEXT NOT NULL,
+        priority TEXT DEFAULT 'medium',
+        repeat_type TEXT DEFAULT 'once',
+        category TEXT DEFAULT 'Other',
+        email_notify INTEGER DEFAULT 1,
+        notify_15min INTEGER DEFAULT 0,
+        notify_1hour INTEGER DEFAULT 0,
+        is_important INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'upcoming',
+        snooze_until TEXT,
+        created_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        reminder_sent INTEGER DEFAULT 0,
+        pre_15min_sent INTEGER DEFAULT 0,
+        pre_1hour_sent INTEGER DEFAULT 0,
+        overdue_sent INTEGER DEFAULT 0
+      );
 
-  // Also add project_id to tasks if it doesn't exist
-  const taskColumns = db.prepare("PRAGMA table_info(tasks)").all().map(c => c.name);
-  if (!taskColumns.includes('project_id')) {
-    db.exec('ALTER TABLE tasks ADD COLUMN project_id INTEGER REFERENCES projects(id)');
-  }
+      -- Gym entries (date-wise fitness journal)
+      CREATE TABLE IF NOT EXISTS gym_entries (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        entry_date TEXT NOT NULL,
+        entry_time TEXT,
+        type TEXT NOT NULL,
+        data JSONB DEFAULT '{}',
+        source TEXT DEFAULT 'manual',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
 
-  // Add payment_mode and tags to expenses if they do not exist
-  const expenseCols = db.prepare("PRAGMA table_info(expenses)").all().map(c => c.name);
-  if (!expenseCols.includes('payment_mode')) {
-    db.exec("ALTER TABLE expenses ADD COLUMN payment_mode TEXT DEFAULT 'Cash'");
-  }
-  if (!expenseCols.includes('tags')) {
-    db.exec("ALTER TABLE expenses ADD COLUMN tags TEXT");
-  }
+      -- Gym days (per-day meta: goals, mood, notes, completed)
+      CREATE TABLE IF NOT EXISTS gym_days (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        entry_date TEXT NOT NULL,
+        protein_goal INTEGER DEFAULT 150,
+        water_goal INTEGER DEFAULT 3000,
+        mood TEXT,
+        day_notes TEXT,
+        completed INTEGER DEFAULT 0,
+        UNIQUE(user_id, entry_date)
+      );
 
-  // Add password-reset token columns to users if they do not exist
-  const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
-  if (!userCols.includes('reset_token')) {
-    db.exec('ALTER TABLE users ADD COLUMN reset_token TEXT');
-  }
-  if (!userCols.includes('reset_token_expiry')) {
-    db.exec('ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME');
-  }
-  if (!userCols.includes('email_notifications')) {
-    db.exec('ALTER TABLE users ADD COLUMN email_notifications INTEGER DEFAULT 1');
-  }
-
-  // Add "completed" flag to gym_days if missing (for the day tick-mark + summary email)
-  const gymDayCols = db.prepare("PRAGMA table_info(gym_days)").all().map(c => c.name);
-  if (!gymDayCols.includes('completed')) {
-    db.exec('ALTER TABLE gym_days ADD COLUMN completed INTEGER DEFAULT 0');
-  }
-
-  // Add source tracking to gym_entries (marks duplicated vs manual entries)
-  const gymEntryCols = db.prepare("PRAGMA table_info(gym_entries)").all().map(c => c.name);
-  if (!gymEntryCols.includes('source')) {
-    db.exec("ALTER TABLE gym_entries ADD COLUMN source TEXT DEFAULT 'manual'");
-  }
-
-  // Auto-create permission rows for users that don't have one yet
-  const allUsers = db.prepare('SELECT id FROM users').all();
-  const insertPermIfMissing = db.prepare('INSERT OR IGNORE INTO permissions (user_id) VALUES (?)');
-  for (const u of allUsers) {
-    insertPermIfMissing.run(u.id);
-  }
-
-  // Seed admin user - ALWAYS ensure correct password
-  const adminEmail = 'kunjbhuva301@gmail.com';
-  const adminPassword = 'Admin@123';
-  const adminQuery = db.prepare('SELECT * FROM users WHERE email = ?');
-  const adminExists = adminQuery.get(adminEmail);
-  const salt = bcrypt.genSaltSync(10);
-  const hash = bcrypt.hashSync(adminPassword, salt);
-
-  if (!adminExists) {
-    const insertUser = db.prepare(`
-      INSERT INTO users (name, email, password_hash, role, is_active)
-      VALUES (?, ?, ?, ?, 1)
+      -- Index for gym performance
+      CREATE INDEX IF NOT EXISTS idx_gym_entries_user_date ON gym_entries(user_id, entry_date);
     `);
-    const info = insertUser.run('Admin', adminEmail, hash, 'admin');
-    const adminId = info.lastInsertRowid;
 
-    db.prepare(`
-      INSERT INTO permissions (
-        user_id, can_create_task, can_edit_task, can_delete_task, 
-        can_view_all_tasks, can_manage_users, is_super_admin, can_view_projects, can_manage_projects
-      ) VALUES (?, 1, 1, 1, 1, 1, 1, 1, 1)
-    `).run(adminId);
+    // ── Seed admin user ──
+    const adminEmail = 'kunjbhuva301@gmail.com';
+    const adminPassword = 'Admin@123';
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(adminPassword, salt);
 
-    db.prepare(`
-      INSERT INTO activity_log (user_id, action, target_type, target_id, details)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(adminId, 'System Initialized', 'system', null, 'Admin user seeded');
+    const existing = await client.query('SELECT * FROM users WHERE email = $1', [adminEmail]);
+    if (existing.rows.length === 0) {
+      const ins = await client.query(
+        `INSERT INTO users (name, email, password_hash, role, is_active) VALUES ($1, $2, $3, $4, 1) RETURNING id`,
+        ['Admin', adminEmail, hash, 'admin']
+      );
+      const adminId = ins.rows[0].id;
+      await client.query(
+        `INSERT INTO permissions (user_id, can_create_task, can_edit_task, can_delete_task, can_view_all_tasks, can_manage_users, is_super_admin, can_view_projects, can_manage_projects)
+         VALUES ($1, 1, 1, 1, 1, 1, 1, 1, 1) ON CONFLICT (user_id) DO NOTHING`,
+        [adminId]
+      );
+      await client.query(
+        `INSERT INTO activity_log (user_id, action, target_type, details) VALUES ($1, $2, $3, $4)`,
+        [adminId, 'System Initialized', 'system', 'Admin user seeded']
+      );
+      console.log('✅ Admin user created:', adminEmail);
+    } else {
+      await client.query(
+        `UPDATE users SET password_hash = $1, is_active = 1, role = 'admin' WHERE email = $2`,
+        [hash, adminEmail]
+      );
+      const adminId = existing.rows[0].id;
+      await client.query(
+        `INSERT INTO permissions (user_id, can_view_projects, can_manage_projects, is_super_admin, can_create_task, can_edit_task, can_delete_task, can_view_all_tasks, can_manage_users)
+         VALUES ($1, 1, 1, 1, 1, 1, 1, 1, 1) ON CONFLICT (user_id) DO UPDATE SET
+         can_view_projects=1, can_manage_projects=1, is_super_admin=1, can_create_task=1, can_edit_task=1, can_delete_task=1, can_view_all_tasks=1, can_manage_users=1`,
+        [adminId]
+      );
+      console.log('✅ Admin user updated/verified:', adminEmail);
+    }
 
-    console.log('✅ Admin user created:', adminEmail);
-  } else {
-    // Always update password_hash and ensure admin is active
-    db.prepare(`
-      UPDATE users 
-      SET password_hash = ?, is_active = 1, role = 'admin'
-      WHERE email = ?
-    `).run(hash, adminEmail);
+    // Ensure all users have permission rows
+    await client.query(`
+      INSERT INTO permissions (user_id)
+      SELECT id FROM users WHERE id NOT IN (SELECT user_id FROM permissions)
+      ON CONFLICT (user_id) DO NOTHING
+    `);
 
-    // Ensure admin permissions are set
-    db.prepare(`
-      UPDATE permissions 
-      SET can_view_projects = 1, can_manage_projects = 1, is_super_admin = 1,
-          can_create_task = 1, can_edit_task = 1, can_delete_task = 1,
-          can_view_all_tasks = 1, can_manage_users = 1
-      WHERE user_id = ?
-    `).run(adminExists.id);
-
-    console.log('✅ Admin user updated/verified:', adminEmail);
+  } finally {
+    client.release();
   }
 };
 
-initDb();
+// ── Notification trigger (replicated in app logic since PG triggers need plpgsql setup) ──
+// We'll handle notification creation in the routes directly instead of a DB trigger.
 
-module.exports = db;
+module.exports = { db, pool, initDb };

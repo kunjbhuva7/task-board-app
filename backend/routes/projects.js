@@ -1,25 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const { db } = require('../database');
 const auth = require('../middleware/auth');
 const checkPermission = require('../middleware/permissions');
 
 // Get all projects
-router.get('/', auth, checkPermission('can_view_projects'), (req, res) => {
+router.get('/', auth, checkPermission('can_view_projects'), async (req, res) => {
   try {
-    const projects = db.prepare(`
+    const projects = await db.all(`
       SELECT p.*, u.name as created_by_name 
       FROM projects p
       LEFT JOIN users u ON p.created_by = u.id
       ORDER BY p.created_at DESC
-    `).all();
-    
+    `);
+
     // Get task counts for each project
-    const projectWithCounts = projects.map(p => {
-      const taskCount = db.prepare('SELECT COUNT(*) as count FROM tasks WHERE project_id = ?').get(p.id).count;
-      return { ...p, task_count: taskCount };
-    });
-    
+    const projectWithCounts = [];
+    for (const p of projects) {
+      const countRow = await db.get('SELECT COUNT(*) as count FROM tasks WHERE project_id = $1', [p.id]);
+      projectWithCounts.push({ ...p, task_count: countRow.count });
+    }
+
     res.json(projectWithCounts);
   } catch (error) {
     console.error('Error fetching projects:', error);
@@ -28,22 +29,34 @@ router.get('/', auth, checkPermission('can_view_projects'), (req, res) => {
 });
 
 // Create project
-router.post('/', auth, checkPermission('can_manage_projects'), (req, res) => {
+router.post('/', auth, checkPermission('can_manage_projects'), async (req, res) => {
   try {
     const { name, description } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ message: 'Project name is required' });
     }
-    
-    const stmt = db.prepare('INSERT INTO projects (name, description, created_by) VALUES (?, ?, ?)');
-    const info = stmt.run(name, description, req.user.id);
-    
+
+    const result = await db.run(
+      'INSERT INTO projects (name, description, created_by) VALUES ($1, $2, $3) RETURNING *',
+      [name, description, req.user.id]
+    );
+    const projectId = result.rows[0].id;
+
     // Log activity
-    const logStmt = db.prepare('INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)');
-    logStmt.run(req.user.id, 'Project Created', 'project', info.lastInsertRowid, `Created project: ${name}`);
-    
-    res.status(201).json({ id: info.lastInsertRowid, message: 'Project created successfully' });
+    await db.run(
+      'INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)',
+      [req.user.id, 'Project Created', 'project', projectId, `Created project: ${name}`]
+    );
+
+    // Inline notification for admins
+    const details = `Created project: ${name}`;
+    await db.run(
+      "INSERT INTO notifications (user_id, message) SELECT id, $1 FROM users WHERE role = 'admin'",
+      [details]
+    );
+
+    res.status(201).json({ id: projectId, message: 'Project created successfully' });
   } catch (error) {
     console.error('Error creating project:', error);
     res.status(500).json({ message: 'Error creating project' });
@@ -51,22 +64,23 @@ router.post('/', auth, checkPermission('can_manage_projects'), (req, res) => {
 });
 
 // Update project
-router.put('/:id', auth, checkPermission('can_manage_projects'), (req, res) => {
+router.put('/:id', auth, checkPermission('can_manage_projects'), async (req, res) => {
   try {
     const { name, description } = req.body;
     const projectId = req.params.id;
-    
+
     if (!name) {
       return res.status(400).json({ message: 'Project name is required' });
     }
-    
-    const stmt = db.prepare('UPDATE projects SET name = ?, description = ? WHERE id = ?');
-    stmt.run(name, description, projectId);
-    
+
+    await db.run('UPDATE projects SET name = $1, description = $2 WHERE id = $3', [name, description, projectId]);
+
     // Log activity
-    const logStmt = db.prepare('INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)');
-    logStmt.run(req.user.id, 'Project Updated', 'project', projectId, `Updated project: ${name}`);
-    
+    await db.run(
+      'INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)',
+      [req.user.id, 'Project Updated', 'project', projectId, `Updated project: ${name}`]
+    );
+
     res.json({ message: 'Project updated successfully' });
   } catch (error) {
     console.error('Error updating project:', error);
@@ -75,24 +89,25 @@ router.put('/:id', auth, checkPermission('can_manage_projects'), (req, res) => {
 });
 
 // Delete project
-router.delete('/:id', auth, checkPermission('can_manage_projects'), (req, res) => {
+router.delete('/:id', auth, checkPermission('can_manage_projects'), async (req, res) => {
   try {
     const projectId = req.params.id;
-    
+
     // First clear project_id from tasks belonging to this project
-    db.prepare('UPDATE tasks SET project_id = NULL WHERE project_id = ?').run(projectId);
-    
-    const stmt = db.prepare('DELETE FROM projects WHERE id = ?');
-    const info = stmt.run(projectId);
-    
-    if (info.changes === 0) {
+    await db.run('UPDATE tasks SET project_id = NULL WHERE project_id = $1', [projectId]);
+
+    const result = await db.run('DELETE FROM projects WHERE id = $1', [projectId]);
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Project not found' });
     }
-    
+
     // Log activity
-    const logStmt = db.prepare('INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)');
-    logStmt.run(req.user.id, 'Project Deleted', 'project', projectId, `Deleted project ID: ${projectId}`);
-    
+    await db.run(
+      'INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5)',
+      [req.user.id, 'Project Deleted', 'project', projectId, `Deleted project ID: ${projectId}`]
+    );
+
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('Error deleting project:', error);

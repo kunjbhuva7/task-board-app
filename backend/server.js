@@ -14,7 +14,7 @@ const { Server } = require('socket.io');
 console.log("Loading node-cron...");
 const cron = require('node-cron');
 console.log("Loading db...");
-const db = require('./database');
+const { db, initDb } = require('./database');
 console.log("Loading email utils...");
 const sendEmail = require('./utils/email');
 
@@ -39,6 +39,7 @@ const io = new Server(server, {
 
 // Attach io to app so routes can use it via req.app.get('io')
 app.set('io', io);
+app.set('db', db);
 
 // Redis setup for Socket.io adapter and caching
 if (process.env.REDIS_URL || process.env.REDISPROXY_URL) {
@@ -119,14 +120,14 @@ cron.schedule('* * * * *', async () => {
     const now = new Date();
     
     // --- 1. Event Reminders (Original Logic) ---
-    const events = db.prepare('SELECT * FROM events WHERE reminder_sent = 0').all();
+    const events = await db.all("SELECT * FROM events WHERE reminder_sent = 0");
     for (const event of events) {
       const eventDateTime = new Date(`${event.event_date}T${event.event_time}`);
       const diffMs = eventDateTime.getTime() - now.getTime();
       const diffMinutes = Math.floor(diffMs / 60000);
       
       if (diffMinutes > 0 && diffMinutes <= 120) {
-        db.prepare('UPDATE events SET reminder_sent = 1 WHERE id = ?').run(event.id);
+        await db.run('UPDATE events SET reminder_sent = 1 WHERE id = $1', [event.id]);
         await sendEmail({
           to: 'kunjbhuva301@gmail.com',
           subject: `Reminder: ${event.title} starts in 2 hours!`,
@@ -136,23 +137,16 @@ cron.schedule('* * * * *', async () => {
     }
 
     // --- 2. Advanced Reminders (IST Timezone Aware Scheduler) ---
-    // Helper to get formatted IST time strings
     const getISTTimeDetails = () => {
       const cur = new Date();
       const offset = 5.5 * 60 * 60 * 1000;
       const istDate = new Date(cur.getTime() + offset);
-      
       const yyyy = istDate.getUTCFullYear();
       const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
       const dd = String(istDate.getUTCDate()).padStart(2, '0');
       const hh = String(istDate.getUTCHours()).padStart(2, '0');
       const min = String(istDate.getUTCMinutes()).padStart(2, '0');
-      
-      return {
-        dateStr: `${yyyy}-${mm}-${dd}`,
-        timeStr: `${hh}:${min}`,
-        dateTimeStr: `${yyyy}-${mm}-${dd} ${hh}:${min}`
-      };
+      return { dateStr: `${yyyy}-${mm}-${dd}`, timeStr: `${hh}:${min}`, dateTimeStr: `${yyyy}-${mm}-${dd} ${hh}:${min}` };
     };
 
     const formatDateYmd = (date) => {
@@ -163,86 +157,55 @@ cron.schedule('* * * * *', async () => {
     };
 
     const nowIST = getISTTimeDetails();
-    const activeReminders = db.prepare(`SELECT * FROM reminders WHERE status != 'done'`).all();
+    const activeReminders = await db.all("SELECT * FROM reminders WHERE status != 'done'");
 
     for (const rem of activeReminders) {
-      // (a) Handle Snoozed Reminders
       if (rem.snooze_until) {
         if (nowIST.dateTimeStr >= rem.snooze_until) {
-          db.prepare('UPDATE reminders SET snooze_until = NULL WHERE id = ?').run(rem.id);
-          if (rem.email_notify === 1) {
-            await sendReminderNotification(rem, 'alert').catch(console.error);
-          }
+          await db.run('UPDATE reminders SET snooze_until = NULL WHERE id = $1', [rem.id]);
+          if (rem.email_notify === 1) { await sendReminderNotification(rem, 'alert').catch(console.error); }
           io.emit('tasks_updated');
         }
-        continue; // Skip standard checking
+        continue;
       }
 
-      // (b) Handle Standard Scheduled Reminders
-      const scheduledDateTimeStr = `${rem.reminder_date} ${rem.reminder_time}`; // YYYY-MM-DD HH:MM
+      const scheduledDateTimeStr = `${rem.reminder_date} ${rem.reminder_time}`;
       const currentISTSecs = new Date(nowIST.dateTimeStr.replace(' ', 'T')).getTime();
       const scheduledISTSecs = new Date(scheduledDateTimeStr.replace(' ', 'T')).getTime();
-      
       const diffMin = Math.floor((scheduledISTSecs - currentISTSecs) / 60000);
 
-      // (1) 1 Hour Before Pre-Alert
       if (rem.notify_1hour === 1 && rem.pre_1hour_sent === 0 && diffMin <= 60 && diffMin > 15) {
-        db.prepare('UPDATE reminders SET pre_1hour_sent = 1, status = "due_soon" WHERE id = ?').run(rem.id);
-        const updatedRem = { ...rem, status: 'due_soon' };
-        if (rem.email_notify === 1) {
-          await sendReminderNotification(updatedRem, 'alert').catch(console.error);
-        }
+        await db.run("UPDATE reminders SET pre_1hour_sent = 1, status = 'due_soon' WHERE id = $1", [rem.id]);
+        if (rem.email_notify === 1) { await sendReminderNotification({ ...rem, status: 'due_soon' }, 'alert').catch(console.error); }
         io.emit('tasks_updated');
       }
       
-      // (2) 15 Min Before Pre-Alert
       if (rem.notify_15min === 1 && rem.pre_15min_sent === 0 && diffMin <= 15 && diffMin > 0) {
-        db.prepare('UPDATE reminders SET pre_15min_sent = 1, status = "due_soon" WHERE id = ?').run(rem.id);
-        const updatedRem = { ...rem, status: 'due_soon' };
-        if (rem.email_notify === 1) {
-          await sendReminderNotification(updatedRem, 'alert').catch(console.error);
-        }
+        await db.run("UPDATE reminders SET pre_15min_sent = 1, status = 'due_soon' WHERE id = $1", [rem.id]);
+        if (rem.email_notify === 1) { await sendReminderNotification({ ...rem, status: 'due_soon' }, 'alert').catch(console.error); }
         io.emit('tasks_updated');
       }
 
-      // (3) Exact Alarm Alert
       if (rem.reminder_sent === 0 && diffMin <= 0 && diffMin > -10) {
-        db.prepare('UPDATE reminders SET reminder_sent = 1, status = "due_soon" WHERE id = ?').run(rem.id);
-        const updatedRem = { ...rem, status: 'due_soon' };
-        if (rem.email_notify === 1) {
-          await sendReminderNotification(updatedRem, 'alert').catch(console.error);
-        }
+        await db.run("UPDATE reminders SET reminder_sent = 1, status = 'due_soon' WHERE id = $1", [rem.id]);
+        if (rem.email_notify === 1) { await sendReminderNotification({ ...rem, status: 'due_soon' }, 'alert').catch(console.error); }
         io.emit('tasks_updated');
 
-        // Handle Rollover for repeating alarms
         if (rem.repeat_type !== 'once') {
           let nextDate = new Date(rem.reminder_date);
-          if (rem.repeat_type === 'daily') {
-            nextDate.setDate(nextDate.getDate() + 1);
-          } else if (rem.repeat_type === 'weekly') {
-            nextDate.setDate(nextDate.getDate() + 7);
-          } else if (rem.repeat_type === 'monthly') {
-            nextDate.setMonth(nextDate.getMonth() + 1);
-          } else {
-            nextDate.setDate(nextDate.getDate() + 1);
-          }
+          if (rem.repeat_type === 'daily') nextDate.setDate(nextDate.getDate() + 1);
+          else if (rem.repeat_type === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
+          else if (rem.repeat_type === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+          else nextDate.setDate(nextDate.getDate() + 1);
           const nextDateStr = formatDateYmd(nextDate);
-          db.prepare(`
-            UPDATE reminders 
-            SET reminder_date = ?, reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0, overdue_sent = 0, status = "upcoming"
-            WHERE id = ?
-          `).run(nextDateStr, rem.id);
+          await db.run(`UPDATE reminders SET reminder_date = $1, reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0, overdue_sent = 0, status = 'upcoming' WHERE id = $2`, [nextDateStr, rem.id]);
           io.emit('tasks_updated');
         }
       }
 
-      // (4) Overdue Alert (when scheduled time has passed by more than 10 mins)
       if (rem.overdue_sent === 0 && diffMin <= -10) {
-        db.prepare('UPDATE reminders SET overdue_sent = 1, status = "overdue" WHERE id = ?').run(rem.id);
-        const updatedRem = { ...rem, status: 'overdue' };
-        if (rem.email_notify === 1) {
-          await sendReminderNotification(updatedRem, 'overdue').catch(console.error);
-        }
+        await db.run("UPDATE reminders SET overdue_sent = 1, status = 'overdue' WHERE id = $1", [rem.id]);
+        if (rem.email_notify === 1) { await sendReminderNotification({ ...rem, status: 'overdue' }, 'overdue').catch(console.error); }
         io.emit('tasks_updated');
       }
     }
@@ -292,11 +255,10 @@ server.on('error', (err) => {
   process.exit(1);
 });
 
-// Close DB + server cleanly on stop (checkpoints WAL, avoids stale locks on next run)
 const shutdown = (signal) => {
   console.log(`\n${signal} received — closing server & database...`);
   server.close(() => {
-    try { db.close(); } catch (e) { /* ignore */ }
+    try { db.pool.end(); } catch (e) { /* ignore */ }
     console.log('Closed cleanly.');
     process.exit(0);
   });
@@ -305,7 +267,15 @@ const shutdown = (signal) => {
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
-console.log('Starting server.listen()...');
-server.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port}`);
+// ── Start: init DB then listen ──
+console.log('Initializing database...');
+initDb().then(() => {
+  console.log('DB initialized. Starting server.listen()...');
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on port ${port}`);
+  });
+}).catch((err) => {
+  console.error('❌ Failed to initialize database:', err.message);
+  console.error('   Make sure DATABASE_URL is set (Railway injects it automatically).');
+  process.exit(1);
 });

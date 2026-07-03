@@ -1,35 +1,47 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const { db } = require('../database');
 const authMiddleware = require('../middleware/auth');
 
 router.use(authMiddleware);
 
 // GET /api/dashboard/stats — Admin global stats
-router.get('/stats', (req, res) => {
-  const isAdmin = req.user.role === 'admin';
-  const perms = isAdmin ? null : db.prepare('SELECT is_super_admin, can_view_analytics FROM permissions WHERE user_id = ?').get(req.user.id);
-  if (!isAdmin && !(perms?.is_super_admin || perms?.can_view_analytics)) {
-    return res.status(403).json({ message: 'Forbidden' });
-  }
-
+router.get('/stats', async (req, res) => {
   try {
-    const totalUsers = db.prepare('SELECT count(*) as count FROM users WHERE is_active = 1').get().count;
-    const tasksByStatus = db.prepare('SELECT status, count(*) as count FROM tasks GROUP BY status').all();
-    const tasksCompletedThisWeek = db.prepare('SELECT count(*) as count FROM tasks WHERE status = "done" AND updated_at >= date("now", "-7 days")').get().count;
-    const pendingInvites = db.prepare('SELECT count(*) as count FROM users WHERE invite_token IS NOT NULL AND password_hash IS NULL').get().count;
+    const isAdmin = req.user.role === 'admin';
+    let allowed = isAdmin;
 
-    const recentActivity = db.prepare(`
+    if (!isAdmin) {
+      const perms = await db.get('SELECT is_super_admin, can_view_analytics FROM permissions WHERE user_id = $1', [req.user.id]);
+      allowed = !!(perms?.is_super_admin || perms?.can_view_analytics);
+    }
+
+    if (!allowed) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const totalUsersRow = await db.get('SELECT count(*) as count FROM users WHERE is_active = 1');
+    const totalUsers = parseInt(totalUsersRow.count);
+
+    const tasksByStatus = await db.all('SELECT status, count(*) as count FROM tasks GROUP BY status');
+
+    const tasksCompletedThisWeekRow = await db.get("SELECT count(*) as count FROM tasks WHERE status = 'done' AND updated_at >= CURRENT_DATE - INTERVAL '7 days'");
+    const tasksCompletedThisWeek = parseInt(tasksCompletedThisWeekRow.count);
+
+    const pendingInvitesRow = await db.get('SELECT count(*) as count FROM users WHERE invite_token IS NOT NULL AND password_hash IS NULL');
+    const pendingInvites = parseInt(pendingInvitesRow.count);
+
+    const recentActivity = await db.all(`
       SELECT a.*, u.name as user_name
       FROM activity_log a LEFT JOIN users u ON a.user_id = u.id
       ORDER BY a.created_at DESC LIMIT 10
-    `).all();
+    `);
 
-    const totalTasks = tasksByStatus.reduce((s, r) => s + r.count, 0);
-    const doneTasks = tasksByStatus.find(r => r.status === 'done')?.count || 0;
-    const inProgressTasks = tasksByStatus.find(r => r.status === 'in_progress')?.count || 0;
-    const todoTasks = tasksByStatus.find(r => r.status === 'todo')?.count || 0;
-    const reviewTasks = tasksByStatus.find(r => r.status === 'review')?.count || 0;
+    const totalTasks = tasksByStatus.reduce((s, r) => s + parseInt(r.count), 0);
+    const doneTasks = parseInt(tasksByStatus.find(r => r.status === 'done')?.count || 0);
+    const inProgressTasks = parseInt(tasksByStatus.find(r => r.status === 'in_progress')?.count || 0);
+    const todoTasks = parseInt(tasksByStatus.find(r => r.status === 'todo')?.count || 0);
+    const reviewTasks = parseInt(tasksByStatus.find(r => r.status === 'review')?.count || 0);
     const activeTasks = inProgressTasks + todoTasks + reviewTasks;
 
     res.json({
@@ -42,50 +54,71 @@ router.get('/stats', (req, res) => {
   }
 });
 
-// GET /api/dashboard/my-stats — Per-user stats (fixed SQL)
-router.get('/my-stats', (req, res) => {
+// GET /api/dashboard/my-stats — Per-user stats
+router.get('/my-stats', async (req, res) => {
   try {
     const userId = req.user.id;
     const isAdmin = req.user.role === 'admin';
-    const perms = isAdmin ? null : db.prepare('SELECT can_view_all_tasks, is_super_admin FROM permissions WHERE user_id = ?').get(userId);
-    const canViewAll = isAdmin || !!(perms?.is_super_admin) || !!(perms?.can_view_all_tasks);
+    let canViewAll = isAdmin;
 
-    // Build correct queries based on scope
-    let counts, dueTodayRows, recentlyUpdatedRows;
+    if (!isAdmin) {
+      const perms = await db.get('SELECT can_view_all_tasks, is_super_admin FROM permissions WHERE user_id = $1', [userId]);
+      canViewAll = !!(perms?.is_super_admin) || !!(perms?.can_view_all_tasks);
+    }
 
     const today = new Date().toISOString().split('T')[0];
+    let counts, dueTodayRows, recentlyUpdatedRows;
 
     if (canViewAll) {
+      const todoRow = await db.get("SELECT count(*) as c FROM tasks WHERE status = 'todo'");
+      const inProgressRow = await db.get("SELECT count(*) as c FROM tasks WHERE status = 'in_progress'");
+      const doneRow = await db.get("SELECT count(*) as c FROM tasks WHERE status = 'done'");
+      const reviewRow = await db.get("SELECT count(*) as c FROM tasks WHERE status = 'review'");
       counts = {
-        todo:       db.prepare("SELECT count(*) as c FROM tasks WHERE status = 'todo'").get().c,
-        inProgress: db.prepare("SELECT count(*) as c FROM tasks WHERE status = 'in_progress'").get().c,
-        done:       db.prepare("SELECT count(*) as c FROM tasks WHERE status = 'done'").get().c,
-        review:     db.prepare("SELECT count(*) as c FROM tasks WHERE status = 'review'").get().c,
+        todo: parseInt(todoRow.c),
+        inProgress: parseInt(inProgressRow.c),
+        done: parseInt(doneRow.c),
+        review: parseInt(reviewRow.c),
       };
-      dueTodayRows       = db.prepare("SELECT * FROM tasks WHERE date(due_date) = ? AND status != 'done' ORDER BY priority DESC LIMIT 10").all(today);
-      recentlyUpdatedRows = db.prepare("SELECT t.*, u.name as creator_name FROM tasks t LEFT JOIN users u ON t.created_by = u.id ORDER BY t.updated_at DESC LIMIT 8").all();
+      dueTodayRows = await db.all(
+        "SELECT * FROM tasks WHERE due_date::date = $1 AND status != 'done' ORDER BY priority DESC LIMIT 10",
+        [today]
+      );
+      recentlyUpdatedRows = await db.all(
+        "SELECT t.*, u.name as creator_name FROM tasks t LEFT JOIN users u ON t.created_by = u.id ORDER BY t.updated_at DESC LIMIT 8"
+      );
     } else {
+      const todoRow = await db.get("SELECT count(*) as c FROM tasks WHERE created_by = $1 AND status = 'todo'", [userId]);
+      const inProgressRow = await db.get("SELECT count(*) as c FROM tasks WHERE created_by = $1 AND status = 'in_progress'", [userId]);
+      const doneRow = await db.get("SELECT count(*) as c FROM tasks WHERE created_by = $1 AND status = 'done'", [userId]);
+      const reviewRow = await db.get("SELECT count(*) as c FROM tasks WHERE created_by = $1 AND status = 'review'", [userId]);
       counts = {
-        todo:       db.prepare("SELECT count(*) as c FROM tasks WHERE created_by = ? AND status = 'todo'").get(userId).c,
-        inProgress: db.prepare("SELECT count(*) as c FROM tasks WHERE created_by = ? AND status = 'in_progress'").get(userId).c,
-        done:       db.prepare("SELECT count(*) as c FROM tasks WHERE created_by = ? AND status = 'done'").get(userId).c,
-        review:     db.prepare("SELECT count(*) as c FROM tasks WHERE created_by = ? AND status = 'review'").get(userId).c,
+        todo: parseInt(todoRow.c),
+        inProgress: parseInt(inProgressRow.c),
+        done: parseInt(doneRow.c),
+        review: parseInt(reviewRow.c),
       };
-      dueTodayRows       = db.prepare("SELECT * FROM tasks WHERE created_by = ? AND date(due_date) = ? AND status != 'done' ORDER BY priority DESC LIMIT 10").all(userId, today);
-      recentlyUpdatedRows = db.prepare("SELECT * FROM tasks WHERE created_by = ? ORDER BY updated_at DESC LIMIT 8").all(userId);
+      dueTodayRows = await db.all(
+        "SELECT * FROM tasks WHERE created_by = $1 AND due_date::date = $2 AND status != 'done' ORDER BY priority DESC LIMIT 10",
+        [userId, today]
+      );
+      recentlyUpdatedRows = await db.all(
+        "SELECT * FROM tasks WHERE created_by = $1 ORDER BY updated_at DESC LIMIT 8",
+        [userId]
+      );
     }
 
     const total = counts.todo + counts.inProgress + counts.done + counts.review;
     const progressPct = total > 0 ? Math.round((counts.done / total) * 100) : 0;
 
-    // Recent activity from log — always show for the user
-    const recentActivity = db.prepare(`
+    // Recent activity from log
+    const recentActivity = await db.all(`
       SELECT a.action, a.details, a.created_at, u.name as user_name, a.target_type
       FROM activity_log a
       LEFT JOIN users u ON a.user_id = u.id
       ORDER BY a.created_at DESC
       LIMIT 12
-    `).all();
+    `);
 
     res.json({
       counts: { ...counts, total },

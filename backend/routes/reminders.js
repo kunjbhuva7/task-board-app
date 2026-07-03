@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const { db } = require('../database');
 const auth = require('../middleware/auth');
 const { sendReminderNotification } = require('../utils/reminderEmail');
 
@@ -8,51 +8,52 @@ const { sendReminderNotification } = require('../utils/reminderEmail');
 const getSnoozedTime = (minutes) => {
   const now = new Date();
   const snoozed = new Date(now.getTime() + minutes * 60000);
-  
+
   // Format to YYYY-MM-DD HH:MM in IST
   const offset = 5.5 * 60 * 60 * 1000; // IST offset is +5:30
   const istDate = new Date(snoozed.getTime() + offset);
-  
+
   const yyyy = istDate.getUTCFullYear();
   const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
   const dd = String(istDate.getUTCDate()).padStart(2, '0');
   const hh = String(istDate.getUTCHours()).padStart(2, '0');
   const min = String(istDate.getUTCMinutes()).padStart(2, '0');
-  
+
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 };
 
 // ── USER ROUTES (Authenticated) ──────────────────────────────────────────────
 
 // GET /api/reminders - Fetch user reminders
-router.get('/', auth, (req, res) => {
+router.get('/', auth, async (req, res) => {
   const { priority, category, status, date } = req.query;
   const userId = req.user.id;
 
-  let query = 'SELECT * FROM reminders WHERE created_by = ?';
+  let query = 'SELECT * FROM reminders WHERE created_by = $1';
   const params = [userId];
+  let paramIndex = 2;
 
   if (priority) {
-    query += ' AND priority = ?';
+    query += ` AND priority = $${paramIndex++}`;
     params.push(priority);
   }
   if (category) {
-    query += ' AND category = ?';
+    query += ` AND category = $${paramIndex++}`;
     params.push(category);
   }
   if (status) {
-    query += ' AND status = ?';
+    query += ` AND status = $${paramIndex++}`;
     params.push(status);
   }
   if (date) {
-    query += ' AND reminder_date = ?';
+    query += ` AND reminder_date = $${paramIndex++}`;
     params.push(date);
   }
 
-  query += ' ORDER BY status = "overdue" DESC, status = "upcoming" DESC, reminder_date ASC, reminder_time ASC';
+  query += ` ORDER BY (CASE WHEN status = 'overdue' THEN 0 WHEN status = 'upcoming' THEN 1 ELSE 2 END), reminder_date ASC, reminder_time ASC`;
 
   try {
-    const list = db.prepare(query).all(...params);
+    const list = await db.all(query, params);
     res.json(list);
   } catch (error) {
     console.error('Error fetching reminders:', error);
@@ -81,32 +82,31 @@ router.post('/', auth, async (req, res) => {
   }
 
   try {
-    const insert = db.prepare(`
-      INSERT INTO reminders (
+    const result = await db.run(
+      `INSERT INTO reminders (
         title, description, reminder_date, reminder_time, priority, repeat_type, 
         category, email_notify, notify_15min, notify_1hour, is_important, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const info = insert.run(
-      title,
-      description || null,
-      reminder_date,
-      reminder_time,
-      priority || 'medium',
-      repeat_type || 'once',
-      category || 'Other',
-      email_notify ? 1 : 0,
-      notify_15min ? 1 : 0,
-      notify_1hour ? 1 : 0,
-      is_important ? 1 : 0,
-      req.user.id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+      [
+        title,
+        description || null,
+        reminder_date,
+        reminder_time,
+        priority || 'medium',
+        repeat_type || 'once',
+        category || 'Other',
+        email_notify ? 1 : 0,
+        notify_15min ? 1 : 0,
+        notify_1hour ? 1 : 0,
+        is_important ? 1 : 0,
+        req.user.id
+      ]
     );
 
-    const createdReminder = db.prepare('SELECT * FROM reminders WHERE id = ?').get(info.lastInsertRowid);
+    const createdReminder = result.rows[0];
 
     // Push WebSocket alert
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     // Trigger confirmation email if requested
     if (createdReminder.email_notify === 1) {
@@ -121,7 +121,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // PUT /api/reminders/:id - Edit reminder
-router.put('/:id', auth, (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   const { id } = req.params;
   const {
     title,
@@ -139,36 +139,37 @@ router.put('/:id', auth, (req, res) => {
   } = req.body;
 
   try {
-    const reminder = db.prepare('SELECT * FROM reminders WHERE id = ? AND created_by = ?').get(id, req.user.id);
+    const reminder = await db.get('SELECT * FROM reminders WHERE id = $1 AND created_by = $2', [id, req.user.id]);
     if (!reminder) return res.status(404).json({ message: 'Reminder not found' });
 
-    db.prepare(`
-      UPDATE reminders
-      SET title = ?, description = ?, reminder_date = ?, reminder_time = ?, 
-          priority = ?, repeat_type = ?, category = ?, email_notify = ?, 
-          notify_15min = ?, notify_1hour = ?, is_important = ?, status = ?,
-          reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0, overdue_sent = 0, snooze_until = NULL
-      WHERE id = ?
-    `).run(
-      title || reminder.title,
-      description !== undefined ? description : reminder.description,
-      reminder_date || reminder.reminder_date,
-      reminder_time || reminder.reminder_time,
-      priority || reminder.priority,
-      repeat_type || reminder.repeat_type,
-      category || reminder.category,
-      email_notify !== undefined ? (email_notify ? 1 : 0) : reminder.email_notify,
-      notify_15min !== undefined ? (notify_15min ? 1 : 0) : reminder.notify_15min,
-      notify_1hour !== undefined ? (notify_1hour ? 1 : 0) : reminder.notify_1hour,
-      is_important !== undefined ? (is_important ? 1 : 0) : reminder.is_important,
-      status || reminder.status,
-      id
+    await db.run(
+      `UPDATE reminders
+       SET title = $1, description = $2, reminder_date = $3, reminder_time = $4, 
+           priority = $5, repeat_type = $6, category = $7, email_notify = $8, 
+           notify_15min = $9, notify_1hour = $10, is_important = $11, status = $12,
+           reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0, overdue_sent = 0, snooze_until = NULL
+       WHERE id = $13`,
+      [
+        title || reminder.title,
+        description !== undefined ? description : reminder.description,
+        reminder_date || reminder.reminder_date,
+        reminder_time || reminder.reminder_time,
+        priority || reminder.priority,
+        repeat_type || reminder.repeat_type,
+        category || reminder.category,
+        email_notify !== undefined ? (email_notify ? 1 : 0) : reminder.email_notify,
+        notify_15min !== undefined ? (notify_15min ? 1 : 0) : reminder.notify_15min,
+        notify_1hour !== undefined ? (notify_1hour ? 1 : 0) : reminder.notify_1hour,
+        is_important !== undefined ? (is_important ? 1 : 0) : reminder.is_important,
+        status || reminder.status,
+        id
+      ]
     );
 
-    const updated = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
-    
+    const updated = await db.get('SELECT * FROM reminders WHERE id = $1', [id]);
+
     // WS update
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     res.json(updated);
   } catch (error) {
@@ -178,17 +179,17 @@ router.put('/:id', auth, (req, res) => {
 });
 
 // DELETE /api/reminders/:id - Remove reminder
-router.delete('/:id', auth, (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const reminder = db.prepare('SELECT * FROM reminders WHERE id = ? AND created_by = ?').get(id, req.user.id);
+    const reminder = await db.get('SELECT * FROM reminders WHERE id = $1 AND created_by = $2', [id, req.user.id]);
     if (!reminder) return res.status(404).json({ message: 'Reminder not found' });
 
-    db.prepare('DELETE FROM reminders WHERE id = ?').run(id);
+    await db.run('DELETE FROM reminders WHERE id = $1', [id]);
 
     // WS update
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     res.json({ message: 'Reminder deleted successfully' });
   } catch (error) {
@@ -203,15 +204,15 @@ router.patch('/:id/status', auth, async (req, res) => {
   const { status } = req.body; // 'done' or 'upcoming'
 
   try {
-    const reminder = db.prepare('SELECT * FROM reminders WHERE id = ? AND created_by = ?').get(id, req.user.id);
+    const reminder = await db.get('SELECT * FROM reminders WHERE id = $1 AND created_by = $2', [id, req.user.id]);
     if (!reminder) return res.status(404).json({ message: 'Reminder not found' });
 
-    db.prepare('UPDATE reminders SET status = ? WHERE id = ?').run(status, id);
+    await db.run('UPDATE reminders SET status = $1 WHERE id = $2', [status, id]);
 
-    const updated = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
+    const updated = await db.get('SELECT * FROM reminders WHERE id = $1', [id]);
 
     // WS update
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     // Trigger Completion Email Alert
     if (status === 'done' && updated.email_notify === 1) {
@@ -235,22 +236,23 @@ router.patch('/:id/snooze', auth, async (req, res) => {
   }
 
   try {
-    const reminder = db.prepare('SELECT * FROM reminders WHERE id = ? AND created_by = ?').get(id, req.user.id);
+    const reminder = await db.get('SELECT * FROM reminders WHERE id = $1 AND created_by = $2', [id, req.user.id]);
     if (!reminder) return res.status(404).json({ message: 'Reminder not found' });
 
     const snoozeTime = getSnoozedTime(minutes);
 
     // Reset sent status so it re-triggers after snooze finishes
-    db.prepare(`
-      UPDATE reminders 
-      SET snooze_until = ?, status = "upcoming", reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0
-      WHERE id = ?
-    `).run(snoozeTime, id);
+    await db.run(
+      `UPDATE reminders 
+       SET snooze_until = $1, status = 'upcoming', reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0
+       WHERE id = $2`,
+      [snoozeTime, id]
+    );
 
-    const updated = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
+    const updated = await db.get('SELECT * FROM reminders WHERE id = $1', [id]);
 
     // WS update
-    req.app.get('io').emit('tasks_updated');
+    req.app.get('io')?.emit('tasks_updated');
 
     res.json(updated);
   } catch (error) {
@@ -266,11 +268,11 @@ router.get('/:id/complete-email', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const reminder = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
+    const reminder = await db.get('SELECT * FROM reminders WHERE id = $1', [id]);
     if (!reminder) return res.status(404).send('Reminder not found');
 
-    db.prepare('UPDATE reminders SET status = "done" WHERE id = ?').run(id);
-    const updated = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
+    await db.run("UPDATE reminders SET status = 'done' WHERE id = $1", [id]);
+    const updated = await db.get('SELECT * FROM reminders WHERE id = $1', [id]);
 
     if (updated.email_notify === 1) {
       sendReminderNotification(updated, 'completed').catch(console.error);
@@ -299,6 +301,7 @@ router.get('/:id/complete-email', async (req, res) => {
       </html>
     `);
   } catch (error) {
+    console.error('Complete-email error:', error);
     res.status(500).send('Server error completing task');
   }
 });
@@ -309,15 +312,16 @@ router.get('/:id/snooze-email', async (req, res) => {
   const minutes = parseInt(req.query.minutes) || 30;
 
   try {
-    const reminder = db.prepare('SELECT * FROM reminders WHERE id = ?').get(id);
+    const reminder = await db.get('SELECT * FROM reminders WHERE id = $1', [id]);
     if (!reminder) return res.status(404).send('Reminder not found');
 
     const snoozeTime = getSnoozedTime(minutes);
-    db.prepare(`
-      UPDATE reminders 
-      SET snooze_until = ?, status = "upcoming", reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0
-      WHERE id = ?
-    `).run(snoozeTime, id);
+    await db.run(
+      `UPDATE reminders 
+       SET snooze_until = $1, status = 'upcoming', reminder_sent = 0, pre_15min_sent = 0, pre_1hour_sent = 0
+       WHERE id = $2`,
+      [snoozeTime, id]
+    );
 
     const frontendBase = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
     res.send(`
@@ -342,6 +346,7 @@ router.get('/:id/snooze-email', async (req, res) => {
       </html>
     `);
   } catch (error) {
+    console.error('Snooze-email error:', error);
     res.status(500).send('Server error snoozing task');
   }
 });
