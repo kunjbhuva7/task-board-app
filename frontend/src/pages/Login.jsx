@@ -48,8 +48,8 @@ const Login = () => {
           <span className="auth-logo-text">Pur<span className="auth-logo-accent">p</span>le</span>
         </div>
 
-        <h1 className="auth-title">Sign in</h1>
-        <p className="auth-subtitle">Access your workspace</p>
+        <h1 className="auth-title">Welcome back</h1>
+        <p className="auth-subtitle">Enter your credentials to continue</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="auth-input-group">
