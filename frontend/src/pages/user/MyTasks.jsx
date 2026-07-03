@@ -89,7 +89,7 @@ const MyTasks = () => {
     fetchTasks();
     if (user.role === 'admin' || canCreateTask)
       api.get('/users').then(r => setUsers(r.data)).catch(() => {});
-    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5005');
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || (window.location.hostname === 'localhost' ? 'http://localhost:5005' : window.location.origin));
     s.on('tasks_updated', fetchTasks);
     return () => s.disconnect();
   }, [user, canCreateTask]);

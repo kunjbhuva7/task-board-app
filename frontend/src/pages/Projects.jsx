@@ -46,18 +46,21 @@ const Projects = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this project? Tasks belonging to it will not be deleted but will lose their project association.')) return;
+  const handleDelete = async (project) => {
+    const input = window.prompt(`To delete this project, type the project name exactly:\n"${project.name}"\n\nNote: Tasks belonging to it will not be deleted but will lose their project association.`);
+    if (input !== project.name) {
+      if (input !== null) toast.error('Project name did not match, deletion cancelled.');
+      return;
+    }
     
     try {
-      await axios.delete(`/projects/${id}`);
+      await axios.delete(`/projects/${project.id}`);
       toast.success('Project deleted');
       fetchProjects();
     } catch (err) {
       toast.error('Error deleting project');
     }
   };
-
   const openModal = (proj = null) => {
     if (proj) {
       setFormData({ name: proj.name, description: proj.description || '' });
@@ -192,7 +195,7 @@ const Projects = () => {
                   {canManage && (
                     <td style={tdStyle}>
                       <button style={btnEdit} onClick={() => openModal(p)}>Edit</button>
-                      <button style={btnDelete} onClick={() => handleDelete(p.id)}>Delete</button>
+                      <button style={btnDelete} onClick={() => handleDelete(p)}>Delete</button>
                     </td>
                   )}
                 </tr>

@@ -35,7 +35,7 @@ const AllTasks = () => {
 
   useEffect(() => {
     fetchTasks();
-    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5005');
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || (window.location.hostname === 'localhost' ? 'http://localhost:5005' : window.location.origin));
     s.on('tasks_updated', fetchTasks);
     return () => s.disconnect();
   }, []);

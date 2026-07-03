@@ -29,9 +29,11 @@ router.get('/stats', (req, res) => {
     const doneTasks = tasksByStatus.find(r => r.status === 'done')?.count || 0;
     const inProgressTasks = tasksByStatus.find(r => r.status === 'in_progress')?.count || 0;
     const todoTasks = tasksByStatus.find(r => r.status === 'todo')?.count || 0;
+    const reviewTasks = tasksByStatus.find(r => r.status === 'review')?.count || 0;
+    const activeTasks = inProgressTasks + todoTasks + reviewTasks;
 
     res.json({
-      totalUsers, totalTasks, doneTasks, inProgressTasks, todoTasks,
+      totalUsers, totalTasks, doneTasks, inProgressTasks, todoTasks, reviewTasks, activeTasks,
       tasksCompletedThisWeek, pendingInvites, recentActivity, tasksByStatus
     });
   } catch (error) {

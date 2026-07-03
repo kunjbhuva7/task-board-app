@@ -3,9 +3,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder } from 'lucide-react';
+import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
   <div
@@ -38,12 +39,13 @@ const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
   </div>
 );
 
-const Sidebar = () => {
+const Sidebar = ({ setMobileOpen }) => {
   const { user, permissions, logout } = useContext(AuthContext);
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const { canViewAllTasks } = usePermissions();
   const navigate = useNavigate();
   const [openPanel, setOpenPanel] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState([]);
   const [taskDueDates, setTaskDueDates] = useState([]);
@@ -64,28 +66,67 @@ const Sidebar = () => {
       setNotifications(res.data.map(n => ({
         id: n.id,
         message: n.message,
-        time: new Date(n.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase(),
+        time: new Date(n.created_at.replace(' ', 'T') + 'Z').toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase(),
         read: n.is_read === 1
       })));
     }).catch(() => {});
   };
 
-  useEffect(() => {
-    fetchNotifications();
-
+  const fetchTasks = () => {
     api.get('/tasks').then(res => {
-      const dates = (res.data || []).filter(t => t.due_date).map(t => ({
+      const dates = (res.data || []).map(t => ({
         date: t.due_date?.slice(0,10),
         title: t.title,
         status: t.status,
       }));
       setTaskDueDates(dates);
     }).catch(() => {});
+  };
 
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchTasks();
     fetchEvents();
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    
+    // Check if already in standalone mode
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      setIsInstallable(false);
+    }
+
+    const s = io(import.meta.env.VITE_API_URL?.replace('/api','') || (window.location.hostname === 'localhost' ? 'http://localhost:5005' : window.location.origin));
+    s.on('tasks_updated', () => {
+      fetchNotifications();
+      fetchTasks();
+      fetchEvents();
+    });
+    return () => {
+      s.disconnect();
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
   }, []);
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleInstallClick = () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        setIsInstallable(false);
+      }
+      setDeferredPrompt(null);
+    });
+  };
+
+  const handleLogout = () => { logout(); navigate('/'); };
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -108,6 +149,7 @@ const Sidebar = () => {
       return;
     }
     setAddingEvent(true);
+    await new Promise(r => setTimeout(r, 3000));
     try {
       await api.post('/events', {
         title: eventForm.title,
@@ -125,7 +167,7 @@ const Sidebar = () => {
     }
   };
 
-  const handleDeleteEvent = (id) => {
+  const handleDeleteEvent = async (id) => {
     setEventToDelete(id);
   };
 
@@ -157,31 +199,39 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="sidebar">
+      <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header" style={{ padding:'1.5rem', borderBottom:'1px solid rgba(0,0,0,0.05)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
             <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-            <div style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', letterSpacing:'-0.3px', lineHeight:1 }}>
+            <div className="sidebar-text" style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', letterSpacing:'-0.3px', lineHeight:1 }}>
               Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
             </div>
           </div>
+          {setMobileOpen && (
+            <button className="mobile-close-sidebar-btn" onClick={() => setMobileOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'none' }}>
+              <X size={20} />
+            </button>
+          )}
+          <button className="desktop-collapse-sidebar-btn" onClick={() => setCollapsed(!collapsed)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
+            <Menu size={18} />
+          </button>
         </div>
 
-        <div className="sidebar-nav">
+        <div className="sidebar-nav" onClick={() => setMobileOpen && setMobileOpen(false)}>
           <div className="sidebar-section-title">MAIN MENU</div>
 
           <div className={`sidebar-item${openPanel === 'search' ? ' active' : ''}`}
             onClick={() => setOpenPanel(openPanel === 'search' ? null : 'search')}
             style={{ cursor:'pointer' }}>
-            <Search size={17} /> Search
+            <Search size={17} className="sidebar-icon" /> <span className="sidebar-text">Search</span>
           </div>
 
           <div className={`sidebar-item${openPanel === 'notification' ? ' active' : ''}`}
             onClick={() => setOpenPanel(openPanel === 'notification' ? null : 'notification')}
             style={{ cursor:'pointer', position:'relative' }}>
-            <Bell size={17} /> Notification
+            <Bell size={17} className="sidebar-icon" /> <span className="sidebar-text">Notification</span>
             {notifications.filter(n => !n.read).length > 0 && (
-              <span style={{ marginLeft:'auto', background:'#EF4444', color:'white', fontSize:'0.65rem', fontWeight:'700', padding:'0.1rem 0.4rem', borderRadius:'10px', minWidth:'18px', textAlign:'center' }}>
+              <span className="sidebar-badge" style={{ marginLeft:'auto', background:'#EF4444', color:'white', fontSize:'0.65rem', fontWeight:'700', padding:'0.1rem 0.4rem', borderRadius:'10px', minWidth:'18px', textAlign:'center' }}>
                 {notifications.filter(n => !n.read).length}
               </span>
             )}
@@ -190,64 +240,173 @@ const Sidebar = () => {
           <div className={`sidebar-item${openPanel === 'calendar' ? ' active' : ''}`}
             onClick={() => setOpenPanel(openPanel === 'calendar' ? null : 'calendar')}
             style={{ cursor:'pointer' }}>
-            <Calendar size={17} /> Calendar
+            <Calendar size={17} className="sidebar-icon" /> <span className="sidebar-text">Calendar</span>
           </div>
 
           <NavLink to="/user/profile" className="sidebar-item">
-            <Settings size={17} /> Settings
+            <Settings size={17} className="sidebar-icon" /> <span className="sidebar-text">Settings</span>
           </NavLink>
 
-          <div className="sidebar-section-title">MY PAGES</div>
+          <div className="sidebar-section-title">WORKSPACE</div>
 
           {/* Dashboard - always visible, route depends on role */}
           {user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_analytics ? (
-            <NavLink to="/admin/dashboard" className="sidebar-item"><FolderKanban size={17} /> Dashboard</NavLink>
+            <NavLink to="/admin/dashboard" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">Dashboard</span></NavLink>
           ) : (
-            <NavLink to="/user/dashboard" className="sidebar-item"><FolderKanban size={17} /> Dashboard</NavLink>
+            <NavLink to="/user/dashboard" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">Dashboard</span></NavLink>
           )}
 
           {/* Tasks - always visible */}
-          <NavLink to="/user/tasks" className="sidebar-item"><FolderKanban size={17} /> My Tasks</NavLink>
+          <NavLink to="/user/tasks" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">My Tasks</span></NavLink>
+
+          {/* Gym Tracker - always visible */}
+          <NavLink to="/user/gym" className="sidebar-item"><Dumbbell size={17} className="sidebar-icon" /> <span className="sidebar-text">Gym Tracker</span></NavLink>
+
+          {/* Reminders - always visible */}
+          <NavLink to="/user/reminders" className="sidebar-item"><Bell size={17} className="sidebar-icon" /> <span className="sidebar-text">Reminders</span></NavLink>
 
           {/* Projects - Admin/Permitted only */}
           {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_projects) && (
-            <NavLink to="/projects" className="sidebar-item"><Folder size={17} /> Projects</NavLink>
+            <NavLink to="/projects" className="sidebar-item"><Folder size={17} className="sidebar-icon" /> <span className="sidebar-text">Projects</span></NavLink>
+          )}
+
+          {/* Management section header */}
+          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_tasks || permissions?.can_view_users || permissions?.can_manage_users || permissions?.can_manage_roles || permissions?.can_view_reports) && (
+            <div className="sidebar-section-title" style={{ marginTop: '1.25rem' }}>MANAGEMENT</div>
           )}
 
           {/* Admin-level pages — only shown if user has relevant permissions */}
           {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_tasks) && (
-            <NavLink to="/admin/tasks" className="sidebar-item"><FolderKanban size={17} /> Task Management</NavLink>
+            <NavLink to="/admin/tasks" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">Task Management</span></NavLink>
           )}
           {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_users || permissions?.can_manage_users) && (
-            <NavLink to="/admin/users" className="sidebar-item"><Users size={17} /> Manage Users</NavLink>
+            <NavLink to="/admin/users" className="sidebar-item"><Users size={17} className="sidebar-icon" /> <span className="sidebar-text">Manage Users</span></NavLink>
           )}
           {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_roles) && (
-            <NavLink to="/admin/permissions" className="sidebar-item"><Shield size={17} /> Permissions</NavLink>
+            <NavLink to="/admin/permissions" className="sidebar-item"><Shield size={17} className="sidebar-icon" /> <span className="sidebar-text">Permissions</span></NavLink>
           )}
           {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_reports) && (
-            <NavLink to="/admin/activity" className="sidebar-item"><Activity size={17} /> Activity Log</NavLink>
+            <NavLink to="/admin/activity" className="sidebar-item"><Activity size={17} className="sidebar-icon" /> <span className="sidebar-text">Activity Log</span></NavLink>
+          )}
+
+          {/* Financials section header */}
+          {!!(user.role === 'admin' || permissions?.is_super_admin) && (
+            <>
+              <div className="sidebar-section-title" style={{ marginTop: '1.25rem' }}>FINANCIALS</div>
+              <NavLink to="/admin/expenses" className="sidebar-item"><IndianRupee size={17} className="sidebar-icon" /> <span className="sidebar-text">SpendFlow</span></NavLink>
+            </>
+          )}
+
+
+          {/* Today's Schedule Widget */}
+          <div className="sidebar-section-title sidebar-schedule" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+            <span>TODAY'S SCHEDULE</span>
+            <span onClick={() => setOpenPanel('calendar')} style={{ textTransform: 'none', letterSpacing: 'normal', fontSize: '0.75rem', fontWeight: '700', color: '#4F46E5', cursor: 'pointer' }}>View all</span>
+          </div>
+          <div className="sidebar-schedule" style={{ padding: '0 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1rem' }}>
+            {(() => {
+              const todays = events.filter(e => {
+                const todayDate = new Date();
+                const todayStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+                return e.event_date && e.event_date.slice(0, 10) === todayStr;
+              }).sort((a,b) => a.event_time.localeCompare(b.event_time)).slice(0, 3);
+              
+              if (todays.length === 0) return <div style={{ fontSize:'0.8rem', color:'var(--text-muted)' }}>No schedule for today.</div>;
+              
+              return todays.map((ev, i) => {
+                const colors = [
+                  { bg: 'rgba(59,130,246,0.15)', dot: '#3B82F6' },
+                  { bg: 'rgba(245,158,11,0.15)', dot: '#F59E0B' },
+                  { bg: 'rgba(16,185,129,0.15)', dot: '#10B981' }
+                ];
+                const color = colors[i % colors.length];
+                return (
+                  <div key={ev.id} style={{ display:'flex', alignItems:'center', gap:'0.85rem' }}>
+                    <div style={{ width:'26px', height:'26px', borderRadius:'50%', background: color.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <div style={{ width:'8px', height:'8px', borderRadius:'50%', background: color.dot }} />
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:'0.75rem', color:'var(--text-muted)', fontWeight:'700' }}>
+                        {new Date(ev.event_date + 'T' + ev.event_time).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'})}
+                      </div>
+                      <div style={{ fontWeight:'700', color:'var(--text-primary)', fontSize:'0.85rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{ev.title}</div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+
+          {/* PWA Install Banner */}
+          {!collapsed && isInstallable && (
+            <div style={{
+              margin: '1.25rem 0.5rem 0.5rem',
+              padding: '1rem',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(255, 126, 95, 0.05) 100%)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.02)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.65rem',
+              animation: 'fadeIn 0.3s ease'
+            }}>
+              <div style={{ fontSize: '1.2rem' }}>📱</div>
+              <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '0.82rem', letterSpacing: '-0.2px' }}>
+                Install App
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: '1.4', fontWeight: '500' }}>
+                Install Purple for faster access and live reminders.
+              </div>
+              <button
+                onClick={handleInstallClick}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #FF7E5F 100%)',
+                  color: '#ffffff',
+                  fontSize: '0.78rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(139,92,246,0.25)',
+                  transition: 'transform 0.18s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                Install Now
+              </button>
+            </div>
           )}
         </div>
 
-        <div className="sidebar-footer" style={{ padding:'1rem 1.5rem 1.5rem', borderTop:'1px solid var(--border)' }}>
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', background: darkMode ? 'rgba(255,126,95,0.1)' : 'rgba(0,0,0,0.04)', border: darkMode ? '1px solid rgba(255,126,95,0.25)' : '1px solid rgba(0,0,0,0.08)', color:'var(--text-secondary)', fontSize:'0.875rem', fontWeight:'600', cursor:'pointer', padding:'0.6rem 0.75rem', borderRadius:'10px', transition:'all 0.2s', marginBottom:'0.5rem' }}
-            onMouseEnter={e => { e.currentTarget.style.background = darkMode ? 'rgba(255,126,95,0.2)' : 'rgba(0,0,0,0.08)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = darkMode ? 'rgba(255,126,95,0.1)' : 'rgba(0,0,0,0.04)'; }}>
-            <span style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>{darkMode ? <Sun size={16} color="#FF7E5F" /> : <Moon size={16} />} {darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-            <div style={{ width:'32px', height:'18px', borderRadius:'20px', background: darkMode ? '#FF7E5F' : '#CBD5E1', position:'relative', transition:'background 0.3s' }}>
-              <div style={{ width:'14px', height:'14px', borderRadius:'50%', background:'white', position:'absolute', top:'2px', left: darkMode ? '16px' : '2px', transition:'left 0.3s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }} />
+        <div className="sidebar-footer" style={{ padding:'1rem', borderTop:'1px solid var(--border)' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent: collapsed ? 'center' : 'space-between', padding:'0.75rem', borderRadius:'14px', background:'var(--card-bg)', border:'1px solid var(--border)', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 2px 10px rgba(0,0,0,0.02)' }}
+               onMouseEnter={e => e.currentTarget.style.background='var(--row-hover)'}
+               onMouseLeave={e => e.currentTarget.style.background='var(--card-bg)'}>
+            <div style={{ display:'flex', alignItems:'center', gap:'0.8rem' }}>
+              <div style={{ position:'relative' }}>
+                <div style={{ width:'38px', height:'38px', borderRadius:'12px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'1.1rem', boxShadow:'0 4px 12px rgba(255,126,95,0.3)' }}>
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
+                <div style={{ position:'absolute', bottom:'-2px', right:'-2px', width:'12px', height:'12px', background:'#10B981', border:'2px solid var(--card-bg)', borderRadius:'50%' }}></div>
+              </div>
+              {!collapsed && (
+                <div style={{ display:'flex', flexDirection:'column' }}>
+                  <span style={{ fontSize:'0.9rem', fontWeight:'700', color:'var(--text-primary)', lineHeight:'1.2' }}>{user?.name}</span>
+                  <span style={{ fontSize:'0.75rem', fontWeight:'600', color:'var(--text-muted)' }}>{user?.role === 'admin' ? 'Admin' : 'Developer'}</span>
+                </div>
+              )}
             </div>
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'transparent', border:'none', color:'var(--text-muted)', fontSize:'0.875rem', fontWeight:'600', cursor:'pointer', padding:'0.5rem', borderRadius:'8px', transition:'all 0.2s', width:'100%' }}
-            onMouseEnter={e => { e.currentTarget.style.background='rgba(239,68,68,0.08)'; e.currentTarget.style.color='#EF4444'; }}
-            onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text-muted)'; }}>
-            <LogOut size={17} /> Logout
-          </button>
+            {!collapsed && (
+              <button onClick={handleLogout} style={{ background:'transparent', border:'none', color:'var(--text-muted)', cursor:'pointer', padding:'6px', transition:'all 0.2s', borderRadius:'8px' }} onMouseEnter={e=>{e.currentTarget.style.color='#EF4444'; e.currentTarget.style.background='rgba(239,68,68,0.1)';}} onMouseLeave={e=>{e.currentTarget.style.color='var(--text-muted)'; e.currentTarget.style.background='transparent';}} title="Logout">
+                <LogOut size={16} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -391,10 +550,15 @@ const Sidebar = () => {
                       onFocus={e => e.target.style.borderColor='#4F46E5'} onBlur={e => e.target.style.borderColor='rgba(226,232,240,0.8)'}/>
                   </div>
                   <button type="submit" disabled={addingEvent}
-                    style={{ background:'#4F46E5', color:'white', border:'none', padding:'0.7rem', borderRadius:'8px', fontWeight:'700', cursor:'pointer', fontSize:'0.875rem', display:'flex', justifyContent:'center', alignItems:'center', gap:'0.5rem', transition:'background 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background='#4338CA'}
-                    onMouseLeave={e => e.currentTarget.style.background='#4F46E5'}>
-                    {addingEvent ? 'Scheduling...' : 'Schedule & Send Email'}
+                    style={{ background:'#4F46E5', color:'white', border:'none', padding:'0.7rem', borderRadius:'8px', fontWeight:'700', cursor: addingEvent ? 'not-allowed' : 'pointer', fontSize:'0.875rem', display:'flex', justifyContent:'center', alignItems:'center', gap:'0.5rem', transition:'background 0.2s', opacity: addingEvent ? 0.7 : 1 }}
+                    onMouseEnter={e => !addingEvent && (e.currentTarget.style.background='#4338CA')}
+                    onMouseLeave={e => !addingEvent && (e.currentTarget.style.background='#4F46E5')}>
+                    {addingEvent ? (
+                      <>
+                        <div className="spinner" style={{ width:14, height:14, borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white', borderWidth:2 }}></div>
+                        Scheduling...
+                      </>
+                    ) : 'Schedule & Send Email'}
                   </button>
                 </form>
               </div>

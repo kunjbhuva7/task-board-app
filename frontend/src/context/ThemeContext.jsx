@@ -1,26 +1,18 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useEffect } from 'react';
 
 export const ThemeContext = createContext();
 
+// Dark mode has been removed — the app always uses the light theme.
+// This provider is kept (no-op) so existing consumers don't break.
 export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved === 'true';
-  });
-
   useEffect(() => {
-    localStorage.setItem('darkMode', darkMode);
-    if (darkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  }, [darkMode]);
-
-  const toggleDarkMode = () => setDarkMode(prev => !prev);
+    // Force light theme regardless of any previously saved preference
+    document.documentElement.removeAttribute('data-theme');
+    try { localStorage.removeItem('darkMode'); } catch (e) { /* ignore */ }
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+    <ThemeContext.Provider value={{ darkMode: false, toggleDarkMode: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -8,12 +8,17 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      navigate('/user/dashboard');
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
     }
   }, [user, navigate]);
 
@@ -25,7 +30,11 @@ const Login = () => {
       login(res.data.token, res.data.user);
       toast.success('Welcome back!');
       await new Promise(resolve => setTimeout(resolve, 3000));
-      navigate('/user/dashboard');
+      if (res.data.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
       setLoading(false);
@@ -37,12 +46,43 @@ const Login = () => {
       display: 'flex', minHeight: '100vh',
       alignItems: 'center', justifyContent: 'center',
       padding: '1.5rem',
-      fontFamily: "'Inter', sans-serif"
+      fontFamily: "'Inter', sans-serif",
+      backgroundColor: '#FAF9F6',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      
+      {/* Background Dot Pattern */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+        maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'
+      }} />
+
+      {/* Beautiful Ambient Mesh Gradients */}
+      <div style={{
+        position: 'absolute', top: '-10%', right: '-5%', width: '800px', height: '800px',
+        background: 'radial-gradient(circle, rgba(255, 183, 130, 0.25) 0%, rgba(255,255,255,0) 70%)',
+        filter: 'blur(70px)', zIndex: 0, pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-20%', left: '-10%', width: '900px', height: '900px',
+        background: 'radial-gradient(circle, rgba(130, 224, 255, 0.25) 0%, rgba(255,255,255,0) 70%)',
+        filter: 'blur(90px)', zIndex: 0, pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute', top: '20%', left: '15%', width: '600px', height: '600px',
+        background: 'radial-gradient(circle, rgba(255, 236, 179, 0.3) 0%, rgba(255,255,255,0) 70%)',
+        filter: 'blur(70px)', zIndex: 0, pointerEvents: 'none'
+      }} />
+
       {/* Light Glass Card */}
       <div style={{
+        position: 'relative', zIndex: 10,
         width: '100%', maxWidth: '440px',
-        background: 'rgba(255,255,255,0.75)',
+        background: 'transparent',
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
         borderRadius: '24px',
@@ -92,20 +132,35 @@ const Login = () => {
             <label style={{ display:'block', fontSize:'0.82rem', fontWeight:'700', color:'#334155', marginBottom:'6px', letterSpacing:'0.02em' }}>
               Password
             </label>
-            <input
-              type="password" required
-              value={password} onChange={e => setPassword(e.target.value)}
-              style={{
-                width:'100%', height:'46px', padding:'0 14px',
-                borderRadius:'12px', outline:'none', fontSize:'0.9rem',
-                background:'rgba(255,255,255,0.9)',
-                border:'1px solid rgba(0,0,0,0.08)',
-                color:'#1E293B',
-                transition:'all 0.2s',
-              }}
-              onFocus={e => { e.target.style.borderColor='#FF7E5F'; e.target.style.boxShadow='0 0 0 3px rgba(255,126,95,0.15)'; }}
-              onBlur={e => { e.target.style.borderColor='rgba(0,0,0,0.08)'; e.target.style.boxShadow='none'; }}
-            />
+            <div style={{ position:'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'} required
+                value={password} onChange={e => setPassword(e.target.value)}
+                style={{
+                  width:'100%', height:'46px', padding:'0 64px 0 14px',
+                  borderRadius:'12px', outline:'none', fontSize:'0.9rem',
+                  background:'rgba(255,255,255,0.9)',
+                  border:'1px solid rgba(0,0,0,0.08)',
+                  color:'#1E293B',
+                  transition:'all 0.2s',
+                }}
+                onFocus={e => { e.target.style.borderColor='#FF7E5F'; e.target.style.boxShadow='0 0 0 3px rgba(255,126,95,0.15)'; }}
+                onBlur={e => { e.target.style.borderColor='rgba(0,0,0,0.08)'; e.target.style.boxShadow='none'; }}
+              />
+              <button type="button" onClick={() => setShowPassword(v => !v)}
+                style={{ position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'transparent', border:'none', cursor:'pointer', color:'#64748B', fontSize:'0.78rem', fontWeight:'700' }}>
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ textAlign:'right', marginTop:'-0.5rem' }}>
+            <span
+              onClick={() => navigate('/forgot-password')}
+              style={{ fontSize:'0.82rem', fontWeight:'600', color:'#FF7E5F', cursor:'pointer' }}
+            >
+              Forgot password?
+            </span>
           </div>
 
           <button

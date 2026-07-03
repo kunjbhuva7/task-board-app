@@ -39,6 +39,7 @@ router.post('/', async (req, res) => {
       text: `An event has been scheduled.\n\nTitle: ${title}\nDate: ${event_date}\nTime: ${event_time}`
     });
 
+    req.app.get('io')?.emit('tasks_updated');
     res.json({ message: 'Event scheduled successfully' });
   } catch (error) {
     console.error(error);
@@ -54,6 +55,7 @@ router.delete('/:id', (req, res) => {
     db.prepare('DELETE FROM events WHERE id = ?').run(req.params.id);
     db.prepare(`INSERT INTO activity_log (user_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)`).run(req.user.id, 'Delete Event', 'event', req.params.id, `Deleted event: ${event.title}`);
 
+    req.app.get('io')?.emit('tasks_updated');
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
     console.error('Delete event error:', error);

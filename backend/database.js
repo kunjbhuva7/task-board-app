@@ -8,6 +8,8 @@ const db = new Database(dbPath);
 console.log('DB connected.');
 
 db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
+db.pragma('synchronous = NORMAL');
 
 const initDb = () => {
   db.exec(`
@@ -111,6 +113,71 @@ const initDb = () => {
       INSERT INTO notifications (user_id, message)
       SELECT id, NEW.details FROM users WHERE role = 'admin';
     END;
+
+    -- Expenses table
+    CREATE TABLE IF NOT EXISTS expenses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      amount REAL NOT NULL,
+      description TEXT NOT NULL,
+      expense_date DATE NOT NULL,
+      category TEXT DEFAULT 'Other',
+      payment_mode TEXT DEFAULT 'Cash',
+      tags TEXT,
+      receipt_filename TEXT,
+      receipt_mimetype TEXT,
+      receipt_data TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Reminders table
+    CREATE TABLE IF NOT EXISTS reminders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      reminder_date TEXT NOT NULL,
+      reminder_time TEXT NOT NULL,
+      priority TEXT DEFAULT 'medium',
+      repeat_type TEXT DEFAULT 'once',
+      category TEXT DEFAULT 'Other',
+      email_notify INTEGER DEFAULT 1,
+      notify_15min INTEGER DEFAULT 0,
+      notify_1hour INTEGER DEFAULT 0,
+      is_important INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'upcoming',
+      snooze_until TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      reminder_sent INTEGER DEFAULT 0,
+      pre_15min_sent INTEGER DEFAULT 0,
+      pre_1hour_sent INTEGER DEFAULT 0,
+      overdue_sent INTEGER DEFAULT 0
+    );
+
+    -- Gym & Nutrition Tracker: flexible date-wise entries (one date = many entries)
+    CREATE TABLE IF NOT EXISTS gym_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER REFERENCES users(id),
+      entry_date TEXT NOT NULL,
+      entry_time TEXT,
+      type TEXT NOT NULL,
+      data TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Per-day gym meta (protein/water goals, mood, day notes)
+    CREATE TABLE IF NOT EXISTS gym_days (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER REFERENCES users(id),
+      entry_date TEXT NOT NULL,
+      protein_goal INTEGER DEFAULT 150,
+      water_goal INTEGER DEFAULT 3000,
+      mood TEXT,
+      day_notes TEXT,
+      UNIQUE(user_id, entry_date)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_gym_entries_user_date ON gym_entries(user_id, entry_date);
   `);
 
   // Add columns if they do not exist (for existing databases)
@@ -134,6 +201,39 @@ const initDb = () => {
   const taskColumns = db.prepare("PRAGMA table_info(tasks)").all().map(c => c.name);
   if (!taskColumns.includes('project_id')) {
     db.exec('ALTER TABLE tasks ADD COLUMN project_id INTEGER REFERENCES projects(id)');
+  }
+
+  // Add payment_mode and tags to expenses if they do not exist
+  const expenseCols = db.prepare("PRAGMA table_info(expenses)").all().map(c => c.name);
+  if (!expenseCols.includes('payment_mode')) {
+    db.exec("ALTER TABLE expenses ADD COLUMN payment_mode TEXT DEFAULT 'Cash'");
+  }
+  if (!expenseCols.includes('tags')) {
+    db.exec("ALTER TABLE expenses ADD COLUMN tags TEXT");
+  }
+
+  // Add password-reset token columns to users if they do not exist
+  const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+  if (!userCols.includes('reset_token')) {
+    db.exec('ALTER TABLE users ADD COLUMN reset_token TEXT');
+  }
+  if (!userCols.includes('reset_token_expiry')) {
+    db.exec('ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME');
+  }
+  if (!userCols.includes('email_notifications')) {
+    db.exec('ALTER TABLE users ADD COLUMN email_notifications INTEGER DEFAULT 1');
+  }
+
+  // Add "completed" flag to gym_days if missing (for the day tick-mark + summary email)
+  const gymDayCols = db.prepare("PRAGMA table_info(gym_days)").all().map(c => c.name);
+  if (!gymDayCols.includes('completed')) {
+    db.exec('ALTER TABLE gym_days ADD COLUMN completed INTEGER DEFAULT 0');
+  }
+
+  // Add source tracking to gym_entries (marks duplicated vs manual entries)
+  const gymEntryCols = db.prepare("PRAGMA table_info(gym_entries)").all().map(c => c.name);
+  if (!gymEntryCols.includes('source')) {
+    db.exec("ALTER TABLE gym_entries ADD COLUMN source TEXT DEFAULT 'manual'");
   }
 
   // Auto-create permission rows for users that don't have one yet
