@@ -640,13 +640,13 @@ textarea.gym-input { resize: vertical; min-height: 64px; line-height: 1.5; }
 .auth-page {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
   padding: 2rem; font-family: 'Inter', sans-serif; position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #E8D5F5 0%, #F9E4EC 25%, #FDEBD3 50%, #FCE8D8 75%, #E8D5F5 100%);
+  background: linear-gradient(145deg, #DDD6FE 0%, #FBCFE8 100%);
 }
 .auth-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
 .auth-gradient { position: absolute; border-radius: 50%; pointer-events: none; animation: authFloat 16s ease-in-out infinite alternate; }
-.auth-gradient-1 { width: 800px; height: 800px; top: -25%; left: -10%; background: radial-gradient(circle, rgba(180,130,255,0.4) 0%, transparent 70%); filter: blur(80px); }
-.auth-gradient-2 { width: 700px; height: 700px; bottom: -20%; right: -8%; background: radial-gradient(circle, rgba(255,150,100,0.35) 0%, transparent 70%); filter: blur(80px); animation-delay: 5s; animation-direction: alternate-reverse; }
-.auth-gradient-3 { width: 500px; height: 500px; top: 15%; right: 15%; background: radial-gradient(circle, rgba(255,180,200,0.3) 0%, transparent 70%); filter: blur(60px); animation-delay: 8s; }
+.auth-gradient-1 { width: 900px; height: 900px; top: -30%; left: -20%; background: radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%); filter: blur(90px); }
+.auth-gradient-2 { width: 800px; height: 800px; bottom: -25%; right: -15%; background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%); filter: blur(80px); animation-delay: 5s; animation-direction: alternate-reverse; }
+.auth-gradient-3 { width: 500px; height: 500px; top: 40%; left: 50%; background: radial-gradient(circle, rgba(167,139,250,0.25) 0%, transparent 70%); filter: blur(60px); animation-delay: 8s; }
 @keyframes authFloat { from { transform: translate(0,0) scale(1); } to { transform: translate(20px,-15px) scale(1.03); } }
 .auth-grid-pattern {
   position: absolute; inset: 0;
