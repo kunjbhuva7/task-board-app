@@ -41,6 +41,16 @@ router.post('/login', loginLimiter, [
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret_change_me', { expiresIn: '8h' });
     await db.run(`INSERT INTO activity_log (user_id, action, target_type, details) VALUES ($1, $2, $3, $4)`, [user.id, 'Login', 'system', 'User logged in']);
     await notifyAdmins(user.id, 'User logged in');
+
+    // Send login notification email (non-blocking)
+    const sendEmail = require('../utils/email');
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+    sendEmail({
+      to: user.email,
+      subject: `🔐 New login to Purple`,
+      text: `Hi ${user.name},\n\nA new login was detected on your Purple account at ${now} IST.\n\nIf this wasn't you, please change your password immediately.`
+    }).catch(() => {});
+
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (error) {
     console.error('Login error:', error.message);
