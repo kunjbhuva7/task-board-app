@@ -13,7 +13,7 @@ const nowHM = () => {
 const blankForm = (type) => {
   switch (type) {
     case 'meal': return { mealType: 'Breakfast', foodItems: '', protein: '', notes: '' };
-    case 'workout': return { workoutType: 'Push', workoutName: '', duration: '', cardioMinutes: '', notes: '' };
+    case 'workout': return { workoutTypes: ['Push'], duration: '', cardioMinutes: '', notes: '' };
     case 'supplement': return { name: 'Whey Protein', customName: '', protein: '', notes: '' };
     case 'weight': return { bodyWeight: '', bodyFat: '', waist: '', chest: '', arms: '' };
     case 'water': return { amount: 500 };
@@ -38,6 +38,10 @@ const EntryModal = ({ open, date, editing, onClose, onSaved }) => {
       if (editing.type === 'supplement' && !['Whey Protein','Creatine','Coffee','Pre Workout','Fish Oil','Multivitamin','Vitamin D','Custom'].includes(data.name)) {
         data.customName = data.name; data.name = 'Custom';
       }
+      // Convert old single workoutType to array
+      if (editing.type === 'workout' && !Array.isArray(data.workoutTypes)) {
+        data.workoutTypes = data.workoutType ? data.workoutType.split(' + ').map(s => s.trim()).filter(Boolean) : ['Push'];
+      }
       setForm(data);
     } else {
       setType(null);
@@ -56,12 +60,16 @@ const EntryModal = ({ open, date, editing, onClose, onSaved }) => {
       const name = form.name === 'Custom' ? (form.customName || 'Custom') : form.name;
       return { name, protein: form.protein || '', notes: form.notes || '' };
     }
+    if (type === 'workout') {
+      const types = form.workoutTypes || [];
+      return { workoutTypes: types, workoutType: types.join(' + '), workoutName: types.join(' + '), duration: form.duration, cardioMinutes: form.cardioMinutes, notes: form.notes };
+    }
     return { ...form };
   };
 
   const validate = () => {
     if (type === 'meal' && !form.foodItems.trim()) return 'Please enter the food items';
-    if (type === 'workout' && !form.workoutName.trim()) return 'Add a workout name';
+    if (type === 'workout' && (!form.workoutTypes || form.workoutTypes.length === 0)) return 'Select at least one workout type';
     if (type === 'weight' && !form.bodyWeight) return 'Enter your body weight';
     if (type === 'water' && !form.amount) return 'Enter a water amount';
     if (type === 'note' && !form.text.trim()) return 'Write something in the note';
@@ -161,13 +169,37 @@ const EntryModal = ({ open, date, editing, onClose, onSaved }) => {
 
               {type === 'workout' && (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <Field label="Workout Type">
-                      <Select value={form.workoutType} onChange={v => set('workoutType', v)} options={WORKOUT_TYPE_OPTIONS} accent="#8B5CF6" />
-                    </Field>
-                    <Field label="Workout Name">
-                      <Input type="text" value={form.workoutName} onChange={e => set('workoutName', e.target.value)} placeholder="e.g. Chest Day" />
-                    </Field>
+                  <div className="gym-field">
+                    <label className="gym-label">Workout Type (select one or more)</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {WORKOUT_TYPE_OPTIONS.map(opt => {
+                        const Icon = opt.icon;
+                        const selected = (form.workoutTypes || []).includes(opt.value);
+                        return (
+                          <button key={opt.value} type="button"
+                            onClick={() => {
+                              const current = form.workoutTypes || [];
+                              if (selected) {
+                                set('workoutTypes', current.filter(v => v !== opt.value));
+                              } else {
+                                set('workoutTypes', [...current, opt.value]);
+                              }
+                            }}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                              padding: '0.5rem 0.85rem', borderRadius: 10, cursor: 'pointer',
+                              fontSize: '0.82rem', fontWeight: 700, fontFamily: 'inherit',
+                              border: selected ? '2px solid #8B5CF6' : '1.5px solid var(--border)',
+                              background: selected ? 'rgba(139,92,246,0.1)' : 'var(--card-bg)',
+                              color: selected ? '#7C3AED' : 'var(--text-secondary)',
+                              transition: 'all 0.15s'
+                            }}>
+                            <Icon size={15} />
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
