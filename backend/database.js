@@ -224,14 +224,14 @@ const initDb = async () => {
       CREATE INDEX IF NOT EXISTS idx_gym_entries_user_date ON gym_entries(user_id, entry_date);
     `);
 
-    // ── Seed admin user ──
+    // ── Seed admin user (NEVER overwrites existing password) ──
     const adminEmail = 'kunjbhuva301@gmail.com';
-    const adminPassword = 'Admin@123';
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(adminPassword, salt);
 
     const existing = await client.query('SELECT * FROM users WHERE email = $1', [adminEmail]);
     if (existing.rows.length === 0) {
+      const adminPassword = 'Admin@123';
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(adminPassword, salt);
       const ins = await client.query(
         `INSERT INTO users (name, email, password_hash, role, is_active) VALUES ($1, $2, $3, $4, 1) RETURNING id`,
         ['Admin', adminEmail, hash, 'admin']
@@ -248,9 +248,10 @@ const initDb = async () => {
       );
       console.log('✅ Admin user created:', adminEmail);
     } else {
+      // Only ensure role + active status — NEVER overwrite password
       await client.query(
-        `UPDATE users SET password_hash = $1, is_active = 1, role = 'admin' WHERE email = $2`,
-        [hash, adminEmail]
+        `UPDATE users SET is_active = 1, role = 'admin' WHERE email = $1`,
+        [adminEmail]
       );
       const adminId = existing.rows[0].id;
       await client.query(
@@ -259,7 +260,7 @@ const initDb = async () => {
          can_view_projects=1, can_manage_projects=1, is_super_admin=1, can_create_task=1, can_edit_task=1, can_delete_task=1, can_view_all_tasks=1, can_manage_users=1`,
         [adminId]
       );
-      console.log('✅ Admin user updated/verified:', adminEmail);
+      console.log('✅ Admin user verified (password NOT overwritten):', adminEmail);
     }
 
     // Ensure all users have permission rows
