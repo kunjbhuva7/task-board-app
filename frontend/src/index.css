@@ -796,3 +796,76 @@ textarea.gym-input { resize: vertical; min-height: 64px; line-height: 1.5; }
   .landing-features { padding: 1.5rem; }
   .landing-nav-actions .landing-nav-login { display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — Perfect on phones & tablets
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Global mobile ── */
+@media (max-width: 768px) {
+  /* Cards */
+  .card { padding: 1.25rem; border-radius: 14px; }
+
+  /* Modals full-width */
+  .modal-content { padding: 1.5rem; border-radius: 16px; max-height: 85vh; width: calc(100vw - 2rem); max-width: 100%; }
+
+  /* Kanban scroll */
+  .kanban-board { padding-bottom: 1rem; }
+  .kanban-column { flex: 0 0 260px; }
+}
+
+/* ── Gym tracker mobile ── */
+@media (max-width: 768px) {
+  .gym-two { grid-template-columns: 1fr !important; gap: 1rem; }
+
+  /* Workout chips wrap nicely */
+  .gym-field [style*="flex-wrap: wrap"] { gap: 0.4rem !important; }
+
+  /* Timeline cards */
+  .gym-timeline-row { gap: 0.6rem !important; }
+  .gym-timeline-card { padding: 0.65rem 0.75rem !important; }
+  .gym-timeline-actions { gap: 0 !important; }
+}
+
+/* ── Settings grid mobile ── */
+@media (max-width: 768px) {
+  .settings-grid { grid-template-columns: 1fr !important; gap: 1rem; }
+  .settings-col { gap: 1rem; }
+}
+
+/* ── Auth pages mobile ── */
+@media (max-width: 500px) {
+  .auth-page { padding: 1.5rem 1.25rem; }
+  .auth-card { max-width: 100%; }
+  .auth-title { font-size: 1.5rem; }
+  .auth-input-box { height: 48px; border-radius: 10px; }
+  .auth-submit-btn { height: 48px; border-radius: 10px; }
+}
+
+/* ── Touch targets: minimum 44px for all interactive elements ── */
+@media (max-width: 768px) {
+  .btn, .sidebar-item, button { min-height: 44px; }
+  .gym-option { min-height: 44px; padding: 0.7rem 0.75rem; }
+  .gym-select-trigger { min-height: 44px; }
+  input, select, textarea { min-height: 44px; }
+}
+
+/* ── Small phone (< 380px) ── */
+@media (max-width: 380px) {
+  .auth-page { padding: 1rem; }
+  .auth-logo-text { font-size: 1.4rem; }
+  .auth-title { font-size: 1.3rem; }
+  .landing-h1 { font-size: 2.2rem !important; letter-spacing: -1.5px !important; }
+  .landing-nav { padding: 1rem; }
+  .landing-hero { padding: 3rem 1rem 2rem; }
+}
+
+/* ── PWA standalone mode: extra top padding for status bar ── */
+@media all and (display-mode: standalone) {
+  .sidebar { padding-top: env(safe-area-inset-top, 0px); }
+  .topbar { padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem); }
+  .auth-page { padding-top: calc(env(safe-area-inset-top, 0px) + 2rem); }
+}
+
+/* ── Prevent horizontal overflow on any screen ── */
+html, body { overflow-x: hidden; max-width: 100vw; }
