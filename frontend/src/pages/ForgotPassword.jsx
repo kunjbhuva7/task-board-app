@@ -42,10 +42,12 @@ const ForgotPassword = () => {
         {sent ? (
           <>
             <h1 className="auth-title">Check your email</h1>
-            <p className="auth-subtitle" style={{ marginBottom: '1.5rem' }}>
+            <p className="auth-subtitle">
               If an account exists for <strong>{email}</strong>, a reset link is on its way. Expires in 1 hour.
             </p>
-            <button onClick={() => navigate('/login')} className="auth-submit-btn">Back to Login</button>
+            <div className="auth-form">
+              <button onClick={() => navigate('/login')} className="auth-submit-btn" style={{ width: '100%' }}>Back to Login</button>
+            </div>
           </>
         ) : (
           <>
