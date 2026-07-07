@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
-import { Lock, User, Mail, Eye, EyeOff, Check } from 'lucide-react';
+import { Lock, User, Mail, Eye, EyeOff } from 'lucide-react';
 
 const SetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -107,24 +107,15 @@ const SetPassword = () => {
             </div>
           </div>
 
-          {/* Password strength */}
+          {/* Password strength — minimal visual only */}
           {password.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} style={{ flex: 1, height: 5, borderRadius: 999, background: i <= strength ? strengthColors[strength] : '#E2E8F0', transition: 'background 0.2s' }} />
+                  <div key={i} style={{ flex: 1, height: 4, borderRadius: 999, background: i <= strength ? strengthColors[strength] : '#E2E8F0', transition: 'background 0.25s' }} />
                 ))}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: strengthColors[strength] }}>{strengthLabels[strength]}</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                {[['8+ characters', checks.len], ['Uppercase letter', checks.upper], ['Number', checks.num], ['Special character', checks.special]].map(([label, met]) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: met ? '#10B981' : '#94A3B8', fontWeight: 600 }}>
-                    <Check size={13} style={{ opacity: met ? 1 : 0.3 }} /> {label}
-                  </div>
-                ))}
-              </div>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: strengthColors[strength], minWidth: 40 }}>{strengthLabels[strength]}</span>
             </div>
           )}
 
