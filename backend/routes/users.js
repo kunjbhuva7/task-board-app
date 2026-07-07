@@ -66,7 +66,7 @@ router.post('/', async (req, res) => {
     );
 
     // Respond IMMEDIATELY - don't wait for email
-    const frontendUrl = process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://task-board-production-app.up.railway.app';
     const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
     res.json({
       message: 'User created successfully',
@@ -140,7 +140,7 @@ router.post('/:id/resend-invite', async (req, res) => {
     );
 
     // Respond immediately
-    const frontendUrl = process.env.FRONTEND_URL || 'https://kunjbhuva.up.railway.app';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://task-board-production-app.up.railway.app';
     const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
     res.json({ message: 'Invite resent', emailSent: true, inviteLink });
 

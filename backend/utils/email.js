@@ -29,7 +29,7 @@ const baseHtml = (title, bodyContent) => `<!DOCTYPE html>
     <table border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;">
       <tr>
         <td valign="middle" style="padding-right:8px;"><img src="https://task-board-production-app.up.railway.app/logo.png" alt="Logo" width="28" height="28" style="display:block;border:0;" /></td>
-        <td valign="middle"><span style="font-size:26px;font-weight:900;color:#1B263B;letter-spacing:-0.5px;line-height:1;">Pur<span style="color:${BRAND_COLOR};">p</span>le</span></td>
+        <td valign="middle"><span style="font-size:26px;font-weight:900;color:#1B263B;letter-spacing:-0.5px;line-height:1;">Helios</span></td>
       </tr>
     </table>
   </td></tr>
