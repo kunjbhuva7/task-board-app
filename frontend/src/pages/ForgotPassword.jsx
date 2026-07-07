@@ -41,7 +41,6 @@ const ForgotPassword = () => {
 
         {sent ? (
           <>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📧</div>
             <h1 className="auth-title">Check your email</h1>
             <p className="auth-subtitle" style={{ marginBottom: '1.5rem' }}>
               If an account exists for <strong>{email}</strong>, a reset link is on its way. Expires in 1 hour.
