@@ -202,7 +202,7 @@ router.get('/test-email', async (req, res) => {
     const sendEmail = require('../utils/email');
     const result = await sendEmail({
       to: 'kunjbhuva301@gmail.com',
-      subject: 'Purple Email Test (Resend)',
+      subject: 'Helios Email Test (Resend)',
       text: 'If you received this, Resend email is working on Railway!'
     });
     res.json({ result, env: { RESEND_API_KEY: !!process.env.RESEND_API_KEY } });

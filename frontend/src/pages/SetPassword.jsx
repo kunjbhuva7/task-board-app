@@ -77,7 +77,7 @@ const SetPassword = () => {
         <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'0.4rem', marginBottom:'1rem' }}>
           <img src="/logo.png" alt="Logo" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
           <span style={{ fontSize:'1.8rem', fontWeight:'800', color:'#1E293B', letterSpacing:'-0.5px', lineHeight:1 }}>
-            Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
+            Helios
           </span>
         </div>
 

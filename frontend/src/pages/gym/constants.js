@@ -1,6 +1,6 @@
 import { Utensils, Dumbbell, Pill, Scale, Droplets, StickyNote, Sunrise, UtensilsCrossed, Coffee, Activity, MoonStar, Zap, HeartPulse, Footprints, Target, Bike, Swords, FlaskConical, Fish, BicepsFlexed, Cable, Shield, Gauge } from 'lucide-react';
 
-// Entry type metadata — icon, emoji, colors (matches Purple theme accents)
+// Entry type metadata — icon, emoji, colors (matches Helios theme accents)
 export const ENTRY_TYPES = [
   { key: 'meal',       label: 'Meal',       icon: Utensils,   emoji: '🍽', color: '#FF7E5F', bg: 'rgba(255,126,95,0.12)' },
   { key: 'workout',    label: 'Workout',    icon: Dumbbell,   emoji: '🏋', color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)' },

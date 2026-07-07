@@ -61,13 +61,13 @@ const sendReminderNotification = async (reminder, type = 'created') => {
 
   // Status-specific template variables
   let headerTitle = 'Reminder Notification';
-  let headerGradient = 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)'; // Purple/Indigo
+  let headerGradient = 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)'; // Helios/Indigo
   let statusEmoji = '🔔';
-  let statusText = 'Purple Alert';
+  let statusText = 'Helios Alert';
 
   if (type === 'created') {
     headerTitle = 'Reminder Scheduled';
-    headerGradient = 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)'; // Purple/Pink
+    headerGradient = 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)'; // Helios/Pink
     statusEmoji = '✅';
     statusText = 'Reminder Saved Successfully';
   } else if (type === 'alert') {
@@ -214,7 +214,7 @@ const sendReminderNotification = async (reminder, type = 'created') => {
               <p style="color:#64748B; font-size:12px; margin:0 0 4px; font-weight:600; font-family:sans-serif; text-transform:uppercase; letter-spacing:0.5px;">SYSTEM ALERT TIMELINE</p>
               <p style="color:#94A3B8; font-size:12px; margin:0 0 16px; font-family:sans-serif;">Generated on ${istDateTime}</p>
               <div style="width:40px; height:1px; background-color:#E2E8F0; margin:0 auto 16px;"></div>
-              <p style="color:#94A3B8; font-size:11px; margin:0; font-family:sans-serif;">Purple Reminder Engine • Automated server management task scheduler.</p>
+              <p style="color:#94A3B8; font-size:11px; margin:0; font-family:sans-serif;">Helios Reminder Engine • Automated server management task scheduler.</p>
             </td>
           </tr>
 

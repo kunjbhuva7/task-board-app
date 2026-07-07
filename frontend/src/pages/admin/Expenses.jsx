@@ -115,12 +115,12 @@ const PASTEL_PALETTE = [
   { bg: 'rgba(255, 126, 95, 0.1)', color: '#FF7E5F', border: 'rgba(255, 126, 95, 0.25)' }, // Coral Pink
   { bg: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: 'rgba(59, 130, 246, 0.25)' }, // Blue
   { bg: 'rgba(16, 185, 129, 0.1)', color: '#10B981', border: 'rgba(16, 185, 129, 0.25)' }, // Emerald Green
-  { bg: 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6', border: 'rgba(139, 92, 246, 0.25)' }, // Purple / Violet
+  { bg: 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6', border: 'rgba(139, 92, 246, 0.25)' }, // Helios / Violet
   { bg: 'rgba(245, 158, 11, 0.1)', color: '#D97706', border: 'rgba(245, 158, 11, 0.25)' }, // Amber / Yellow
   { bg: 'rgba(236, 72, 153, 0.1)', color: '#EC4899', border: 'rgba(236, 72, 153, 0.25)' }, // Pink
   { bg: 'rgba(6, 182, 212, 0.1)', color: '#06B6D4', border: 'rgba(6, 182, 212, 0.25)' }, // Cyan
   { bg: 'rgba(14, 165, 233, 0.1)', color: '#0284C7', border: 'rgba(14, 165, 233, 0.25)' }, // Light Blue
-  { bg: 'rgba(168, 85, 247, 0.1)', color: '#9333EA', border: 'rgba(168, 85, 247, 0.25)' }, // Purple-indigo
+  { bg: 'rgba(168, 85, 247, 0.1)', color: '#9333EA', border: 'rgba(168, 85, 247, 0.25)' }, // Helios-indigo
   { bg: 'rgba(244, 63, 94, 0.1)', color: '#E11D48', border: 'rgba(244, 63, 94, 0.25)' }, // Rose
   { bg: 'rgba(20, 184, 166, 0.1)', color: '#0D9488', border: 'rgba(20, 184, 166, 0.25)' }, // Teal
 ];

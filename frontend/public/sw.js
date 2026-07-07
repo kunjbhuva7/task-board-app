@@ -63,12 +63,12 @@ self.addEventListener('fetch', (event) => {
 
 // Handle Push Notifications
 self.addEventListener('push', (event) => {
-  let data = { title: 'Purple 💜', body: 'You have a new alert!' };
+  let data = { title: 'Helios 💜', body: 'You have a new alert!' };
   if (event.data) {
     try {
       data = event.data.json();
     } catch (e) {
-      data = { title: 'Purple 💜', body: event.data.text() };
+      data = { title: 'Helios 💜', body: event.data.text() };
     }
   }
 

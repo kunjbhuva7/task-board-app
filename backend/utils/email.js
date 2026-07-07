@@ -6,7 +6,7 @@
 
 const { Resend } = require('resend');
 
-const FROM = 'Purple <noreply@kunjtech.in>';
+const FROM = 'Helios <noreply@kunjtech.in>';
 const BRAND_COLOR = '#FF7E5F';
 const YEAR = new Date().getFullYear();
 
@@ -18,7 +18,7 @@ const getResend = () => {
   return resend;
 };
 
-// ── Base HTML wrapper (consistent premium Purple branding) ──
+// ── Base HTML wrapper (consistent premium Helios branding) ──
 const baseHtml = (title, bodyContent) => `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${title}</title></head>
 <body style="margin:0;padding:0;background-color:#F8F6F3;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
@@ -35,7 +35,7 @@ const baseHtml = (title, bodyContent) => `<!DOCTYPE html>
   </td></tr>
   <tr><td style="padding:10px 40px 40px;">${bodyContent}</td></tr>
   <tr><td style="background:#F8F6F3;padding:20px 40px;text-align:center;border-top:1px solid rgba(0,0,0,0.05);">
-    <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${YEAR} Purple &middot; kunjtech.in</p>
+    <p style="color:#94A3B8;font-size:12px;margin:0;">&copy; ${YEAR} Helios &middot; kunjtech.in</p>
   </td></tr>
 </table>
 </td></tr>
@@ -86,11 +86,11 @@ const sendInviteEmail = async (to, inviteToken) => {
   const inviteLink = `${frontendUrl}/set-password?token=${inviteToken}`;
   const html = baseHtml('You are Invited!', `
     <h2 style="color:#1E293B;font-size:22px;font-weight:800;margin:0 0 12px;">You're Invited! 🎉</h2>
-    <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 8px;">An administrator has invited you to join <strong>Purple</strong>. Click below to set your password and access your workspace.</p>
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 8px;">An administrator has invited you to join <strong>Helios</strong>. Click below to set your password and access your workspace.</p>
     ${btnHtml('Accept Invitation', inviteLink)}
     <p style="color:#94A3B8;font-size:12px;text-align:center;margin:0;">This link expires in 48 hours.</p>
   `);
-  const result = await send({ to, subject: '🚀 You are invited to join Purple!', html });
+  const result = await send({ to, subject: '🚀 You are invited to join Helios!', html });
   return { ...result, inviteLink };
 };
 
@@ -100,11 +100,11 @@ const sendResetEmail = async (to, resetToken) => {
   const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
   const html = baseHtml('Reset Password', `
     <h2 style="color:#1E293B;font-size:22px;font-weight:800;margin:0 0 12px;">Reset your password 🔒</h2>
-    <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 8px;">We received a request to reset your <strong>Purple</strong> account password. Click below to choose a new one.</p>
+    <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 8px;">We received a request to reset your <strong>Helios</strong> account password. Click below to choose a new one.</p>
     ${btnHtml('Reset Password', resetLink)}
     <p style="color:#94A3B8;font-size:12px;text-align:center;margin:0;">This link expires in 1 hour. If you didn't request this, ignore this email.</p>
   `);
-  const result = await send({ to, subject: '🔑 Reset your Purple password', html });
+  const result = await send({ to, subject: '🔑 Reset your Helios password', html });
   return { ...result, resetLink };
 };
 
@@ -114,10 +114,10 @@ const sendLoginAlert = async (to, userName) => {
   const html = baseHtml('Login Alert', `
     <h2 style="color:#1E293B;font-size:20px;font-weight:800;margin:0 0 12px;">New Login Detected 🔐</h2>
     <p style="color:#475569;font-size:15px;line-height:1.7;margin:0;">Hi ${userName},</p>
-    <p style="color:#475569;font-size:15px;line-height:1.7;">A new login to your Purple account was detected at <strong>${now} IST</strong>.</p>
+    <p style="color:#475569;font-size:15px;line-height:1.7;">A new login to your Helios account was detected at <strong>${now} IST</strong>.</p>
     <p style="color:#475569;font-size:15px;line-height:1.7;">If this wasn't you, please change your password immediately.</p>
   `);
-  return send({ to, subject: '🔐 New login to your Purple account', html });
+  return send({ to, subject: '🔐 New login to your Helios account', html });
 };
 
 // Gym summary email

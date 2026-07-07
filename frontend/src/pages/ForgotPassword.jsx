@@ -35,8 +35,8 @@ const ForgotPassword = () => {
 
       <div className="auth-card">
         <div className="auth-logo-row">
-          <img src="/logo.png" alt="Purple" className="auth-logo-img" />
-          <span className="auth-logo-text">Pur<span className="auth-logo-accent">p</span>le</span>
+          <img src="/logo.png" alt="Helios" className="auth-logo-img" />
+          <span className="auth-logo-text">Helios</span>
         </div>
 
         {sent ? (

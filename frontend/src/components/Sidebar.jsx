@@ -204,7 +204,7 @@ const Sidebar = ({ setMobileOpen }) => {
           <div style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
             <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
             <div className="sidebar-text" style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', letterSpacing:'-0.3px', lineHeight:1 }}>
-              Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
+              Helios
             </div>
           </div>
           {setMobileOpen && (
@@ -357,7 +357,7 @@ const Sidebar = ({ setMobileOpen }) => {
                 Install App
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: '1.4', fontWeight: '500' }}>
-                Install Purple for faster access and live reminders.
+                Install Helios for faster access and live reminders.
               </div>
               <button
                 onClick={handleInstallClick}

@@ -16,7 +16,7 @@ const Landing = () => {
       <nav className="landing-nav">
         <div className="landing-nav-brand">
           <img src="/logo.png" alt="Logo" style={{ height: 32 }} />
-          <span className="landing-nav-name">Pur<span style={{ color: '#FF7E5F' }}>p</span>le</span>
+          <span className="landing-nav-name">Helios</span>
         </div>
         <div className="landing-nav-actions">
           <Link to="/login" className="landing-nav-login">Login</Link>
@@ -72,7 +72,7 @@ const Landing = () => {
       </section>
 
       <footer className="landing-footer">
-        <span>© {new Date().getFullYear()} Purple. Built with ❤️</span>
+        <span>© {new Date().getFullYear()} Helios. Built with ❤️</span>
       </footer>
     </div>
   );

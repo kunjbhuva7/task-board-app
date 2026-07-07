@@ -282,7 +282,7 @@ router.get('/:id/complete-email', async (req, res) => {
     res.send(`
       <html>
         <head>
-          <title>Purple Success</title>
+          <title>Helios Success</title>
           <style>
             body { font-family:-apple-system,BlinkMacSystemFont,sans-serif; text-align:center; padding:50px; background:#FAF9F6; color:#1E293B; }
             .card { background:white; padding:40px; border-radius:18px; display:inline-block; box-shadow:0 8px 30px rgba(0,0,0,0.03); max-width:400px; }
@@ -295,7 +295,7 @@ router.get('/:id/complete-email', async (req, res) => {
           <div class="card">
             <h1>🎉 Task Completed!</h1>
             <p>Your reminder "<strong>${reminder.title}</strong>" has been marked as completed successfully from your email.</p>
-            <a href="${frontendBase}/user/reminders" class="btn">Open Purple Dashboard</a>
+            <a href="${frontendBase}/user/reminders" class="btn">Open Helios Dashboard</a>
           </div>
         </body>
       </html>
@@ -327,7 +327,7 @@ router.get('/:id/snooze-email', async (req, res) => {
     res.send(`
       <html>
         <head>
-          <title>Purple Snooze</title>
+          <title>Helios Snooze</title>
           <style>
             body { font-family:-apple-system,BlinkMacSystemFont,sans-serif; text-align:center; padding:50px; background:#FAF9F6; color:#1E293B; }
             .card { background:white; padding:40px; border-radius:18px; display:inline-block; box-shadow:0 8px 30px rgba(0,0,0,0.03); max-width:400px; }
@@ -340,7 +340,7 @@ router.get('/:id/snooze-email', async (req, res) => {
           <div class="card">
             <h1>⏰ Snooze Activated!</h1>
             <p>Your reminder "<strong>${reminder.title}</strong>" has been successfully snoozed for ${minutes} minutes until ${snoozeTime} IST.</p>
-            <a href="${frontendBase}/user/reminders" class="btn">Open Purple Dashboard</a>
+            <a href="${frontendBase}/user/reminders" class="btn">Open Helios Dashboard</a>
           </div>
         </body>
       </html>

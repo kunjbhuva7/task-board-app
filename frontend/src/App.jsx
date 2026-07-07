@@ -62,7 +62,7 @@ const ProtectedRoute = ({ children, requiredPerm }) => {
           <div style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
             <img src="/logo.png" alt="Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
             <span style={{ fontSize:'1.2rem', fontWeight:'800', color:'var(--text-primary)', letterSpacing:'-0.3px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>p</span>le
+              Helios
             </span>
           </div>
           

@@ -152,7 +152,7 @@ const MyTasks = () => {
           <div style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
             <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
             <h1 style={{ fontSize:'1.4rem', fontWeight:'800', color:'var(--text-primary)', margin:0, letterSpacing:'-0.3px' }}>
-              Pur<span style={{ background: 'linear-gradient(135deg, #FF7E5F, #FEB47B)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>p</span>le
+              Helios
             </h1>
           </div>
         </div>
