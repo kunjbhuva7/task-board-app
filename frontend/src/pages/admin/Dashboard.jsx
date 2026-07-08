@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
+import VaultModal from '../../components/VaultModal';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { Users, CheckCircle, Clock, Send, Activity, TrendingUp, Bell } from 'lucide-react';
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [vaultOpen, setVaultOpen] = useState(false);
 
   const fetchStats = () => api.get('/dashboard/stats')
     .then(r => setStats(r.data))
@@ -87,7 +89,7 @@ const Dashboard = () => {
       {/* Header */}
       <div>
         <h2 style={{margin:0, fontSize:'1.6rem', fontWeight:'800', color:'#1E293B'}}>
-          {greeting}, {user?.name || 'Admin'} 👋
+          {greeting}, {user?.name || 'Admin'} <span onClick={() => setVaultOpen(true)} style={{ cursor: 'pointer' }} title="Vault">👋</span>
         </h2>
         <p style={{margin:'0.3rem 0 0', color:'#64748B', fontSize:'0.875rem'}}>
           Here's what's happening with your workspace today.
