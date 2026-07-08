@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Send, X, Trash2, Zap, Mic, MicOff } from 'lucide-react';
+import { Sparkles, Send, X, Trash2, Zap, Mic, MicOff, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -105,7 +105,8 @@ const AIChat = () => {
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8B5CF6', background: 'rgba(139,92,246,0.1)', padding: '2px 7px', borderRadius: 999 }}>Beta</span>
             </div>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
-              <button onClick={clearHistory} className="ai-header-btn" title="Clear chat"><Trash2 size={15} /></button>
+              <button onClick={() => { setMessages([]); api.delete('/ai/history').catch(() => {}); }} className="ai-header-btn" title="New Chat"><Plus size={15} /></button>
+              <button onClick={clearHistory} className="ai-header-btn" title="Clear all"><Trash2 size={15} /></button>
               <button onClick={() => setOpen(false)} className="ai-header-btn" title="Close"><X size={17} /></button>
             </div>
           </div>
@@ -115,10 +116,21 @@ const AIChat = () => {
             {messages.length === 0 && (
               <div style={{ padding: '1.5rem', textAlign: 'center' }}>
                 <Sparkles size={32} color="#8B5CF6" style={{ opacity: 0.5, marginBottom: '0.75rem' }} />
-                <p style={{ fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.3rem' }}>Hi! I'm Helios AI</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: 0, lineHeight: 1.5 }}>
-                  Ask me anything in Hindi or English. I can add expenses, log meals, create tasks, and more!
+                <p style={{ fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.5rem' }}>Hi! I'm Helios AI</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '0 0 1rem', lineHeight: 1.5 }}>
+                  Hindi & English dono samajhta hoon. Bolo ya type karo!
                 </p>
+                <div style={{ textAlign: 'left', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: 12, padding: '0.85rem', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Main ye sab kar sakta hoon:</strong><br/>
+                  • Office expense add/delete karo<br/>
+                  • Gym meal, water, workout log karo<br/>
+                  • Tasks create/delete karo<br/>
+                  • "Kitne projects hain?" — info poochho<br/>
+                  • "Total expense kitna?" — numbers bataunga<br/>
+                  • "Pichle week ke expenses" — filter<br/>
+                  • "Suggest breakfast" — ideas dunga<br/>
+                  • Voice se bolo (mic button) 🎤
+                </div>
               </div>
             )}
 

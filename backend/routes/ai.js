@@ -49,6 +49,15 @@ Response: {"message":"Added breakfast — 4 eggs, 30g protein!","action":{"type"
 User: "500ml water add kar"
 Response: {"message":"Added 500ml water!","action":{"type":"create","module":"gym_water","data":{"amount":500,"entry_date":"2026-07-03","entry_time":"${new Date().toTimeString().slice(0,5)}"}}}
 
+User: "delete chai 30 rupees expense"
+Response: {"message":"Deleted ₹30 Chai & Snacks expense.","action":{"type":"delete","module":"office_expense","data":{"item":"chai","amount":30}}}
+
+User: "last gym meal delete kar"
+Response: {"message":"Deleted your last meal entry.","action":{"type":"delete","module":"gym_meal","data":{}}}
+
+User: "delete last water entry"
+Response: {"message":"Deleted last water entry.","action":{"type":"delete","module":"gym_water","data":{}}}
+
 If you cannot understand or perform the action, set action to null and explain in message.
 Always be helpful, concise, and friendly. Use emojis sparingly.
 
@@ -128,8 +137,34 @@ async function executeAction(action, userId) {
 
     if (type === 'delete') {
       if (mod === 'task' && data.id) {
-        await db.run('DELETE FROM tasks WHERE id = $1', [data.id]);
+        await db.run('DELETE FROM tasks WHERE id = $1 AND created_by = $2', [data.id, userId]);
         return { success: true };
+      }
+      if (mod === 'task' && data.title) {
+        const r = await db.run("DELETE FROM tasks WHERE id = (SELECT id FROM tasks WHERE created_by = $1 AND LOWER(title) LIKE $2 ORDER BY created_at DESC LIMIT 1)", [userId, `%${data.title.toLowerCase()}%`]);
+        return { success: true, deleted: r.rowCount };
+      }
+      if (mod === 'office_expense') {
+        // Delete by matching item name and/or amount (most recent match)
+        let sql = 'DELETE FROM office_expenses WHERE id = (SELECT id FROM office_expenses WHERE user_id = $1';
+        const params = [userId];
+        let idx = 2;
+        if (data.item) { sql += ` AND LOWER(item) LIKE $${idx++}`; params.push(`%${data.item.toLowerCase()}%`); }
+        if (data.amount) { sql += ` AND amount = $${idx++}`; params.push(Number(data.amount)); }
+        sql += ' ORDER BY created_at DESC LIMIT 1)';
+        const r = await db.run(sql, params);
+        return { success: true, deleted: r.rowCount };
+      }
+      if (mod === 'gym_meal' || mod === 'gym_workout' || mod === 'gym_water' || mod === 'gym_supplement') {
+        const typeMap = { gym_meal: 'meal', gym_workout: 'workout', gym_water: 'water', gym_supplement: 'supplement' };
+        const entryType = typeMap[mod];
+        let sql = `DELETE FROM gym_entries WHERE id = (SELECT id FROM gym_entries WHERE user_id = $1 AND type = $2`;
+        const params = [userId, entryType];
+        let idx = 3;
+        if (data.entry_date) { sql += ` AND entry_date = $${idx++}`; params.push(data.entry_date); }
+        sql += ' ORDER BY created_at DESC LIMIT 1)';
+        const r = await db.run(sql, params);
+        return { success: true, deleted: r.rowCount };
       }
     }
 
