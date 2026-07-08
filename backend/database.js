@@ -233,7 +233,6 @@ const initDb = async () => {
         category TEXT DEFAULT 'Other',
         payment_mode TEXT DEFAULT 'Cash',
         notes TEXT,
-        status TEXT DEFAULT 'pending',
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
