@@ -122,7 +122,6 @@ const GymTracker = () => {
   const openEdit = (entry) => { setEditingEntry(entry); setModalOpen(true); };
 
   const handleDelete = async (entry) => {
-    if (!window.confirm('Delete this entry?')) return;
     try { await api.delete(`/gym/entry/${entry.id}`); toast.success('Deleted'); refreshAll(); }
     catch { toast.error('Failed to delete'); }
   };

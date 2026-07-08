@@ -963,10 +963,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 .ai-welcome { padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .ai-welcome-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(139,92,246,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
 .ai-typewriter {
-  font-size: 0.92rem; font-weight: 600; color: var(--text-primary); line-height: 1.6; margin: 0;
-  overflow: hidden; white-space: nowrap; border-right: 2px solid #8B5CF6;
-  animation: aiType 2.5s steps(55, end) forwards, aiBlink 0.6s step-end infinite;
-  max-width: 100%; width: 0;
+  font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height: 1.5; margin: 0;
+  animation: aiFadeIn 0.8s ease forwards; opacity: 0;
 }
-@keyframes aiType { from { width: 0; } to { width: 100%; white-space: normal; } }
-@keyframes aiBlink { 50% { border-color: transparent; } }
+@keyframes aiFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }

@@ -149,7 +149,7 @@ const AIChat = () => {
                     <circle cx="18" cy="18" r="1" fill="#8B5CF6" stroke="none" opacity="0.5"/>
                   </svg>
                 </div>
-                <p className="ai-typewriter">Hi, I'm Helios AI — your smart assistant. Ask me anything or just speak!</p>
+                <p className="ai-typewriter">Hi, I'm Helios AI</p>
               </div>
             )}
 
