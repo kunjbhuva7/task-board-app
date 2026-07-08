@@ -90,8 +90,18 @@ const AIChat = () => {
       {/* Floating AI button */}
       {!open && (
         <button onClick={() => setOpen(true)} className="ai-fab" title="Helios AI">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m12.73-12.73l1.41-1.41"/>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 8V4m0 16v-4m-4-4H4m16 0h-4"/>
+            <circle cx="12" cy="12" r="3"/>
+            <circle cx="12" cy="4" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            <circle cx="20" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+            <path d="M15.5 8.5l2-2M6.5 17.5l2-2M8.5 8.5l-2-2M17.5 17.5l-2-2"/>
+            <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
+            <circle cx="6" cy="18" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
+            <circle cx="6" cy="6" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
+            <circle cx="18" cy="18" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
           </svg>
         </button>
       )}
@@ -102,8 +112,14 @@ const AIChat = () => {
           {/* Header */}
           <div className="ai-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m12.73-12.73l1.41-1.41"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 8V4m0 16v-4m-4-4H4m16 0h-4"/>
+                <circle cx="12" cy="12" r="3"/>
+                <circle cx="12" cy="4" r="1.5" fill="#8B5CF6" stroke="none"/>
+                <circle cx="12" cy="20" r="1.5" fill="#8B5CF6" stroke="none"/>
+                <circle cx="4" cy="12" r="1.5" fill="#8B5CF6" stroke="none"/>
+                <circle cx="20" cy="12" r="1.5" fill="#8B5CF6" stroke="none"/>
+                <path d="M15.5 8.5l2-2M6.5 17.5l2-2M8.5 8.5l-2-2M17.5 17.5l-2-2"/>
               </svg>
               <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Helios AI</span>
             </div>
@@ -119,9 +135,18 @@ const AIChat = () => {
             {messages.length === 0 && (
               <div className="ai-welcome">
                 <div className="ai-welcome-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 3v1m0 16v1m-8-9H3m18 0h-1m-2.636-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707"/>
-                    <circle cx="12" cy="12" r="4"/>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 8V4m0 16v-4m-4-4H4m16 0h-4"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <circle cx="12" cy="4" r="1.5" fill="#8B5CF6" stroke="none"/>
+                    <circle cx="12" cy="20" r="1.5" fill="#8B5CF6" stroke="none"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#8B5CF6" stroke="none"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#8B5CF6" stroke="none"/>
+                    <path d="M15.5 8.5l2-2M6.5 17.5l2-2M8.5 8.5l-2-2M17.5 17.5l-2-2"/>
+                    <circle cx="18" cy="6" r="1" fill="#8B5CF6" stroke="none" opacity="0.5"/>
+                    <circle cx="6" cy="18" r="1" fill="#8B5CF6" stroke="none" opacity="0.5"/>
+                    <circle cx="6" cy="6" r="1" fill="#8B5CF6" stroke="none" opacity="0.5"/>
+                    <circle cx="18" cy="18" r="1" fill="#8B5CF6" stroke="none" opacity="0.5"/>
                   </svg>
                 </div>
                 <p className="ai-typewriter">Hi, I'm Helios AI — your smart assistant. Ask me anything or just speak!</p>
