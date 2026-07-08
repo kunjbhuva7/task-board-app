@@ -264,6 +264,7 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+    <VaultModal open={vaultOpen} onClose={() => setVaultOpen(false)} />
     </div>
   );
 };
