@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X, Trash2, Zap, Mic, MicOff, Plus } from 'lucide-react';
+import { Send, X, Trash2, Zap, Mic, MicOff, Plus, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -90,12 +90,7 @@ const AIChat = () => {
       {/* Floating AI button */}
       {!open && (
         <button onClick={() => setOpen(true)} className="ai-fab" title="Helios AI">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>
-            <path d="M19 14l1 3.5L23.5 19 20 20l-1 3.5L17.5 20 14 19l3.5-1L19 14z" opacity="0.7"/>
-            <line x1="20" y1="5" x2="20" y2="9" strokeWidth="1.5" opacity="0.5"/>
-            <line x1="18" y1="7" x2="22" y2="7" strokeWidth="1.5" opacity="0.5"/>
-          </svg>
+          <Sparkles size={24} />
         </button>
       )}
 
