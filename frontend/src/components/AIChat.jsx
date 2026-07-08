@@ -36,9 +36,9 @@ const AIChat = () => {
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.message }]);
       if (res.data.actionResult?.success) {
         toast.success(res.data.message);
-        // Refresh suggestions
-        api.get('/ai/suggestions').then(r => setSuggestions(r.data || [])).catch(() => {});
       }
+      // Refresh suggestions every time (randomized)
+      api.get('/ai/suggestions').then(r => setSuggestions(r.data || [])).catch(() => {});
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Something went wrong';
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
@@ -90,18 +90,11 @@ const AIChat = () => {
       {/* Floating AI button */}
       {!open && (
         <button onClick={() => setOpen(true)} className="ai-fab" title="Helios AI">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 8V4m0 16v-4m-4-4H4m16 0h-4"/>
-            <circle cx="12" cy="12" r="3"/>
-            <circle cx="12" cy="4" r="1.5" fill="currentColor" stroke="none"/>
-            <circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"/>
-            <circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/>
-            <circle cx="20" cy="12" r="1.5" fill="currentColor" stroke="none"/>
-            <path d="M15.5 8.5l2-2M6.5 17.5l2-2M8.5 8.5l-2-2M17.5 17.5l-2-2"/>
-            <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
-            <circle cx="6" cy="18" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
-            <circle cx="6" cy="6" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
-            <circle cx="18" cy="18" r="1" fill="currentColor" stroke="none" opacity="0.6"/>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>
+            <path d="M19 14l1 3.5L23.5 19 20 20l-1 3.5L17.5 20 14 19l3.5-1L19 14z" opacity="0.7"/>
+            <line x1="20" y1="5" x2="20" y2="9" strokeWidth="1.5" opacity="0.5"/>
+            <line x1="18" y1="7" x2="22" y2="7" strokeWidth="1.5" opacity="0.5"/>
           </svg>
         </button>
       )}
@@ -168,7 +161,7 @@ const AIChat = () => {
           </div>
 
           {/* Suggestions */}
-          {suggestions.length > 0 && messages.length < 3 && (
+          {suggestions.length > 0 && (
             <div className="ai-suggestions">
               {suggestions.map((s, i) => (
                 <button key={i} onClick={() => sendMessage(s.text)} className="ai-suggestion-chip">

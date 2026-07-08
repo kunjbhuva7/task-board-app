@@ -299,13 +299,25 @@ router.get('/suggestions', async (req, res) => {
       suggestions.push({ text: 'Complete today & get summary email', icon: '✅', action: { type: 'complete_day' } });
     }
 
-    // Always-available suggestions (fill up to 6)
-    if (suggestions.length < 6) suggestions.push({ text: 'Add office expense', icon: '💰' });
-    if (suggestions.length < 6) suggestions.push({ text: 'Log workout', icon: '🏋' });
-    if (suggestions.length < 6) suggestions.push({ text: 'Total expense kitna?', icon: '📊' });
-    if (suggestions.length < 6) suggestions.push({ text: 'Add 500ml water', icon: '💧' });
-    if (suggestions.length < 6) suggestions.push({ text: 'Kitne projects hain?', icon: '📁' });
-    if (suggestions.length < 6) suggestions.push({ text: 'Create a task', icon: '✏️' });
+    // Always-available suggestions pool (randomized)
+    const pool = [
+      { text: 'Add office expense', icon: '💰' },
+      { text: 'Log workout', icon: '🏋' },
+      { text: 'Total expense kitna?', icon: '📊' },
+      { text: 'Add 500ml water', icon: '💧' },
+      { text: 'Kitne projects hain?', icon: '📁' },
+      { text: 'Create a task', icon: '✏️' },
+      { text: 'Add 1000ml water', icon: '💧' },
+      { text: 'Log supplement', icon: '💊' },
+      { text: 'Aaj ka protein kitna?', icon: '🥚' },
+      { text: 'Weekly summary', icon: '📈' },
+      { text: 'Delete last expense', icon: '🗑' },
+      { text: 'Suggest breakfast', icon: '🍳' },
+    ];
+    // Shuffle
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    // Fill up to 6
+    while (suggestions.length < 6 && pool.length > 0) { suggestions.push(pool.shift()); }
 
     res.json(suggestions.slice(0, 6));
   } catch (e) {
