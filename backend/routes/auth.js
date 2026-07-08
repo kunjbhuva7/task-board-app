@@ -196,7 +196,67 @@ router.put('/password', require('../middleware/auth'), [
   } catch (error) { res.status(500).json({ message: 'Server error' }); }
 });
 
-// Test email connectivity
+// ══════════════════════════════════════════════════════════════
+// MFA / 2FA — Google Authenticator (TOTP)
+// ══════════════════════════════════════════════════════════════
+const OTPAuth = require('otpauth');
+const QRCode = require('qrcode');
+
+// POST /api/auth/mfa/setup — generate secret + QR code
+router.post('/mfa/setup', require('../middleware/auth'), async (req, res) => {
+  try {
+    const user = await db.get('SELECT email, mfa_enabled FROM users WHERE id = $1', [req.user.id]);
+    const secret = new OTPAuth.Secret({ size: 20 });
+    const totp = new OTPAuth.TOTP({ issuer: 'Helios', label: user.email, algorithm: 'SHA1', digits: 6, period: 30, secret });
+    const uri = totp.toString();
+    const qr = await QRCode.toDataURL(uri);
+    // Save secret (not enabled yet until verified)
+    await db.run('UPDATE users SET mfa_secret = $1 WHERE id = $2', [secret.base32, req.user.id]);
+    res.json({ qr, secret: secret.base32, uri });
+  } catch (e) { console.error('MFA setup error:', e); res.status(500).json({ message: 'Server error' }); }
+});
+
+// POST /api/auth/mfa/verify — verify OTP and enable MFA
+router.post('/mfa/verify', require('../middleware/auth'), async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ message: 'Code is required' });
+    const user = await db.get('SELECT mfa_secret FROM users WHERE id = $1', [req.user.id]);
+    if (!user || !user.mfa_secret) return res.status(400).json({ message: 'MFA not set up' });
+    const totp = new OTPAuth.TOTP({ issuer: 'Helios', algorithm: 'SHA1', digits: 6, period: 30, secret: OTPAuth.Secret.fromBase32(user.mfa_secret) });
+    const valid = totp.validate({ token: code, window: 1 }) !== null;
+    if (!valid) return res.status(400).json({ message: 'Invalid code. Try again.' });
+    await db.run('UPDATE users SET mfa_enabled = 1 WHERE id = $1', [req.user.id]);
+    res.json({ message: 'MFA enabled successfully!' });
+  } catch (e) { console.error('MFA verify error:', e); res.status(500).json({ message: 'Server error' }); }
+});
+
+// POST /api/auth/mfa/disable — disable MFA
+router.post('/mfa/disable', require('../middleware/auth'), async (req, res) => {
+  try {
+    await db.run('UPDATE users SET mfa_enabled = 0, mfa_secret = NULL WHERE id = $1', [req.user.id]);
+    res.json({ message: 'MFA disabled' });
+  } catch (e) { res.status(500).json({ message: 'Server error' }); }
+});
+
+// POST /api/auth/mfa/validate — validate OTP during login
+router.post('/mfa/validate', async (req, res) => {
+  try {
+    const { userId, code } = req.body;
+    if (!userId || !code) return res.status(400).json({ message: 'userId and code required' });
+    const user = await db.get('SELECT id, name, email, role, mfa_secret FROM users WHERE id = $1', [userId]);
+    if (!user || !user.mfa_secret) return res.status(400).json({ message: 'MFA not configured' });
+    const totp = new OTPAuth.TOTP({ issuer: 'Helios', algorithm: 'SHA1', digits: 6, period: 30, secret: OTPAuth.Secret.fromBase32(user.mfa_secret) });
+    const valid = totp.validate({ token: code, window: 1 }) !== null;
+    if (!valid) return res.status(400).json({ message: 'Invalid code' });
+    // Generate JWT
+    const payload = { id: user.id, role: user.role };
+    const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret_change_me', { expiresIn: '8h' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  } catch (e) { console.error('MFA validate error:', e); res.status(500).json({ message: 'Server error' }); }
+});
+
+// Test email endpoint
 router.get('/test-email', async (req, res) => {
   try {
     const sendEmail = require('../utils/email');

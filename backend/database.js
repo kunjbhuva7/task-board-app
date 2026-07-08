@@ -69,6 +69,8 @@ const initDb = async () => {
         reset_token TEXT,
         reset_token_expiry TIMESTAMPTZ,
         email_notifications INTEGER DEFAULT 1,
+        mfa_secret TEXT,
+        mfa_enabled INTEGER DEFAULT 0,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
 
