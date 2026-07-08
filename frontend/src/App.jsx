@@ -22,6 +22,7 @@ import Profile from './pages/user/Profile';
 import Projects from './pages/Projects';
 import Reminders from './pages/user/Reminders';
 import GymTracker from './pages/gym/GymTracker';
+import OfficeExpenses from './pages/user/OfficeExpenses';
 
 import Sidebar from './components/Sidebar';
 import Landing from './pages/Landing';
@@ -110,6 +111,7 @@ function App() {
         <Route path="/user/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/user/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
         <Route path="/user/gym" element={<ProtectedRoute><GymTracker /></ProtectedRoute>} />
+        <Route path="/user/office-expenses" element={<ProtectedRoute><OfficeExpenses /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

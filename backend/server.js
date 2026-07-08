@@ -98,6 +98,8 @@ console.log('Loading reminderRoutes...');
 const reminderRoutes = require('./routes/reminders');
 console.log('Loading gymRoutes...');
 const gymRoutes = require('./routes/gym');
+console.log('Loading officeExpenseRoutes...');
+const officeExpenseRoutes = require('./routes/officeExpenses');
 const { sendReminderNotification } = require('./utils/reminderEmail');
 console.log('Finished loading routes.');
 
@@ -113,6 +115,7 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/gym', gymRoutes);
+app.use('/api/office-expenses', officeExpenseRoutes);
 
 // Cron Job for Event & Reminders (Checks every minute)
 cron.schedule('* * * * *', async () => {

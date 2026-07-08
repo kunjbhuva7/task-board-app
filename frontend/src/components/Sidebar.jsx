@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell } from 'lucide-react';
+import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell, Receipt } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
@@ -294,6 +294,7 @@ const Sidebar = ({ setMobileOpen }) => {
             <>
               <div className="sidebar-section-title" style={{ marginTop: '1.25rem' }}>FINANCIALS</div>
               <NavLink to="/admin/expenses" className="sidebar-item"><IndianRupee size={17} className="sidebar-icon" /> <span className="sidebar-text">SpendFlow</span></NavLink>
+              <NavLink to="/user/office-expenses" className="sidebar-item"><Receipt size={17} className="sidebar-icon" /> <span className="sidebar-text">Office Expenses</span></NavLink>
             </>
           )}
 

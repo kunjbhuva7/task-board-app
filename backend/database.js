@@ -222,6 +222,20 @@ const initDb = async () => {
 
       -- Index for gym performance
       CREATE INDEX IF NOT EXISTS idx_gym_entries_user_date ON gym_entries(user_id, entry_date);
+
+      -- Office Expenses (reimbursement tracker)
+      CREATE TABLE IF NOT EXISTS office_expenses (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        expense_date DATE NOT NULL DEFAULT CURRENT_DATE,
+        item TEXT NOT NULL,
+        amount REAL NOT NULL,
+        category TEXT DEFAULT 'Other',
+        payment_mode TEXT DEFAULT 'Cash',
+        notes TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
     `);
 
     // ── Seed admin user (NEVER overwrites existing password) ──
