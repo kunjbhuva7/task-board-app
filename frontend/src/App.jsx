@@ -25,6 +25,7 @@ import GymTracker from './pages/gym/GymTracker';
 import OfficeExpenses from './pages/user/OfficeExpenses';
 
 import Sidebar from './components/Sidebar';
+import AIChat from './components/AIChat';
 import Landing from './pages/Landing';
 
 const ProtectedRoute = ({ children, requiredPerm }) => {
@@ -73,6 +74,7 @@ const ProtectedRoute = ({ children, requiredPerm }) => {
         <div className="page-content" style={{ height:'100%', display:'flex', flexDirection:'column' }}>
           {children}
         </div>
+        <AIChat />
       </div>
 
       {/* Responsive mobile backdrop overlay */}

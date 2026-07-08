@@ -235,6 +235,15 @@ const initDb = async () => {
         notes TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
+
+      -- AI Chat History
+      CREATE TABLE IF NOT EXISTS ai_chat_history (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
     `);
 
     // ── Seed admin user (NEVER overwrites existing password) ──
