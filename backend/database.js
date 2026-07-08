@@ -246,6 +246,15 @@ const initDb = async () => {
         content TEXT NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
+
+      -- Vault (hidden modules config per user)
+      CREATE TABLE IF NOT EXISTS vault_config (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER UNIQUE REFERENCES users(id),
+        pin_hash TEXT,
+        hidden_modules TEXT DEFAULT '[]',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
     `);
 
     // ── Seed admin user (NEVER overwrites existing password) ──

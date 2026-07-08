@@ -1,7 +1,9 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
+import { VaultContext } from '../context/VaultContext';
+import VaultModal from './VaultModal';
 import { usePermissions } from '../hooks/usePermissions';
 import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell, Receipt } from 'lucide-react';
 import api from '../api/axios';
@@ -42,6 +44,7 @@ const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
 const Sidebar = ({ setMobileOpen }) => {
   const { user, permissions, logout } = useContext(AuthContext);
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+  const { isHidden } = useContext(VaultContext);
   const { canViewAllTasks } = usePermissions();
   const navigate = useNavigate();
   const [openPanel, setOpenPanel] = useState(null);
@@ -56,6 +59,11 @@ const Sidebar = ({ setMobileOpen }) => {
   const [eventForm, setEventForm] = useState({ title: '', event_time: '' });
   const [addingEvent, setAddingEvent] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
+
+  const [vaultModalOpen, setVaultModalOpen] = useState(false);
+  const longPressTimer = useRef(null);
+  const handleAvatarDown = () => { longPressTimer.current = setTimeout(() => setVaultModalOpen(true), 3000); };
+  const handleAvatarUp = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
   const fetchEvents = () => {
     api.get('/events').then(res => setEvents(res.data || [])).catch(() => {});
@@ -259,14 +267,18 @@ const Sidebar = ({ setMobileOpen }) => {
           {/* Tasks - always visible */}
           <NavLink to="/user/tasks" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">My Tasks</span></NavLink>
 
-          {/* Gym Tracker - always visible */}
-          <NavLink to="/user/gym" className="sidebar-item"><Dumbbell size={17} className="sidebar-icon" /> <span className="sidebar-text">Gym Tracker</span></NavLink>
+          {/* Gym Tracker - always visible unless vaulted */}
+          {!isHidden('gym') && (
+            <NavLink to="/user/gym" className="sidebar-item"><Dumbbell size={17} className="sidebar-icon" /> <span className="sidebar-text">Gym Tracker</span></NavLink>
+          )}
 
-          {/* Reminders - always visible */}
-          <NavLink to="/user/reminders" className="sidebar-item"><Bell size={17} className="sidebar-icon" /> <span className="sidebar-text">Reminders</span></NavLink>
+          {/* Reminders - always visible unless vaulted */}
+          {!isHidden('reminders') && (
+            <NavLink to="/user/reminders" className="sidebar-item"><Bell size={17} className="sidebar-icon" /> <span className="sidebar-text">Reminders</span></NavLink>
+          )}
 
-          {/* Projects - Admin/Permitted only */}
-          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_projects) && (
+          {/* Projects - Admin/Permitted only, unless vaulted */}
+          {!isHidden('projects') && !!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_projects) && (
             <NavLink to="/projects" className="sidebar-item"><Folder size={17} className="sidebar-icon" /> <span className="sidebar-text">Projects</span></NavLink>
           )}
 
@@ -290,11 +302,11 @@ const Sidebar = ({ setMobileOpen }) => {
           )}
 
           {/* Financials section header */}
-          {!!(user.role === 'admin' || permissions?.is_super_admin) && (
+          {!!(user.role === 'admin' || permissions?.is_super_admin) && (!isHidden('spendflow') || !isHidden('office_expenses')) && (
             <>
               <div className="sidebar-section-title" style={{ marginTop: '1.25rem' }}>FINANCIALS</div>
-              <NavLink to="/admin/expenses" className="sidebar-item"><IndianRupee size={17} className="sidebar-icon" /> <span className="sidebar-text">SpendFlow</span></NavLink>
-              <NavLink to="/user/office-expenses" className="sidebar-item"><Receipt size={17} className="sidebar-icon" /> <span className="sidebar-text">Office Expenses</span></NavLink>
+              {!isHidden('spendflow') && <NavLink to="/admin/expenses" className="sidebar-item"><IndianRupee size={17} className="sidebar-icon" /> <span className="sidebar-text">SpendFlow</span></NavLink>}
+              {!isHidden('office_expenses') && <NavLink to="/user/office-expenses" className="sidebar-item"><Receipt size={17} className="sidebar-icon" /> <span className="sidebar-text">Office Expenses</span></NavLink>}
             </>
           )}
 
@@ -386,8 +398,11 @@ const Sidebar = ({ setMobileOpen }) => {
 
         <div className="sidebar-footer" style={{ padding:'1rem', borderTop:'1px solid var(--border)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent: collapsed ? 'center' : 'space-between', padding:'0.75rem', borderRadius:'14px', background:'var(--card-bg)', border:'1px solid var(--border)', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 2px 10px rgba(0,0,0,0.02)' }}
+               onMouseDown={handleAvatarDown} onMouseUp={handleAvatarUp} onMouseLeave={handleAvatarUp}
+               onTouchStart={handleAvatarDown} onTouchEnd={handleAvatarUp}
                onMouseEnter={e => e.currentTarget.style.background='var(--row-hover)'}
-               onMouseLeave={e => e.currentTarget.style.background='var(--card-bg)'}>
+               onMouseDown={handleAvatarDown} onMouseUp={handleAvatarUp} onMouseLeave={handleAvatarUp}
+               onTouchStart={handleAvatarDown} onTouchEnd={handleAvatarUp}>
             <div style={{ display:'flex', alignItems:'center', gap:'0.8rem' }}>
               <div style={{ position:'relative' }}>
                 <div style={{ width:'38px', height:'38px', borderRadius:'12px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'1.1rem', boxShadow:'0 4px 12px rgba(255,126,95,0.3)' }}>
@@ -635,3 +650,4 @@ const Sidebar = ({ setMobileOpen }) => {
 };
 
 export default Sidebar;
+
