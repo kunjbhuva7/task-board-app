@@ -62,8 +62,12 @@ const Sidebar = ({ setMobileOpen }) => {
 
   const [vaultModalOpen, setVaultModalOpen] = useState(false);
   const longPressTimer = useRef(null);
-  const handleAvatarDown = () => { longPressTimer.current = setTimeout(() => setVaultModalOpen(true), 3000); };
-  const handleAvatarUp = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
+  const handleAvatarDown = () => { 
+    longPressTimer.current = setTimeout(() => { 
+      setVaultModalOpen(true); 
+    }, 2000); 
+  };
+  const handleAvatarUp = () => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; } };
 
   const fetchEvents = () => {
     api.get('/events').then(res => setEvents(res.data || [])).catch(() => {});
@@ -397,12 +401,12 @@ const Sidebar = ({ setMobileOpen }) => {
         </div>
 
         <div className="sidebar-footer" style={{ padding:'1rem', borderTop:'1px solid var(--border)' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent: collapsed ? 'center' : 'space-between', padding:'0.75rem', borderRadius:'14px', background:'var(--card-bg)', border:'1px solid var(--border)', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 2px 10px rgba(0,0,0,0.02)' }}
-               onMouseDown={handleAvatarDown} onMouseUp={handleAvatarUp} onMouseLeave={handleAvatarUp}
-               onTouchStart={handleAvatarDown} onTouchEnd={handleAvatarUp}
-               onMouseEnter={e => e.currentTarget.style.background='var(--row-hover)'}
-               onMouseDown={handleAvatarDown} onMouseUp={handleAvatarUp} onMouseLeave={handleAvatarUp}
-               onTouchStart={handleAvatarDown} onTouchEnd={handleAvatarUp}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent: collapsed ? 'center' : 'space-between', padding:'0.75rem', borderRadius:'14px', background:'var(--card-bg)', border:'1px solid var(--border)', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 2px 10px rgba(0,0,0,0.02)', userSelect:'none' }}
+               onMouseDown={handleAvatarDown}
+               onMouseUp={handleAvatarUp}
+               onMouseLeave={handleAvatarUp}
+               onTouchStart={handleAvatarDown}
+               onTouchEnd={handleAvatarUp}>
             <div style={{ display:'flex', alignItems:'center', gap:'0.8rem' }}>
               <div style={{ position:'relative' }}>
                 <div style={{ width:'38px', height:'38px', borderRadius:'12px', background:'linear-gradient(135deg, #FF7E5F, #FEB47B)', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'800', fontSize:'1.1rem', boxShadow:'0 4px 12px rgba(255,126,95,0.3)' }}>
