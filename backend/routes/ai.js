@@ -9,7 +9,7 @@ router.use(auth);
 const getModel = () => {
   if (!process.env.GEMINI_API_KEY) return null;
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 };
 
 // System context for AI — teaches it about the app
@@ -50,7 +50,14 @@ User: "500ml water add kar"
 Response: {"message":"Added 500ml water!","action":{"type":"create","module":"gym_water","data":{"amount":500,"entry_date":"2026-07-03","entry_time":"${new Date().toTimeString().slice(0,5)}"}}}
 
 If you cannot understand or perform the action, set action to null and explain in message.
-Always be helpful, concise, and friendly. Use emojis sparingly.`;
+Always be helpful, concise, and friendly. Use emojis sparingly.
+
+For date filtering queries like "pichle week ke expenses dikha" or "last month gym entries":
+Response: {"message":"Here are your expenses from last week...","action":{"type":"filter","module":"office_expense","data":{"from":"2026-06-26","to":"2026-07-03"}}}
+
+For auto-fill suggestions when user is typing a form:
+If user asks "suggest breakfast items" or "kya khau":
+Response: {"message":"Here are some common options:\n• Oats + banana (25g protein)\n• 4 eggs + toast (28g protein)\n• Greek yogurt + nuts (20g protein)","action":null}`;
 
 // Execute the action returned by AI
 async function executeAction(action, userId) {
@@ -103,6 +110,19 @@ async function executeAction(action, userId) {
       if (mod === 'office_expense') {
         const total = await db.get('SELECT COALESCE(SUM(amount),0) as total, COUNT(*) as count FROM office_expenses WHERE user_id = $1', [userId]);
         return { success: true, total: Number(total.total), count: Number(total.count) };
+      }
+    }
+
+    if (type === 'filter') {
+      if (mod === 'office_expense') {
+        const rows = await db.all('SELECT * FROM office_expenses WHERE user_id=$1 AND expense_date >= $2 AND expense_date <= $3 ORDER BY expense_date DESC', [userId, data.from, data.to]);
+        const total = rows.reduce((s, r) => s + Number(r.amount), 0);
+        return { success: true, count: rows.length, total, data: rows.slice(0, 10) };
+      }
+      if (mod === 'gym_meal' || mod === 'gym_workout') {
+        const typeFilter = mod === 'gym_meal' ? 'meal' : 'workout';
+        const rows = await db.all("SELECT * FROM gym_entries WHERE user_id=$1 AND entry_date >= $2 AND entry_date <= $3 AND type=$4 ORDER BY entry_date DESC", [userId, data.from, data.to, typeFilter]);
+        return { success: true, count: rows.length, data: rows.slice(0, 10) };
       }
     }
 
@@ -248,6 +268,38 @@ router.get('/suggestions', async (req, res) => {
   } catch (e) {
     console.error('Suggestions error:', e);
     res.json([]);
+  }
+});
+
+// GET /api/ai/weekly-insights — AI-generated weekly summary
+router.get('/weekly-insights', async (req, res) => {
+  try {
+    const model = getModel();
+    if (!model) return res.json({ insights: 'AI not configured. Set GEMINI_API_KEY.' });
+
+    const today = new Date();
+    const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+    const from = weekAgo.toISOString().split('T')[0];
+    const to = today.toISOString().split('T')[0];
+
+    // Gather data
+    const tasks = await db.all("SELECT status, COUNT(*) as c FROM tasks WHERE created_by=$1 AND created_at >= $2 GROUP BY status", [req.user.id, from]);
+    const gymEntries = await db.all("SELECT type, COUNT(*) as c FROM gym_entries WHERE user_id=$1 AND entry_date >= $2 GROUP BY type", [req.user.id, from]);
+    const expenses = await db.get("SELECT COALESCE(SUM(amount),0) as total, COUNT(*) as count FROM office_expenses WHERE user_id=$1 AND expense_date >= $2", [req.user.id, from]);
+    const proteinData = await db.all("SELECT entry_date, data FROM gym_entries WHERE user_id=$1 AND entry_date >= $2 AND type IN ('meal','supplement')", [req.user.id, from]);
+
+    let totalProtein = 0;
+    proteinData.forEach(e => { const d = e.data || {}; totalProtein += Number(d.protein) || 0; });
+
+    const dataStr = JSON.stringify({ tasks, gymEntries, expenses, totalProtein, from, to });
+
+    const result = await model.generateContent(`Based on this user's weekly data, generate a brief motivational weekly insight summary (3-4 sentences, friendly tone, include specific numbers). Data: ${dataStr}`);
+    const insights = result.response.text().trim();
+
+    res.json({ insights, period: { from, to } });
+  } catch (e) {
+    console.error('Weekly insights error:', e.message);
+    res.json({ insights: 'Could not generate insights this week.' });
   }
 });
 

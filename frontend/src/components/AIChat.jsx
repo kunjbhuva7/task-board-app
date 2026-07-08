@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Send, X, Trash2, Zap } from 'lucide-react';
+import { Sparkles, Send, X, Trash2, Zap, Mic, MicOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -9,7 +9,9 @@ const AIChat = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
+  const [listening, setListening] = useState(false);
   const endRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -52,6 +54,36 @@ const AIChat = () => {
   };
 
   const handleKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); } };
+
+  // Voice input (Web Speech API)
+  const toggleVoice = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      toast.error('Voice not supported in this browser');
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN'; // Hindi primary, also understands English
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setListening(false);
+      // Auto-send after voice
+      setTimeout(() => sendMessage(transcript), 300);
+    };
+    recognition.onerror = () => { setListening(false); };
+    recognition.onend = () => { setListening(false); };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
+  };
 
   return (
     <>
@@ -117,8 +149,11 @@ const AIChat = () => {
 
           {/* Input */}
           <div className="ai-input-area">
+            <button onClick={toggleVoice} className={`ai-mic-btn ${listening ? 'active' : ''}`} title="Voice input">
+              {listening ? <MicOff size={17} /> : <Mic size={17} />}
+            </button>
             <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
-              placeholder="Type a message..." disabled={loading} className="ai-input" />
+              placeholder="Type or speak..." disabled={loading} className="ai-input" />
             <button onClick={() => sendMessage(input)} disabled={loading || !input.trim()} className="ai-send-btn">
               <Send size={17} />
             </button>
