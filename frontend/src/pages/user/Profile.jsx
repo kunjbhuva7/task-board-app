@@ -100,7 +100,7 @@ const Profile = () => {
     background: 'var(--input-bg)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.9rem', transition: 'border-color 0.2s'
   };
   const primaryBtn = {
-    background: 'linear-gradient(135deg,#FF7E5F,#FEB47B)', color: 'white', border: 'none',
+    background: '#0F172A', color: 'white', border: 'none',
     padding: '0.8rem', borderRadius: '10px', fontWeight: '600', cursor: 'pointer',
     display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '0.25rem', transition: 'all 0.2s'
   };

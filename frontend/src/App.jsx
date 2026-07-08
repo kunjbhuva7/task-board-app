@@ -86,7 +86,7 @@ const ProtectedRoute = ({ children, requiredPerm }) => {
 function App() {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" toastOptions={{ duration: 3000, style: { background: '#0F172A', color: '#fff', borderRadius: '12px', padding: '12px 18px', fontSize: '0.88rem', fontWeight: 600, boxShadow: '0 12px 36px rgba(15,23,42,0.25)' }, success: { iconTheme: { primary: '#10B981', secondary: '#fff' } }, error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } } }} />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
