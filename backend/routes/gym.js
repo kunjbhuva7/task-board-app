@@ -171,36 +171,49 @@ router.get('/search', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const rows = await db.all('SELECT * FROM gym_entries WHERE user_id=$1', [req.user.id]);
+    const dayRows = await db.all('SELECT entry_date, protein_goal, completed FROM gym_days WHERE user_id=$1', [req.user.id]);
     const byDate = {};
     for (const e of rows) { (byDate[e.entry_date] = byDate[e.entry_date] || []).push(e); }
-    const ymd = (d) => { const off = new Date(d.getTime() - d.getTimezoneOffset()*60000); return off.toISOString().split('T')[0]; };
-    const today = new Date();
+
+    // All "today"-relative math is done in IST (UTC+5:30) so it matches the day
+    // the user actually logged on. The server (Railway) runs in UTC, so using
+    // new Date() directly would make "today" a day behind and zero-out the streak.
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const DAY_MS = 86400000;
+    const nowMs = Date.now();
+    const ymd = (ms) => new Date(ms + IST_OFFSET_MS).toISOString().split('T')[0];
+    const dayKey = (i) => ymd(nowMs - i * DAY_MS); // i days ago, in IST
+
+    const goalMap = {}; const completedSet = new Set();
+    dayRows.forEach(r => { goalMap[r.entry_date] = r.protein_goal || 150; if (r.completed) completedSet.add(r.entry_date); });
+
+    // Streak: a day counts if it has a workout entry OR was marked "complete".
+    // Walk back from today (IST). If today isn't logged yet, start at yesterday
+    // so an unfinished current day doesn't reset the streak.
     const workoutDates = new Set(rows.filter(e => e.type === 'workout').map(e => e.entry_date));
-    let streak = 0; const cur = new Date(today);
-    if (!workoutDates.has(ymd(cur))) cur.setDate(cur.getDate() - 1);
-    while (workoutDates.has(ymd(cur))) { streak++; cur.setDate(cur.getDate() - 1); }
+    const streakDays = new Set([...workoutDates, ...completedSet]);
+    let streak = 0; let si = streakDays.has(dayKey(0)) ? 0 : 1;
+    while (streakDays.has(dayKey(si))) { streak++; si++; }
+
     const proteinSeries = [], caloriesSeries = [];
-    for (let i = 29; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate()-i); const k = ymd(d); const s = computeSummary(byDate[k]||[]); proteinSeries.push({date:k,protein:s.protein}); caloriesSeries.push({date:k,calories:s.calories}); }
+    for (let i = 29; i >= 0; i--) { const k = dayKey(i); const s = computeSummary(byDate[k]||[]); proteinSeries.push({date:k,protein:s.protein}); caloriesSeries.push({date:k,calories:s.calories}); }
     const weightSeries = []; Object.keys(byDate).sort().forEach(date => { const s = computeSummary(byDate[date]); if (s.weight != null) weightSeries.push({date,weight:s.weight}); });
     const last7 = proteinSeries.slice(-7);
     const weeklyProteinAvg = Math.round(last7.reduce((a,b)=>a+b.protein,0)/7);
-    const mprefix = ymd(today).slice(0,7);
+    const mprefix = dayKey(0).slice(0,7);
     const monthlyWorkoutCount = rows.filter(e=>e.type==='workout'&&e.entry_date.startsWith(mprefix)).length;
     const recentWorkouts = rows.filter(e=>e.type==='workout').sort((a,b)=>(b.entry_date+(b.entry_time||'')).localeCompare(a.entry_date+(a.entry_time||''))).slice(0,5).map(e=>({id:e.id,date:e.entry_date,time:e.entry_time,name:(e.data||{}).workoutName||(e.data||{}).workoutType||'Workout',type:(e.data||{}).workoutType||''}));
     const mealFreq = {}; rows.filter(e=>e.type==='meal').forEach(e=>{const n=((e.data||{}).foodItems||'').trim();if(n)mealFreq[n]=(mealFreq[n]||0)+1;});
     const favoriteMeals = Object.entries(mealFreq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([name,count])=>({name,count}));
 
-    // Heatmap + adherence + weekly
-    const dayRows = await db.all('SELECT entry_date, protein_goal, completed FROM gym_days WHERE user_id=$1', [req.user.id]);
-    const goalMap = {}; const completedSet = new Set();
-    dayRows.forEach(r => { goalMap[r.entry_date] = r.protein_goal || 150; if (r.completed) completedSet.add(r.entry_date); });
+    // Heatmap (16 weeks) + adherence (30d) + this-week (7d)
     const heatmap = [];
-    for (let i = 111; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate()-i); const k = ymd(d); heatmap.push({date:k,count:(byDate[k]||[]).length,done:completedSet.has(k)}); }
+    for (let i = 111; i >= 0; i--) { const k = dayKey(i); heatmap.push({date:k,count:(byDate[k]||[]).length,done:completedSet.has(k)}); }
     let loggedCount = 0, hitCount = 0;
-    for (let i = 29; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate()-i); const k = ymd(d); const es = byDate[k]||[]; if (!es.length) continue; loggedCount++; if (computeSummary(es).protein >= (goalMap[k]||150)) hitCount++; }
+    for (let i = 29; i >= 0; i--) { const k = dayKey(i); const es = byDate[k]||[]; if (!es.length) continue; loggedCount++; if (computeSummary(es).protein >= (goalMap[k]||150)) hitCount++; }
     const adherence = loggedCount > 0 ? Math.round((hitCount/loggedCount)*100) : 0;
     let weeklyWorkouts = 0, weeklyLoggedDays = 0; const weekWeights = [];
-    for (let i = 6; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate()-i); const es = byDate[ymd(d)]||[]; if (es.length) weeklyLoggedDays++; weeklyWorkouts += es.filter(e=>e.type==='workout').length; const s = computeSummary(es); if (s.weight!=null) weekWeights.push(s.weight); }
+    for (let i = 6; i >= 0; i--) { const es = byDate[dayKey(i)]||[]; if (es.length) weeklyLoggedDays++; weeklyWorkouts += es.filter(e=>e.type==='workout').length; const s = computeSummary(es); if (s.weight!=null) weekWeights.push(s.weight); }
     const weightChange = weekWeights.length >= 2 ? Number((weekWeights[weekWeights.length-1]-weekWeights[0]).toFixed(1)) : null;
     const weekly = { workouts: weeklyWorkouts, proteinAvg: weeklyProteinAvg, loggedDays: weeklyLoggedDays, weightChange };
 
