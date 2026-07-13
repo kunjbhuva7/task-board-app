@@ -187,13 +187,13 @@ router.get('/stats', async (req, res) => {
     const goalMap = {}; const completedSet = new Set();
     dayRows.forEach(r => { goalMap[r.entry_date] = r.protein_goal || 150; if (r.completed) completedSet.add(r.entry_date); });
 
-    // Streak: a day counts if it has a workout entry OR was marked "complete".
-    // Walk back from today (IST). If today isn't logged yet, start at yesterday
-    // so an unfinished current day doesn't reset the streak.
+    // "Workout Streak" = TOTAL number of distinct days the user actually worked
+    // out (a workout entry that day) OR marked the day complete — NOT a
+    // consecutive run. e.g. went to the gym 8 days out of the last 12 => 8.
+    // Read straight from every entry in the DB so the number is always the truth.
     const workoutDates = new Set(rows.filter(e => e.type === 'workout').map(e => e.entry_date));
-    const streakDays = new Set([...workoutDates, ...completedSet]);
-    let streak = 0; let si = streakDays.has(dayKey(0)) ? 0 : 1;
-    while (streakDays.has(dayKey(si))) { streak++; si++; }
+    const gymDays = new Set([...workoutDates, ...completedSet]);
+    const streak = gymDays.size;
 
     const proteinSeries = [], caloriesSeries = [];
     for (let i = 29; i >= 0; i--) { const k = dayKey(i); const s = computeSummary(byDate[k]||[]); proteinSeries.push({date:k,protein:s.protein}); caloriesSeries.push({date:k,calories:s.calories}); }
