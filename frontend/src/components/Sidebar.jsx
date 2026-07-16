@@ -5,7 +5,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { VaultContext } from '../context/VaultContext';
 import VaultModal from './VaultModal';
 import { usePermissions } from '../hooks/usePermissions';
-import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell, Receipt, RotateCcw } from 'lucide-react';
+import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell, Receipt } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
@@ -287,9 +287,9 @@ const Sidebar = ({ setMobileOpen }) => {
   navItems.push({ id: 'settings', label: 'Settings', icon: Settings, kind: 'link', to: '/user/profile', section: 'mainmenu' });
   navItems.push({ id: 'dashboard', label: 'Dashboard', icon: FolderKanban, kind: 'link', to: dashboardTo, section: 'workspace' });
   navItems.push({ id: 'my-tasks', label: 'My Tasks', icon: FolderKanban, kind: 'link', to: '/user/tasks', section: 'workspace' });
-  if (!isHidden('gym')) navItems.push({ id: 'gym', label: 'Gym Tracker', icon: Dumbbell, kind: 'link', to: '/user/gym', section: 'workspace' });
-  if (!isHidden('reminders')) navItems.push({ id: 'reminders', label: 'Reminders', icon: Bell, kind: 'link', to: '/user/reminders', section: 'workspace' });
   if (!isHidden('projects') && (isAdminish || permissions?.can_view_projects)) navItems.push({ id: 'projects', label: 'Projects', icon: Folder, kind: 'link', to: '/projects', section: 'workspace' });
+  if (!isHidden('reminders')) navItems.push({ id: 'reminders', label: 'Reminders', icon: Bell, kind: 'link', to: '/user/reminders', section: 'workspace' });
+  if (!isHidden('gym')) navItems.push({ id: 'gym', label: 'Gym Tracker', icon: Dumbbell, kind: 'link', to: '/user/gym', section: 'workspace' });
   if (isAdminish || permissions?.can_manage_tasks) navItems.push({ id: 'task-mgmt', label: 'Task Management', icon: FolderKanban, kind: 'link', to: '/admin/tasks', section: 'management' });
   if (isAdminish || permissions?.can_view_users || permissions?.can_manage_users) navItems.push({ id: 'manage-users', label: 'Manage Users', icon: Users, kind: 'link', to: '/admin/users', section: 'management' });
   if (isAdminish || permissions?.can_manage_roles) navItems.push({ id: 'permissions', label: 'Permissions', icon: Shield, kind: 'link', to: '/admin/permissions', section: 'management' });
@@ -318,7 +318,7 @@ const Sidebar = ({ setMobileOpen }) => {
     return result;
   };
 
-  const layoutKey = `helios_sidebar_layout_${user?.id || 'me'}`;
+  const layoutKey = `helios_sidebar_layout_v2_${user?.id || 'me'}`;
   const [layout, setLayout] = useState(() => {
     try { return mergeLayout(JSON.parse(localStorage.getItem(layoutKey))); } catch { return buildDefaultLayout(); }
   });
@@ -381,8 +381,6 @@ const Sidebar = ({ setMobileOpen }) => {
       setLayout((prev) => ({ ...prev, [from]: arrayMove(prev[from], oldIndex, newIndex) }));
     }
   };
-  const resetLayout = () => setLayout(buildDefaultLayout());
-
   return (
     <>
       <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -426,12 +424,6 @@ const Sidebar = ({ setMobileOpen }) => {
               ) : null}
             </DragOverlay>
           </DndContext>
-
-          {!collapsed && (
-            <button className="sidebar-reset-btn" onClick={resetLayout} title="Reset menu to default order">
-              <RotateCcw size={13} /> Reset menu
-            </button>
-          )}
 
 
           {/* Today's Schedule Widget */}

@@ -371,16 +371,7 @@ textarea.gym-input { resize: vertical; min-height: 64px; line-height: 1.5; }
 }
 .sidebar-draggable { cursor: grab; -webkit-user-select: none; user-select: none; }
 .sidebar-draggable:active { cursor: grabbing; }
-.sidebar-reset-btn {
-  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-  margin: 0.85rem 0.5rem 0.25rem; padding: 0.5rem;
-  background: transparent; border: 1px dashed var(--border); border-radius: 10px;
-  color: var(--text-muted); font-size: 0.72rem; font-weight: 700; cursor: pointer;
-  transition: all 0.2s ease;
-}
-.sidebar-reset-btn:hover { color: #4F46E5; border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.05); }
-.sidebar.collapsed .sidebar-drop-empty,
-.sidebar.collapsed .sidebar-reset-btn { display: none; }
+.sidebar.collapsed .sidebar-drop-empty { display: none; }
 
 /* ── Custom thin scrollbars (replaces the thick default "scroll line") ── */
 .sidebar-nav::-webkit-scrollbar,
