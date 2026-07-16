@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Dumbbell, IndianRupee, ListTodo, Shield } from 'lucide-react';
+import { ArrowRight, CheckCircle, Dumbbell, IndianRupee, ListTodo, Shield, MapPin, Phone, Mail } from 'lucide-react';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -72,7 +72,44 @@ const Landing = () => {
       </section>
 
       <footer className="landing-footer">
-        <span>© {new Date().getFullYear()} Helios. Built with ❤️</span>
+        <div className="landing-footer-grid">
+          <div className="landing-footer-brand">
+            <div className="landing-footer-logo">
+              <img src="/logo.png" alt="Helios" style={{ height: 28 }} />
+              <span>Helios</span>
+            </div>
+            <p>Your all-in-one workspace for tasks, fitness &amp; expenses — beautifully unified in one premium suite.</p>
+          </div>
+
+          <div className="landing-footer-col">
+            <h4>Product</h4>
+            <a href="#features">Task Board</a>
+            <a href="#features">Gym Tracker</a>
+            <a href="#features">SpendFlow</a>
+            <Link to="/login">Login</Link>
+          </div>
+
+          <div className="landing-footer-col landing-footer-contact">
+            <h4>Get in touch</h4>
+            <div className="landing-footer-contact-item">
+              <MapPin size={17} />
+              <span>Office 1204, Boulevard Plaza Tower 1,<br />Downtown Dubai, United Arab Emirates</span>
+            </div>
+            <div className="landing-footer-contact-item">
+              <Phone size={17} />
+              <a href="tel:+97141234567">+971 4 123 4567</a>
+            </div>
+            <div className="landing-footer-contact-item">
+              <Mail size={17} />
+              <a href="mailto:hello@kunjtech.in">hello@kunjtech.in</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="landing-footer-bottom">
+          <span>© {new Date().getFullYear()} Helios. All rights reserved.</span>
+          <span>Made with ❤️ in Dubai</span>
+        </div>
       </footer>
     </div>
   );
