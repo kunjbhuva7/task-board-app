@@ -1,7 +1,5 @@
-const CACHE_NAME = 'purple-cache-v1';
+const CACHE_NAME = 'helios-cache-v3';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/logo.png',
   '/icons.svg'
@@ -44,19 +42,34 @@ self.addEventListener('fetch', (event) => {
     return; // Let browser handle it natively (Network Only)
   }
 
-  // Stale-while-revalidate strategy for static assets
+  // Network-first for page navigations & index.html so a new deploy shows up
+  // immediately (avoids serving a stale HTML that points to old JS/CSS).
+  const isNavigation = event.request.mode === 'navigate' ||
+    url.pathname === '/' || url.pathname === '/index.html';
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const copy = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((c) => c || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  // Stale-while-revalidate for hashed static assets (JS/CSS/images)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch fresh asset in the background to update cache
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-      return fetch(event.request);
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        if (networkResponse.status === 200) {
+          const copy = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return networkResponse;
+      }).catch(() => cachedResponse);
+      return cachedResponse || fetchPromise;
     })
   );
 });
