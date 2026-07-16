@@ -1,0 +1,27 @@
+# Render Blueprint for Helios (single container: backend + frontend)
+# Free web service — no credit card required.
+# Secrets (sync:false) are entered in the Render dashboard, never stored in git.
+services:
+  - type: web
+    name: helios-taskboard
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: singapore          # closest Render region to India
+    healthCheckPath: /api/auth/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render injects PORT automatically; server.js reads process.env.PORT.
+      - key: DATABASE_URL       # Neon connection string (sslmode=require)
+        sync: false
+      - key: JWT_SECRET         # openssl rand -hex 32
+        sync: false
+      - key: RESEND_API_KEY     # email (password reset / reminders / invites)
+        sync: false
+      - key: FRONTEND_URL       # public app URL (Render URL, later Cloudflare domain)
+        sync: false
+      - key: GEMINI_API_KEY     # optional — AI chat
+        sync: false

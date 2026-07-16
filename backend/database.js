@@ -11,9 +11,22 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
+// Decide whether to use SSL for the Postgres connection.
+// - No DATABASE_URL (local dev): no SSL.
+// - DATABASE_SSL=false or a URL with sslmode=disable (e.g. in-cluster Postgres): no SSL.
+// - Otherwise (managed DBs like Railway): SSL with relaxed cert verification.
+function resolveSsl() {
+  const url = process.env.DATABASE_URL;
+  if (!url) return false;
+  if (process.env.DATABASE_SSL === 'false') return false;
+  if (process.env.DATABASE_SSL === 'true') return { rejectUnauthorized: false };
+  if (/sslmode=disable/i.test(url)) return false;
+  return { rejectUnauthorized: false };
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgres://localhost:5432/purple_dev',
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+  ssl: resolveSsl(),
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,

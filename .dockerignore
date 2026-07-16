@@ -1,0 +1,36 @@
+# Dependencies (rebuilt inside the image)
+**/node_modules
+
+# Build outputs (frontend is rebuilt inside the image)
+frontend/dist
+frontend/build_output.log
+
+# Local databases / dumps / logs
+**/*.log
+backend/database.db
+backend/database.db-wal
+backend/database.db-shm
+backend/database.db.bak
+**/*.sqlite
+
+# Env / secrets — never bake into the image
+**/.env
+**/.env.*
+!**/.env.docker.example
+
+# VCS / editor / OS junk
+.git
+.gitignore
+**/.DS_Store
+.vscode
+.idea
+
+# Infra not needed for the app image
+gitops
+helm
+monitoring
+Jenkinsfile
+docker-compose.yml
+deploy.sh
+fetch_logs.sh
+default_nginx
