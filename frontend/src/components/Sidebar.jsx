@@ -5,10 +5,77 @@ import { ThemeContext } from '../context/ThemeContext';
 import { VaultContext } from '../context/VaultContext';
 import VaultModal from './VaultModal';
 import { usePermissions } from '../hooks/usePermissions';
-import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell, Receipt } from 'lucide-react';
+import { Search, Bell, Calendar, Settings, FolderKanban, Shield, Users, Activity, LogOut, X, ChevronLeft, ChevronRight, Clock, CheckCircle, Trash2, AlertTriangle, Moon, Sun, Folder, Menu, IndianRupee, Dumbbell, Receipt, RotateCcw } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
+import {
+  DndContext, DragOverlay, MouseSensor, TouchSensor, KeyboardSensor,
+  useSensor, useSensors, closestCorners, useDroppable,
+} from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Section definitions for the flexible sidebar menu
+const SIDEBAR_SECTIONS = [
+  { id: 'mainmenu', title: 'MAIN MENU' },
+  { id: 'workspace', title: 'WORKSPACE' },
+  { id: 'management', title: 'MANAGEMENT' },
+  { id: 'financials', title: 'FINANCIALS' },
+];
+
+// Shared inner content (icon + label + optional badge) for a nav item
+const NavItemInner = ({ item, notifCount }) => (
+  <>
+    <item.icon size={17} className="sidebar-icon" />
+    <span className="sidebar-text">{item.label}</span>
+    {item.badge && notifCount > 0 && (
+      <span className="sidebar-badge" style={{ marginLeft: 'auto', background: '#EF4444', color: 'white', fontSize: '0.65rem', fontWeight: '700', padding: '0.1rem 0.4rem', borderRadius: '10px', minWidth: '18px', textAlign: 'center' }}>
+        {notifCount}
+      </span>
+    )}
+  </>
+);
+
+// A single draggable + sortable nav item (renders as NavLink or panel trigger)
+const SortableNavItem = ({ item, notifCount, openPanel, setOpenPanel }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const style = { transform: CSS.Translate.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
+
+  if (item.kind === 'link') {
+    return (
+      <NavLink to={item.to} ref={setNodeRef} style={style} {...attributes} {...listeners}
+        className={({ isActive }) => `sidebar-item sidebar-draggable${isActive ? ' active' : ''}`}>
+        <NavItemInner item={item} notifCount={notifCount} />
+      </NavLink>
+    );
+  }
+  return (
+    <div ref={setNodeRef} style={{ ...style, position: 'relative' }} {...attributes} {...listeners}
+      className={`sidebar-item sidebar-draggable${openPanel === item.panel ? ' active' : ''}`}
+      onClick={() => setOpenPanel(openPanel === item.panel ? null : item.panel)}>
+      <NavItemInner item={item} notifCount={notifCount} />
+    </div>
+  );
+};
+
+// A droppable section container (so items can be dropped into empty sections too)
+const DroppableSection = ({ id, title, itemIds, itemMap, notifCount, openPanel, setOpenPanel }) => {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div className="sidebar-section">
+      <div className="sidebar-section-title" style={id !== 'mainmenu' ? { marginTop: '1.25rem' } : undefined}>{title}</div>
+      <div ref={setNodeRef} className={`sidebar-drop${isOver ? ' drop-over' : ''}`}>
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          {itemIds.map((iid) => itemMap[iid] ? (
+            <SortableNavItem key={iid} item={itemMap[iid]} notifCount={notifCount} openPanel={openPanel} setOpenPanel={setOpenPanel} />
+          ) : null)}
+        </SortableContext>
+        {itemIds.length === 0 && <div className="sidebar-drop-empty">Drop items here</div>}
+      </div>
+    </div>
+  );
+};
 
 const PanelOverlay = ({ title, icon: Icon, children, onClose }) => (
   <div
@@ -209,6 +276,113 @@ const Sidebar = ({ setMobileOpen }) => {
   const calFirstDay = new Date(calYear, calMonth, 1).getDay();
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+  // ══ Flexible (drag & drop) sidebar menu ══
+  const isAdminish = user.role === 'admin' || permissions?.is_super_admin;
+  const dashboardTo = (isAdminish || permissions?.can_view_analytics) ? '/admin/dashboard' : '/user/dashboard';
+
+  const navItems = [];
+  navItems.push({ id: 'search', label: 'Search', icon: Search, kind: 'panel', panel: 'search', section: 'mainmenu' });
+  navItems.push({ id: 'notification', label: 'Notification', icon: Bell, kind: 'panel', panel: 'notification', section: 'mainmenu', badge: true });
+  navItems.push({ id: 'calendar', label: 'Calendar', icon: Calendar, kind: 'panel', panel: 'calendar', section: 'mainmenu' });
+  navItems.push({ id: 'settings', label: 'Settings', icon: Settings, kind: 'link', to: '/user/profile', section: 'mainmenu' });
+  navItems.push({ id: 'dashboard', label: 'Dashboard', icon: FolderKanban, kind: 'link', to: dashboardTo, section: 'workspace' });
+  navItems.push({ id: 'my-tasks', label: 'My Tasks', icon: FolderKanban, kind: 'link', to: '/user/tasks', section: 'workspace' });
+  if (!isHidden('gym')) navItems.push({ id: 'gym', label: 'Gym Tracker', icon: Dumbbell, kind: 'link', to: '/user/gym', section: 'workspace' });
+  if (!isHidden('reminders')) navItems.push({ id: 'reminders', label: 'Reminders', icon: Bell, kind: 'link', to: '/user/reminders', section: 'workspace' });
+  if (!isHidden('projects') && (isAdminish || permissions?.can_view_projects)) navItems.push({ id: 'projects', label: 'Projects', icon: Folder, kind: 'link', to: '/projects', section: 'workspace' });
+  if (isAdminish || permissions?.can_manage_tasks) navItems.push({ id: 'task-mgmt', label: 'Task Management', icon: FolderKanban, kind: 'link', to: '/admin/tasks', section: 'management' });
+  if (isAdminish || permissions?.can_view_users || permissions?.can_manage_users) navItems.push({ id: 'manage-users', label: 'Manage Users', icon: Users, kind: 'link', to: '/admin/users', section: 'management' });
+  if (isAdminish || permissions?.can_manage_roles) navItems.push({ id: 'permissions', label: 'Permissions', icon: Shield, kind: 'link', to: '/admin/permissions', section: 'management' });
+  if (isAdminish || permissions?.can_view_reports) navItems.push({ id: 'activity', label: 'Activity Log', icon: Activity, kind: 'link', to: '/admin/activity', section: 'management' });
+  if (isAdminish && !isHidden('spendflow')) navItems.push({ id: 'spendflow', label: 'SpendFlow', icon: IndianRupee, kind: 'link', to: '/admin/expenses', section: 'financials' });
+  if (isAdminish && !isHidden('office_expenses')) navItems.push({ id: 'office-exp', label: 'Office Expenses', icon: Receipt, kind: 'link', to: '/user/office-expenses', section: 'financials' });
+
+  const itemMap = {};
+  navItems.forEach((it) => { itemMap[it.id] = it; });
+
+  const buildDefaultLayout = () => {
+    const l = { mainmenu: [], workspace: [], management: [], financials: [] };
+    navItems.forEach((it) => l[it.section].push(it.id));
+    return l;
+  };
+  const mergeLayout = (saved) => {
+    const result = { mainmenu: [], workspace: [], management: [], financials: [] };
+    const availIds = new Set(navItems.map((i) => i.id));
+    const placed = new Set();
+    Object.keys(result).forEach((sec) => {
+      (saved?.[sec] || []).forEach((id) => {
+        if (availIds.has(id) && !placed.has(id)) { result[sec].push(id); placed.add(id); }
+      });
+    });
+    navItems.forEach((it) => { if (!placed.has(it.id)) { result[it.section].push(it.id); placed.add(it.id); } });
+    return result;
+  };
+
+  const layoutKey = `helios_sidebar_layout_${user?.id || 'me'}`;
+  const [layout, setLayout] = useState(() => {
+    try { return mergeLayout(JSON.parse(localStorage.getItem(layoutKey))); } catch { return buildDefaultLayout(); }
+  });
+  const [activeId, setActiveId] = useState(null);
+
+  const navSignature = navItems.map((i) => i.id).join(',');
+  useEffect(() => {
+    setLayout((prev) => mergeLayout(prev));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navSignature]);
+  useEffect(() => {
+    try { localStorage.setItem(layoutKey, JSON.stringify(layout)); } catch { /* ignore */ }
+  }, [layout, layoutKey]);
+
+  const relevantSections = (() => {
+    const def = buildDefaultLayout();
+    return SIDEBAR_SECTIONS.filter((s) => def[s.id].length > 0);
+  })();
+
+  const notifCount = notifications.filter((n) => !n.read).length;
+
+  const dndSensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const findContainer = (id) => {
+    if (layout[id]) return id;
+    return Object.keys(layout).find((sec) => layout[sec].includes(id));
+  };
+  const handleDragStart = ({ active }) => setActiveId(active.id);
+  const handleDragOver = ({ active, over }) => {
+    if (!over) return;
+    const from = findContainer(active.id);
+    const to = findContainer(over.id);
+    if (!from || !to || from === to) return;
+    setLayout((prev) => {
+      const fromItems = prev[from];
+      const toItems = prev[to];
+      const overIndex = toItems.indexOf(over.id);
+      const insertAt = prev[over.id] ? toItems.length : (overIndex >= 0 ? overIndex : toItems.length);
+      return {
+        ...prev,
+        [from]: fromItems.filter((id) => id !== active.id),
+        [to]: [...toItems.slice(0, insertAt), active.id, ...toItems.slice(insertAt)],
+      };
+    });
+  };
+  const handleDragEnd = ({ active, over }) => {
+    setActiveId(null);
+    if (!over) return;
+    const from = findContainer(active.id);
+    const to = findContainer(over.id);
+    if (!from || !to || from !== to) return;
+    const items = layout[from];
+    const oldIndex = items.indexOf(active.id);
+    const newIndex = items.indexOf(over.id);
+    if (oldIndex !== newIndex && newIndex >= 0) {
+      setLayout((prev) => ({ ...prev, [from]: arrayMove(prev[from], oldIndex, newIndex) }));
+    }
+  };
+  const resetLayout = () => setLayout(buildDefaultLayout());
+
   return (
     <>
       <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -230,88 +404,33 @@ const Sidebar = ({ setMobileOpen }) => {
         </div>
 
         <div className="sidebar-nav" onClick={() => setMobileOpen && setMobileOpen(false)}>
-          <div className="sidebar-section-title">MAIN MENU</div>
+          <DndContext sensors={dndSensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+            {relevantSections.map((sec) => (
+              <DroppableSection
+                key={sec.id}
+                id={sec.id}
+                title={sec.title}
+                itemIds={layout[sec.id] || []}
+                itemMap={itemMap}
+                notifCount={notifCount}
+                openPanel={openPanel}
+                setOpenPanel={setOpenPanel}
+              />
+            ))}
+            <DragOverlay>
+              {activeId && itemMap[activeId] ? (
+                <div className="sidebar-item active" style={{ cursor: 'grabbing', boxShadow: '0 12px 30px rgba(15,23,42,0.18)', background: 'var(--card-bg)' }}>
+                  {React.createElement(itemMap[activeId].icon, { size: 17, className: 'sidebar-icon' })}
+                  <span className="sidebar-text">{itemMap[activeId].label}</span>
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
 
-          <div className={`sidebar-item${openPanel === 'search' ? ' active' : ''}`}
-            onClick={() => setOpenPanel(openPanel === 'search' ? null : 'search')}
-            style={{ cursor:'pointer' }}>
-            <Search size={17} className="sidebar-icon" /> <span className="sidebar-text">Search</span>
-          </div>
-
-          <div className={`sidebar-item${openPanel === 'notification' ? ' active' : ''}`}
-            onClick={() => setOpenPanel(openPanel === 'notification' ? null : 'notification')}
-            style={{ cursor:'pointer', position:'relative' }}>
-            <Bell size={17} className="sidebar-icon" /> <span className="sidebar-text">Notification</span>
-            {notifications.filter(n => !n.read).length > 0 && (
-              <span className="sidebar-badge" style={{ marginLeft:'auto', background:'#EF4444', color:'white', fontSize:'0.65rem', fontWeight:'700', padding:'0.1rem 0.4rem', borderRadius:'10px', minWidth:'18px', textAlign:'center' }}>
-                {notifications.filter(n => !n.read).length}
-              </span>
-            )}
-          </div>
-
-          <div className={`sidebar-item${openPanel === 'calendar' ? ' active' : ''}`}
-            onClick={() => setOpenPanel(openPanel === 'calendar' ? null : 'calendar')}
-            style={{ cursor:'pointer' }}>
-            <Calendar size={17} className="sidebar-icon" /> <span className="sidebar-text">Calendar</span>
-          </div>
-
-          <NavLink to="/user/profile" className="sidebar-item">
-            <Settings size={17} className="sidebar-icon" /> <span className="sidebar-text">Settings</span>
-          </NavLink>
-
-          <div className="sidebar-section-title">WORKSPACE</div>
-
-          {/* Dashboard - always visible, route depends on role */}
-          {user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_analytics ? (
-            <NavLink to="/admin/dashboard" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">Dashboard</span></NavLink>
-          ) : (
-            <NavLink to="/user/dashboard" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">Dashboard</span></NavLink>
-          )}
-
-          {/* Tasks - always visible */}
-          <NavLink to="/user/tasks" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">My Tasks</span></NavLink>
-
-          {/* Gym Tracker - always visible unless vaulted */}
-          {!isHidden('gym') && (
-            <NavLink to="/user/gym" className="sidebar-item"><Dumbbell size={17} className="sidebar-icon" /> <span className="sidebar-text">Gym Tracker</span></NavLink>
-          )}
-
-          {/* Reminders - always visible unless vaulted */}
-          {!isHidden('reminders') && (
-            <NavLink to="/user/reminders" className="sidebar-item"><Bell size={17} className="sidebar-icon" /> <span className="sidebar-text">Reminders</span></NavLink>
-          )}
-
-          {/* Projects - Admin/Permitted only, unless vaulted */}
-          {!isHidden('projects') && !!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_projects) && (
-            <NavLink to="/projects" className="sidebar-item"><Folder size={17} className="sidebar-icon" /> <span className="sidebar-text">Projects</span></NavLink>
-          )}
-
-          {/* Management section header */}
-          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_tasks || permissions?.can_view_users || permissions?.can_manage_users || permissions?.can_manage_roles || permissions?.can_view_reports) && (
-            <div className="sidebar-section-title" style={{ marginTop: '1.25rem' }}>MANAGEMENT</div>
-          )}
-
-          {/* Admin-level pages — only shown if user has relevant permissions */}
-          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_tasks) && (
-            <NavLink to="/admin/tasks" className="sidebar-item"><FolderKanban size={17} className="sidebar-icon" /> <span className="sidebar-text">Task Management</span></NavLink>
-          )}
-          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_users || permissions?.can_manage_users) && (
-            <NavLink to="/admin/users" className="sidebar-item"><Users size={17} className="sidebar-icon" /> <span className="sidebar-text">Manage Users</span></NavLink>
-          )}
-          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_manage_roles) && (
-            <NavLink to="/admin/permissions" className="sidebar-item"><Shield size={17} className="sidebar-icon" /> <span className="sidebar-text">Permissions</span></NavLink>
-          )}
-          {!!(user.role === 'admin' || permissions?.is_super_admin || permissions?.can_view_reports) && (
-            <NavLink to="/admin/activity" className="sidebar-item"><Activity size={17} className="sidebar-icon" /> <span className="sidebar-text">Activity Log</span></NavLink>
-          )}
-
-          {/* Financials section header */}
-          {!!(user.role === 'admin' || permissions?.is_super_admin) && (!isHidden('spendflow') || !isHidden('office_expenses')) && (
-            <>
-              <div className="sidebar-section-title" style={{ marginTop: '1.25rem' }}>FINANCIALS</div>
-              {!isHidden('spendflow') && <NavLink to="/admin/expenses" className="sidebar-item"><IndianRupee size={17} className="sidebar-icon" /> <span className="sidebar-text">SpendFlow</span></NavLink>}
-              {!isHidden('office_expenses') && <NavLink to="/user/office-expenses" className="sidebar-item"><Receipt size={17} className="sidebar-icon" /> <span className="sidebar-text">Office Expenses</span></NavLink>}
-            </>
+          {!collapsed && (
+            <button className="sidebar-reset-btn" onClick={resetLayout} title="Reset menu to default order">
+              <RotateCcw size={13} /> Reset menu
+            </button>
           )}
 
 
